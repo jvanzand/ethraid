@@ -37,7 +37,7 @@ min_per = 4*rv_baseline
 # Does it make sense to use e = 0 here? Couldn't we set e really high and get a lower mass planet with high semi-amplitude?
 min_m = rv.utils.Msini(max_rv, min_per, m_star, e, Msini_units='jupiter')
 min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(c.M_jup/c.M_sun).value))
-# print('Min values: ', min_a, min_m)
+print('Min values: ', min_a, min_m)
 
 
 ########### Astrometry Constants #################
@@ -94,7 +94,6 @@ hg_pm_err = np.sqrt(  (ra_array[2]/hg_pm)**2*ra_err_array[0]**2  +   (dec_array[
 
 pm_anom_data = np.sqrt((ra_array[2] - ra_array[1])**2 + (dec_array[2] - dec_array[1])**2)
 pm_anom_data_err = np.sqrt((ra_array[2] - ra_array[1])**2 * (ra_err_array[2]**2 + ra_err_array[1]**2) + (dec_array[2] - dec_array[1])**2 * (dec_err_array[2]**2 + dec_err_array[1]**2)) / (pm_anom_data)
-
 
 
 
