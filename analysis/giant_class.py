@@ -116,18 +116,18 @@ class Giant(object):
         rv_plot_array   = np.zeros((self.plot_num, self.plot_num))
         
         for i in range(self.num_points):
-          # In case we want 1-sigma bounds for RVs only
-          a_i = self.a_inds[i]
-          m_i = self.m_inds[i]
-          rv_bounds_array[m_i, a_i] += self.prob_list_rv[i]
-          
-          # For plotting
-          a_i_plot = self.a_inds_plot[i]
-          m_i_plot = self.m_inds_plot[i]
-          rv_plot_array[m_i_plot, a_i_plot] += self.prob_list_rv[i]
-          
-          if int(i%(int(self.num_points/100))) == 0:
-              print(int(i / (self.num_points/100)), '% ', self.prob_list_rv[i])
+            # In case we want 1-sigma bounds for RVs only
+            a_i = self.a_inds[i]
+            m_i = self.m_inds[i]
+            rv_bounds_array[m_i, a_i] += self.prob_list_rv[i]
+
+            # For plotting
+            a_i_plot = self.a_inds_plot[i]
+            m_i_plot = self.m_inds_plot[i]
+            rv_plot_array[m_i_plot, a_i_plot] += self.prob_list_rv[i]
+
+            if int(i%(int(self.num_points/100))) == 0:
+                  print(int(i / (self.num_points/100)), '% ', self.prob_list_rv[i])
 
         self.rv_bounds_array = rv_bounds_array/rv_bounds_array.sum()
         self.rv_plot_array   = rv_plot_array/rv_plot_array.sum()

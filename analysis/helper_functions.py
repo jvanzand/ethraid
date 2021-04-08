@@ -415,7 +415,7 @@ def value2index(value, index_space, value_space):
     
     index = (np.log10(value)-np.log10(min_value))*(index_range/log_value_range) + min_index
     
-    return int(np.round(index))
+    return int(np.around(index))
 
 def index2value(index, index_space, value_space):
     """
