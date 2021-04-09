@@ -37,7 +37,7 @@ min_per = 4*rv_baseline
 # Does it make sense to use e = 0 here? Couldn't we set e really high and get a lower mass planet with high semi-amplitude?
 min_m = rv.utils.Msini(max_rv, min_per, m_star, e, Msini_units='jupiter')
 min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(c.M_jup/c.M_sun).value))
-print('Min values: ', min_a, min_m)
+# print('Min values: ', min_a, min_m)
 
 
 ########### Astrometry Constants #################
@@ -70,10 +70,18 @@ baseline = gaia_mid - hip_mid
 
 # The proper motions and errors (mas/yr) in the order [Hipparcos, Gaia, HG]
 hdul = ap.io.fits.open('../data/HGCA_vDR2.fits')
+
+# hdul = ap.io.fits.open('../data/HGCA_vEDR3.fits')
 data_df = Table(hdul[1].data).to_pandas()
+
+
 hdul.close()
 
 star_line = data_df.query('gaia_source_id == {}'.format(star_id))
+
+pd.set_option('display.max_columns', None)
+print(star_line)
+dfd
 
 ra_array = star_line[['pmra_hip', 'pmra_gaia', 'pmra_hg']].stack().to_list()
 ra_err_array = star_line[['pmra_hip_error', 'pmra_gaia_error', 'pmra_hg_error']].stack().to_list()
@@ -95,6 +103,23 @@ hg_pm_err = np.sqrt(  (ra_array[2]/hg_pm)**2*ra_err_array[0]**2  +   (dec_array[
 pm_anom_data = np.sqrt((ra_array[2] - ra_array[1])**2 + (dec_array[2] - dec_array[1])**2)
 pm_anom_data_err = np.sqrt((ra_array[2] - ra_array[1])**2 * (ra_err_array[2]**2 + ra_err_array[1]**2) + (dec_array[2] - dec_array[1])**2 * (dec_err_array[2]**2 + dec_err_array[1]**2)) / (pm_anom_data)
 
+print(pm_anom_data, pm_anom_data_err)
+
+### Plotting proper motions ###
+print(ra_array, dec_array)
+print(ra_err_array, dec_err_array)
+
+import matplotlib.pyplot as plt
+
+plt.errorbar(ra_array[0], dec_array[0], xerr = ra_err_array[0], yerr = dec_err_array[0], label='Hip')
+plt.errorbar(ra_array[1], dec_array[1], xerr = ra_err_array[1], yerr = dec_err_array[1], label='Gaia')
+plt.errorbar(ra_array[2], dec_array[2], xerr = ra_err_array[2], yerr = dec_err_array[2], label='HG')
+
+plt.xlabel(r'$PM_{RA}$ (mas/yr)')
+plt.ylabel(r'$PM_{Dec}$ (mas/yr)')
+
+plt.legend()
+plt.show()
 
 
 

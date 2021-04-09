@@ -37,9 +37,9 @@ if __name__ == "__main__":
     prior_grid[min_index_m:, min_index_a:] = 1
     ###########################################################
     
-    hd191939 = ['HD191939', 0.807, 0.114, 0.006, -6e-5, 1.9e-5, 18.62, 0.1187, 0.0961]
+    hd191939 = ['HD191939', 0.807, 0.114, 0.006, -6e-5, 1.9e-5, 18.62, pm_anom_data, pm_anom_data_err]
     my_planet = gc.Giant(*hd191939)
-    my_planet.make_arrays(a_lim = a_lim, m_lim = m_lim, grid_num = grid_num, num_points = int(1e4), plot_num = plot_num)
+    my_planet.make_arrays(a_lim = a_lim, m_lim = m_lim, grid_num = grid_num, num_points = int(1e6), plot_num = plot_num)
 
     print('made the arrays')
     
