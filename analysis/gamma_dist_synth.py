@@ -133,7 +133,7 @@ label_size = 30
 title_size = 35
 tick_num = 4
 #
-num_points = int(1e4)
+num_points = int(1e5)
 grid_num = int(500)
 a_lim = (1.9, 1e2)
 m_lim = (1.5, 1e2)
