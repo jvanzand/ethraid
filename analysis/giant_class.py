@@ -89,8 +89,6 @@ class Giant(object):
         self.a_inds_plot = np.digitize(self.a_list, bins = a_bins_plot)
         self.m_inds_plot = np.digitize(self.m_list, bins = m_bins_plot)
         
-    
-        # self.msini_list = self.m_list*self.sini_list
         
         
         return
@@ -107,7 +105,13 @@ class Giant(object):
         
         # Why three arrays to store probabilities? self.prob_list_rv is a 1D list that will be multiplied with its astrometry counterpart to get a the total (rv+astro) marginalized posterior. rv_bounds_array is a 2D array of the rv probabilities, binned according to a and M. It will be used to find the 1-sigma bounds on a an M. rv_plot_array is similar, but it will be used for plotting the 2D probability surface instead of finding bounds. The only difference between the last two is the number of points used to create the 2D grid.
         
-        self.prob_list_rv = np.exp(-(dot_term_list + dotdot_term_list)/2)
+        chi_sq = dot_term_list + dotdot_term_list
+        
+        self.chi_sq_list_rv = chi_sq
+        
+        self.prob_list_rv = np.exp(-(chi_sq)/2)
+        
+
         # Weird situation with a single NaN showing up here. It may have come from the Kepler solver somehow, but I just set all NaNs to 0
         np.nan_to_num(self.prob_list_rv, copy=False)
         
@@ -159,6 +163,10 @@ class Giant(object):
         T_anom_array = np.repeat(T_anom_array, 2, axis=1)
         T_anom_array = np.repeat(T_anom_array, 100, axis=2)
 
+        
+        ### Just to send to Erik
+        chi_sq_list = []
+        ###
         
         prob_list = []
         astro_bounds_array = np.zeros((self.grid_num, self.grid_num))
@@ -232,6 +240,7 @@ class Giant(object):
             ########################## Angular Velocities ###########################
             
             ##################### Wrong way to get pm_anom ############################
+            ## I take the scalar r_dot and multiply by rot_vec. Since rot_vec is obtained using r_vec, this step implicitly assumed that v and r are in the same direction, which is WRONG.
             # r_dot_pl = hlp.r_dot(T_prog, a*c.au.cgs.value, per*(24*3600), e)
             #
             # r_dot_star = r_dot_pl * ((m*c.M_jup.cgs.value)/(self.m_star*c.M_sun.cgs.value))
@@ -249,11 +258,14 @@ class Giant(object):
 
             rotated_v_vec = np.matmul(rot_matrix, v_vec_star).squeeze()
             rotated_v_vec = np.moveaxis(rotated_v_vec, 2, 0)
-
+            
+            # pm anom values for both Hipparcos and Gaia
             pm_anom_both = ((rotated_v_vec)[:-1] / self.d_star * (206265*1e3*3.15e7)).mean(axis= -2) # (cm/s / cm)*206265*1e3*3.15e7 = mas/yr
             
             
-            # We want only Gaia's x&y components, so we take the second element of the second axis
+            # pm_anom_both has shape (2,2): (x&y components, Hip/Gaia)
+            # We want only Gaia's x&y components, so we take the whole first axis, and only the second element of the second axis
+
             pm_anom_gaia = pm_anom_both[:, 1]
             
             
@@ -285,8 +297,14 @@ class Giant(object):
             m_i_plot = self.m_inds_plot[i]
             astro_plot_array[m_i_plot, a_i_plot] += prob
             
+            ## Just to send to Erik
+            chi_sq_list.append(chi_square)
+            #####
             prob_list.append(prob)
-    
+        
+        ### Just for sending to Erik
+        self.chi_sq_list_astro = np.array(chi_sq_list)
+        ###
         self.prob_list_astro = np.array(prob_list)
         
         self.astro_bounds_array = astro_bounds_array

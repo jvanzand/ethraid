@@ -28,7 +28,7 @@ def P(a, Mtotal):
 
 def rot_matrix(i, om, Om):
     """
-    This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. The multiply it immediately by r*[cos(f), sin(f), 0]
+    This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. They multiply it immediately by r*[cos(f), sin(f), 0]
     because this gives the projection of position onto the sky. However, we also need the projection of velocity, so we need the matrix
     pre-multiplication by the position vector.
     """
@@ -377,7 +377,8 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
         array_1D = prob_array.sum(axis=i)
         grid_num = len(array_1D)
         
-        sig1 = contour_levels_1D(array_1D, [2])[0]
+        # This gives only the 2-sigma, so that we get the 2-sigma limits at the end
+        sig2 = contour_levels_1D(array_1D, [2])[0]
         
         # Interpolate between the points to get a finer spacing of points. This allows for more precise parameter estimation.
         func = sp.interpolate.interp1d(range(grid_num), array_1D)
@@ -388,11 +389,11 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
         # This is analogous to the original array_1D, but finer
         interp_vals = func(fine_array)
         
-        # This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 1-sigma. But from what I can tell, this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
-        inds_1sig = np.where(abs(interp_vals - sig1) < 1e-2*sig1)[0].take((0,-1))
+        # This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But from what I can tell, this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
+        inds_2sig = np.where(abs(interp_vals - sig2) < 1e-2*sig2)[0].take((0,-1))
         
         # value_bounds is a tuple of actual values, not indices
-        value_bounds = index2value(inds_1sig, (0, interp_num-1), value_spaces[::-1][i])
+        value_bounds = index2value(inds_2sig, (0, interp_num-1), value_spaces[::-1][i])
         
         bounds_list.append(value_bounds)
         

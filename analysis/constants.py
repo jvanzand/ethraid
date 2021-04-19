@@ -69,9 +69,9 @@ gaia_mid = gaia_times.mean()
 baseline = gaia_mid - hip_mid
 
 # The proper motions and errors (mas/yr) in the order [Hipparcos, Gaia, HG]
-hdul = ap.io.fits.open('../data/HGCA_vDR2.fits')
+# hdul = ap.io.fits.open('../data/HGCA_vDR2.fits')
 
-# hdul = ap.io.fits.open('../data/HGCA_vEDR3.fits')
+hdul = ap.io.fits.open('../data/HGCA_vEDR3.fits')
 data_df = Table(hdul[1].data).to_pandas()
 
 
@@ -79,9 +79,9 @@ hdul.close()
 
 star_line = data_df.query('gaia_source_id == {}'.format(star_id))
 
-pd.set_option('display.max_columns', None)
-print(star_line)
-dfd
+# pd.set_option('display.max_columns', None)
+# print(star_line)
+# dfd
 
 ra_array = star_line[['pmra_hip', 'pmra_gaia', 'pmra_hg']].stack().to_list()
 ra_err_array = star_line[['pmra_hip_error', 'pmra_gaia_error', 'pmra_hg_error']].stack().to_list()
@@ -108,18 +108,18 @@ print(pm_anom_data, pm_anom_data_err)
 ### Plotting proper motions ###
 print(ra_array, dec_array)
 print(ra_err_array, dec_err_array)
-
-import matplotlib.pyplot as plt
-
-plt.errorbar(ra_array[0], dec_array[0], xerr = ra_err_array[0], yerr = dec_err_array[0], label='Hip')
-plt.errorbar(ra_array[1], dec_array[1], xerr = ra_err_array[1], yerr = dec_err_array[1], label='Gaia')
-plt.errorbar(ra_array[2], dec_array[2], xerr = ra_err_array[2], yerr = dec_err_array[2], label='HG')
-
-plt.xlabel(r'$PM_{RA}$ (mas/yr)')
-plt.ylabel(r'$PM_{Dec}$ (mas/yr)')
-
-plt.legend()
-plt.show()
+#
+# import matplotlib.pyplot as plt
+#
+# plt.errorbar(ra_array[0], dec_array[0], xerr = ra_err_array[0], yerr = dec_err_array[0], label='Hip')
+# plt.errorbar(ra_array[1], dec_array[1], xerr = ra_err_array[1], yerr = dec_err_array[1], label='Gaia')
+# plt.errorbar(ra_array[2], dec_array[2], xerr = ra_err_array[2], yerr = dec_err_array[2], label='HG')
+#
+# plt.xlabel(r'$PM_{RA}$ (mas/yr)')
+# plt.ylabel(r'$PM_{Dec}$ (mas/yr)')
+#
+# plt.legend()
+# plt.show()
 
 
 
