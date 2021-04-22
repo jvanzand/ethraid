@@ -131,7 +131,7 @@ class Giant(object):
             rv_plot_array[m_i_plot, a_i_plot] += self.prob_list_rv[i]
 
             if int(i%(int(self.num_points/100))) == 0:
-                  print(int(i / (self.num_points/100)), '% ', self.prob_list_rv[i])
+                  print(int(i / (self.num_points/100)), '% ')#, self.prob_list_rv[i])
 
         self.rv_bounds_array = rv_bounds_array/rv_bounds_array.sum()
         self.rv_plot_array   = rv_plot_array/rv_plot_array.sum()
@@ -283,7 +283,7 @@ class Giant(object):
             prob = np.exp(-chi_square/2)
             
             if int(i%(int(self.num_points/100))) == 0:
-                print(int(i / (self.num_points/100)), '% ', prob)
+                print(int(i / (self.num_points/100)), '% ')#, prob)
             
             # Placing each probability into the array
             # In case we want 1-sigma bounds for RVs only

@@ -5,10 +5,10 @@ import helper_functions as hlp
 from constants import *
 
 import giant_class as gc
-     
 
-if __name__ == "__main__":
-    
+
+
+def main(save_data=False): 
     grid_num = 30
     plot_num = 30
     tick_num = 6
@@ -37,19 +37,17 @@ if __name__ == "__main__":
     prior_grid[min_index_m:, min_index_a:] = 1
     ###########################################################
     
+    # HD191939 values: [Name, M_star, gdot, gdot_err, gddot, gddot_err, parallax, pm_anom_data, pm_anom_data_err]
     hd191939 = ['HD191939', 0.807, 0.114, 0.006, -6e-5, 1.9e-5, 18.62, pm_anom_data, pm_anom_data_err]
     my_planet = gc.Giant(*hd191939)
-    my_planet.make_arrays(a_lim = a_lim, m_lim = m_lim, grid_num = grid_num, num_points = int(1e7), plot_num = plot_num)
+    my_planet.make_arrays(a_lim = a_lim, m_lim = m_lim, grid_num = grid_num, num_points = int(1e4), plot_num = plot_num)
 
     print('made the arrays')
     
     post_rv = my_planet.rv_post()
     post_astro = my_planet.astro_post()
     post_tot = my_planet.rv_astro_post()
-    # post_tot_plot = np.load('post_tot_trimmed.npy')
-    # post_tot_plot   = (post_tot_plot*prior_grid)/((post_tot_plot*prior_grid).sum())
-    # print(hlp.bounds_1D(post_tot_plot, [m_lim, a_lim], interp_num = 1e4))
-    # fdfd
+
     
     post_rv_plot    = my_planet.rv_plot_array
     post_astro_plot = my_planet.astro_plot_array
@@ -63,58 +61,34 @@ if __name__ == "__main__":
     t_contours_rv = hlp.contour_levels(post_rv_plot, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot_plot, [1,2])
     
-    np.save('save_data/a_list', my_planet.a_list)
-    np.save('save_data/m_list', my_planet.m_list)
-    np.save('save_data/e_list', my_planet.e_list)
-    np.save('save_data/i_list', my_planet.i_list)
-    np.save('save_data/om_list', my_planet.om_list)
-    np.save('save_data/M_anom_list', my_planet.M_anom_list)
+    if save_data:
+        
+        np.save('save_data/a_list', my_planet.a_list)
+        np.save('save_data/m_list', my_planet.m_list)
+        np.save('save_data/e_list', my_planet.e_list)
+        np.save('save_data/i_list', my_planet.i_list)
+        np.save('save_data/om_list', my_planet.om_list)
+        np.save('save_data/M_anom_list', my_planet.M_anom_list)
     
-    np.save('save_data/chi_sq_list_rv', my_planet.chi_sq_list_rv)
-    np.save('save_data/chi_sq_list_astro', my_planet.chi_sq_list_astro)
-    np.save('save_data/prob_list_rv', my_planet.prob_list_rv)
-    np.save('save_data/prob_list_astro', my_planet.prob_list_astro)
+        np.save('save_data/chi_sq_list_rv', my_planet.chi_sq_list_rv)
+        np.save('save_data/chi_sq_list_astro', my_planet.chi_sq_list_astro)
+        np.save('save_data/prob_list_rv', my_planet.prob_list_rv)
+        np.save('save_data/prob_list_astro', my_planet.prob_list_astro)
     
     
-    np.save('save_data/post_rv', post_rv)
-    np.save('save_data/post_astro', post_astro)
-    np.save('save_data/post_tot', post_tot)
+        np.save('save_data/post_rv', post_rv)
+        np.save('save_data/post_astro', post_astro)
+        np.save('save_data/post_tot', post_tot)
 
 
-    
-    # np.save('post_tot_trimmed', post_tot_plot)
-    print(hlp.bounds_1D(post_tot_plot, [m_lim, a_lim], interp_num = 1e4))
+    bounds = hlp.bounds_1D(post_tot_plot, [m_lim, a_lim], interp_num = 1e4)
+    print('a_lim, m_lim = ', bounds[0], bounds[1])
     ##################################################
     fig, ax = plt.subplots(figsize=(12,12))
     
     post_astro_cont = ax.contourf(post_astro_plot, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
     post_rv_cont = ax.contourf(post_rv_plot, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
     post_tot_cont = ax.contourf(post_tot_plot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
-    
-    # # seg_list_1sig = post_tot_plot.allsegs[1][0]
-    # # List of segments corresponding to 1-sigma contour (actually to the lowest sigma value given in t_contours_tot, usually 1)
-    # # Index explanation: -1 to get the tightest contour. Then if that contour is broken, I need to get the farthest-left point of the farthest-left chunk, and the farthest-right point of the farthest-right chunk. My assumption is that contour lists its contours as [left-most, middle, right-most], or even the reverse of that, they just need to not be jumbled. Under this assumption, I take the 0th block for the min value, and for the max I take the -1th block. Finally I transpose to go from [(x,y), (x,y), ...] to [(x,x, ...), (y,y, ...)], and take x for the a index and y for the mass.
-    #
-    # min_a_index_1sig = np.min(post_tot_plot.allsegs[-1][0].T[0])
-    # max_a_index_1sig = np.max(post_tot_plot.allsegs[-1][-1].T[0])
-    #
-    # min_m_index_1sig = np.min(post_tot_plot.allsegs[-1][0].T[1])
-    # max_m_index_1sig = np.max(post_tot_plot.allsegs[-1][-1].T[1])
-    #
-    # # seg_list_1sig = post_tot_plot.allsegs[-1][0]
-    # # min_a_index_1sig = np.min(seg_list_1sig.transpose()[0])
-    # # max_a_index_1sig = np.max(seg_list_1sig.transpose()[0])
-    #
-    # # min_m_index_1sig = np.min(seg_list_1sig.transpose()[1])
-    # # max_m_index_1sig = np.max(seg_list_1sig.transpose()[1])
-    #
-    # min_a_1sig = hlp.index2value(min_a_index_1sig, (0, grid_num-1), a_lim)
-    # max_a_1sig = hlp.index2value(max_a_index_1sig, (0, grid_num-1), a_lim)
-    # min_m_1sig = hlp.index2value(min_m_index_1sig, (0, grid_num-1), m_lim)
-    # max_m_1sig = hlp.index2value(max_m_index_1sig, (0, grid_num-1), m_lim)
-    #
-    # print(min_a_1sig, max_a_1sig)
-    # print(min_m_1sig, max_m_1sig)
     
     mass_rect = ptch.Rectangle((0, 0), plot_num-1, min_index_m, color='gray', alpha=1.0)
     a_rect = ptch.Rectangle((0, 0), min_index_a, plot_num-1, color='gray', alpha=1.0)
@@ -143,10 +117,14 @@ if __name__ == "__main__":
     fig.tight_layout()
     fig.savefig('5thCompConstraints_RV_astr.png')
     plt.show()
+    
+    return
 
 
 
 
+if __name__ == "__main__":
+    main()
 
 
 
