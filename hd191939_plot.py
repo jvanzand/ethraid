@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
-import helper_functions as hlp
+import trends.helper_functions as hlp
+
 
 from constants import *
 
