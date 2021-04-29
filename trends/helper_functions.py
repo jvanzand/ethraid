@@ -4,7 +4,7 @@ import astropy.constants as c
 import astropy.units as u
 
 import radvel as rv
-from c_kepler import _kepler as ck
+from trends.c_kepler import _kepler as ck
         
         
         
