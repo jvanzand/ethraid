@@ -47,7 +47,7 @@ def main(save_data=False):
     post_rv = my_planet.rv_post()
     post_astro = my_planet.astro_post()
     post_tot = my_planet.rv_astro_post()
-
+    
     
     post_rv_plot    = my_planet.rv_plot_array
     post_astro_plot = my_planet.astro_plot_array
@@ -56,7 +56,7 @@ def main(save_data=False):
     post_rv_plot    = (post_rv_plot*prior_grid)/((post_rv_plot*prior_grid).sum())
     post_astro_plot = (post_astro_plot*prior_grid)/((post_astro_plot*prior_grid).sum())
     post_tot_plot   = (post_tot_plot*prior_grid)/((post_tot_plot*prior_grid).sum())
-    
+
     t_contours_astro = hlp.contour_levels(post_astro_plot, [1,2])
     t_contours_rv = hlp.contour_levels(post_rv_plot, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot_plot, [1,2])
@@ -79,9 +79,13 @@ def main(save_data=False):
         np.save('save_data/post_rv', post_rv)
         np.save('save_data/post_astro', post_astro)
         np.save('save_data/post_tot', post_tot)
-
-
-    bounds = hlp.bounds_1D(post_tot_plot, [m_lim, a_lim], interp_num = 1e4)
+    
+    
+    # post_rv = np.load('save_data_10^7/post_rv.npy', allow_pickle=True)
+    # post_astro = np.load('save_data_10^7/post_astro.npy', allow_pickle=True)
+    # post_tot = np.load('save_data_10^7/post_tot.npy', allow_pickle=True)
+    
+    bounds = hlp.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
     print('a_lim, m_lim = ', bounds[0], bounds[1])
     ##################################################
     fig, ax = plt.subplots(figsize=(12,12))
