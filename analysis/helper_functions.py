@@ -5,7 +5,8 @@ import astropy.units as u
 
 import radvel as rv
 from c_kepler import _kepler as ck
-        
+
+# import matplotlib.pyplot as plt
         
         
 def P(a, Mtotal):
@@ -377,7 +378,7 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
         array_1D = prob_array.sum(axis=i)
         grid_num = len(array_1D)
         
-        # This gives only the 2-sigma, so that we get the 2-sigma limits at the end
+        # This gives only the 2-sigma levels, so that we get the 2-sigma limits at the end
         sig2 = contour_levels_1D(array_1D, [2])[0]
         
         # Interpolate between the points to get a finer spacing of points. This allows for more precise parameter estimation.
@@ -389,7 +390,15 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
         # This is analogous to the original array_1D, but finer
         interp_vals = func(fine_array)
         
+        
+        #### For debugging purposes
+        # plt.plot(fine_array, interp_vals)
+        # plt.show()
+        # print(i, np.where(abs(interp_vals - sig2) < 1e-2*sig2)[0])
+        ####
+        
         # This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But from what I can tell, this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
+
         inds_2sig = np.where(abs(interp_vals - sig2) < 1e-2*sig2)[0].take((0,-1))
         
         # value_bounds is a tuple of actual values, not indices
