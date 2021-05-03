@@ -28,7 +28,7 @@ hip97166_gamma = [0.043, 0.033, -2e-4, 1.5e-4]
 
 gamma_dot, gamma_dot_err,  gamma_dotdot, gamma_dotdot_err = hd191939_gamma
 
-timeseries = pd.read_csv('../data/191939_rv.csv', skiprows=14)
+timeseries = pd.read_csv('data/191939_rv.csv', skiprows=14)
 rv_baseline = max(Time(list(timeseries.time.values), format='iso').jd) - min(Time(list(timeseries.time.values), format='iso').jd)
 max_rv = max(timeseries.mnvel)
 
@@ -71,7 +71,7 @@ baseline = gaia_mid - hip_mid
 # The proper motions and errors (mas/yr) in the order [Hipparcos, Gaia, HG]
 # hdul = ap.io.fits.open('../data/HGCA_vDR2.fits')
 
-hdul = ap.io.fits.open('../data/HGCA_vEDR3.fits')
+hdul = ap.io.fits.open('data/HGCA_vEDR3.fits')
 data_df = Table(hdul[1].data).to_pandas()
 
 
@@ -103,11 +103,11 @@ hg_pm_err = np.sqrt(  (ra_array[2]/hg_pm)**2*ra_err_array[0]**2  +   (dec_array[
 pm_anom_data = np.sqrt((ra_array[2] - ra_array[1])**2 + (dec_array[2] - dec_array[1])**2)
 pm_anom_data_err = np.sqrt((ra_array[2] - ra_array[1])**2 * (ra_err_array[2]**2 + ra_err_array[1]**2) + (dec_array[2] - dec_array[1])**2 * (dec_err_array[2]**2 + dec_err_array[1]**2)) / (pm_anom_data)
 
-print(pm_anom_data, pm_anom_data_err)
+# print(pm_anom_data, pm_anom_data_err)
 
 ### Plotting proper motions ###
-print(ra_array, dec_array)
-print(ra_err_array, dec_err_array)
+# print(ra_array, dec_array)
+# print(ra_err_array, dec_err_array)
 #
 # import matplotlib.pyplot as plt
 #

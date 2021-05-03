@@ -1,14 +1,14 @@
 import matplotlib.pyplot as plt
 import astropy.constants as c
 import numpy as np
-import helper_functions as hlp
+import trends.helper_functions as hlp
 
 import radvel as rv
-from c_kepler import _kepler as ck
+from trends.c_kepler import _kepler as ck
 
 from scipy.stats import loguniform, beta
 
-from constants import *
+from trends.constants import *
 
 
 """
