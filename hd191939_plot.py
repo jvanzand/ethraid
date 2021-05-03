@@ -1,11 +1,15 @@
+# import pyximport
+# pyximport.install()
+
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
+
 import trends.helper_functions as hlp
 
 
-from constants import *
+from trends.constants import *
 
-import giant_class as gc
+import trends.giant_class as gc
 
 
 
@@ -82,7 +86,7 @@ def main(save_data=False):
         np.save('save_data/post_tot', post_tot)
 
 
-    bounds = hlp.bounds_1D(post_tot_plot, [m_lim, a_lim], interp_num = 1e4)
+    bounds = hlp.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
     print('a_lim, m_lim = ', bounds[0], bounds[1])
     ##################################################
     fig, ax = plt.subplots(figsize=(12,12))
