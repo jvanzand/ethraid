@@ -26,7 +26,8 @@ extensions = [Extension("_kepler", ["_kepler.pyx"],)]
 
 reqs = []
 for line in open('radvel_requirements.txt', 'r').readlines():
-    if not line.startswith('celerite') and not line.startswith('h5py'):
+    # if not line.startswith('celerite') and not line.startswith('h5py'):
+    if not line.startswith('h5py'):
         reqs.append(line)
 
 setup(
