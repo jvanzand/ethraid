@@ -9,8 +9,6 @@ import astropy as ap
 from astropy.table import Table
 
 
-
-
 ########### RV Constants #################
 
 m_star_hd191939 = 0.807
@@ -103,6 +101,10 @@ hg_pm_err = np.sqrt(  (ra_array[2]/hg_pm)**2*ra_err_array[0]**2  +   (dec_array[
 pm_anom_data = np.sqrt((ra_array[2] - ra_array[1])**2 + (dec_array[2] - dec_array[1])**2)
 pm_anom_data_err = np.sqrt((ra_array[2] - ra_array[1])**2 * (ra_err_array[2]**2 + ra_err_array[1]**2) + (dec_array[2] - dec_array[1])**2 * (dec_err_array[2]**2 + dec_err_array[1]**2)) / (pm_anom_data)
 
+
+au = c.au.cgs.value
+M_sun = c.M_sun.cgs.value
+M_jup = c.M_jup.cgs.value
 # print(pm_anom_data, pm_anom_data_err)
 
 ### Plotting proper motions ###
