@@ -10,7 +10,6 @@ from scipy.stats import loguniform, beta
 
 from trends.constants import *
 
-
 """
 This module is the official version of giant_class.py. 
 It includes the correct rotation of the velocity vector
@@ -138,7 +137,7 @@ class Giant(object):
         return
         
         
-    
+    @profile
     def astro_post(self):
 
         ##########
@@ -213,10 +212,10 @@ class Giant(object):
         
             ######################## Angular Positions ##########################
             # At each of these true anomalies, we need to know the angular separation from barycenter! So first use the r equation on these T_anoms to get r_planet
-            r_pl = hlp.r(T_prog, a*c.au.cgs.value, e)
+            r_pl = hlp.r(T_prog, a*au, e)
 
             # Star physical separation
-            r_star = r_pl*((m*c.M_jup.cgs.value)/(self.m_star*c.M_sun.cgs.value))
+            r_star = r_pl*((m*M_jup)/(self.m_star*M_sun))
     
             
             # r_unit_vec is a stack of arrays that look like [cos(T), sin(T), 0]. It starts with shape (3, 100, 2), but we need it to be 
@@ -252,7 +251,8 @@ class Giant(object):
             v_vec_pl = hlp.v_vec(a, per, e, T_prog)
             
             # Stellar velocity is related to planet through their masses. Also they are in opposite directions, so add negative, which shouldn't affect the final answer.
-            v_vec_star = -v_vec_pl * ((m*c.M_jup.cgs.value)/(self.m_star*c.M_sun.cgs.value))
+            # v_vec_star = -v_vec_pl * ((m*c.M_jup.cgs.value)/(self.m_star*c.M_sun.cgs.value))
+            v_vec_star = -v_vec_pl * ((m*M_jup)/(self.m_star*M_sun))
             v_vec_star = np.moveaxis(v_vec_star, 0, 2)[..., None]
             
 
