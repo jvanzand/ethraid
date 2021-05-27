@@ -4,7 +4,8 @@
 
 ## Installing dependencies
 - Create a new environment (python=3.9.4)
-- *\$ pip install -r requirements.txt*
+- *\$ conda install -file requirements.txt*
+- *\$ pip install radvel celerite*
 - *\$ cd trends/c_kepler*
 - *\$ python radvel_setup.py build_ext --inplace*
 
