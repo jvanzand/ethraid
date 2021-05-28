@@ -1,21 +1,29 @@
 import matplotlib.pyplot as plt
 import astropy.constants as c
 import numpy as np
-import trends.helper_functions as hlp
+cimport numpy as np
+import helper_functions as hlp
 
 import radvel as rv
-from trends.c_kepler import _kepler as ck
+#import sys
+#print(sys.path)
+#print('YABBBBBAAAAAAAA')
+
+from c_kepler import _kepler as ck
 
 from scipy.stats import loguniform, beta
 
-from trends.constants import *
+from constants import *
 
-"""
-This module is the official version of giant_class.py. 
-It includes the correct rotation of the velocity vector
-"""
-class Giant(object):
-    
+
+cdef class Giant:
+    cdef str star_name
+    cdef double m_star, gamma_dot, gamma_dot_err, gamma_dotdot, gamma_dotdot_err, parallax, pm_anom_data, pm_anom_data_err, d_star, tp
+    cdef int num_points, grid_num, plot_num
+    cdef np.ndarray a_list, m_list, per_list, e_list, cosi_list, i_list, sini_list, M_anom_list, E_anom_list, T_anom_list, om_list
+    cdef public Om_list, a_inds, m_inds, a_inds_plot, m_inds_plot, chi_sq_list_rv, prob_list_rv, rv_bounds_array, rv_plot_array
+    cdef public chi_sq_list_astro, prob_list_astro, astro_bounds_array, astro_plot_array, tot_plot_array
+
     def __init__(self, star_name, m_star, gamma_dot, gamma_dot_err, 
                 gamma_dotdot, gamma_dotdot_err, parallax, pm_anom_data, pm_anom_data_err):
         
@@ -26,7 +34,7 @@ class Giant(object):
         self.gamma_dotdot = gamma_dotdot
         self.gamma_dotdot_err = gamma_dotdot_err
         self.parallax = parallax # mas
-        self.d_star = (1/parallax)*c.pc.cgs.value*1000 # cm
+        self.d_star = (1/parallax)*(c.pc.cgs.value)*1000 # cm
         self.pm_anom_data = pm_anom_data
         self.pm_anom_data_err = pm_anom_data_err
         
@@ -134,6 +142,7 @@ class Giant(object):
 
         self.rv_bounds_array = rv_bounds_array/rv_bounds_array.sum()
         self.rv_plot_array   = rv_plot_array/rv_plot_array.sum()
+        
         return
         
         
@@ -237,15 +246,6 @@ class Giant(object):
 
             ########################## Angular Velocities ###########################
             
-            ##################### Wrong way to get pm_anom ############################
-            ## I take the scalar r_dot and multiply by rot_vec. Since rot_vec is obtained using r_vec, this step implicitly assumed that v and r are in the same direction, which is WRONG.
-            # r_dot_pl = hlp.r_dot(T_prog, a*c.au.cgs.value, per*(24*3600), e)
-            #
-            # r_dot_star = r_dot_pl * ((m*c.M_jup.cgs.value)/(self.m_star*c.M_sun.cgs.value))
-            #
-            # # pm_anom_both has shape (2,2): (x&y components, Hip/Gaia)
-            # pm_anom_both = ((r_dot_star*rot_vec)[:-1] / self.d_star * (206265*1e3*3.15e7)).mean(axis= -2) # (cm/s / cm)*206265*1e3*3.15e7 = mas/yr
-            ############################################################################
             
             v_vec_pl = hlp.v_vec(a, per, e, T_prog)
             
