@@ -1,7 +1,7 @@
 /analysis
 /trends/c_kepler/build
 *.c
-*.so
+
 *.png
 *.lprof
 *.html
