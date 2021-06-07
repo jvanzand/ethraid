@@ -121,7 +121,7 @@ def main(save_data=False):
     
     fig.tight_layout()
     fig.savefig('5thCompConstraints_RV_astr.png')
-    plt.show()
+    # plt.show()
     
     return
 

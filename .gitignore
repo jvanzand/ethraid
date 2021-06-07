@@ -1,5 +1,5 @@
 /analysis
 /trends/c_kepler/build
-*.so
+
 *.png
 *.lprof

@@ -137,7 +137,7 @@ class Giant(object):
         return
         
         
-
+    @profile
     def astro_post(self):
 
         ##########
