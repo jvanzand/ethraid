@@ -6,12 +6,12 @@
         "depends": [
             "kepler.c"
         ],
-        "name": "trends.c_kepler._kepler",
+        "name": "_kepler",
         "sources": [
             "_kepler.pyx"
         ]
     },
-    "module_name": "trends.c_kepler._kepler"
+    "module_name": "_kepler"
 }
 END: Cython Metadata */
 
@@ -26,7 +26,7 @@ END: Cython Metadata */
 #else
 #define CYTHON_ABI "0_29_23"
 #define CYTHON_HEX_VERSION 0x001D17F0
-#define CYTHON_FUTURE_DIVISION 0
+#define CYTHON_FUTURE_DIVISION 1
 #include <stddef.h>
 #ifndef offsetof
   #define offsetof(type, member) ( (size_t) & ((type*)0) -> member )
@@ -619,8 +619,8 @@ static CYTHON_INLINE float __PYX_NAN() {
   #endif
 #endif
 
-#define __PYX_HAVE__trends__c_kepler___kepler
-#define __PYX_HAVE_API__trends__c_kepler___kepler
+#define __PYX_HAVE___kepler
+#define __PYX_HAVE_API___kepler
 /* Early includes */
 #include <string.h>
 #include <stdio.h>
@@ -1170,14 +1170,14 @@ typedef npy_double __pyx_t_5numpy_double_t;
  */
 typedef npy_longdouble __pyx_t_5numpy_longdouble_t;
 
-/* "trends/c_kepler/_kepler.pyx":20
+/* "_kepler.pyx":20
  * 
  * DTYPE = np.float64
  * ctypedef np.float64_t DTYPE_t             # <<<<<<<<<<<<<<
  * 
  * # create the wrapper code, with numpy type annotations
  */
-typedef __pyx_t_5numpy_float64_t __pyx_t_6trends_8c_kepler_7_kepler_DTYPE_t;
+typedef __pyx_t_5numpy_float64_t __pyx_t_7_kepler_DTYPE_t;
 /* Declarations.proto */
 #if CYTHON_CCOMPLEX
   #ifdef __cplusplus
@@ -2165,7 +2165,7 @@ static CYTHON_INLINE int __pyx_f_5numpy_import_array(void); /*proto*/
 
 /* Module declarations from 'libc.math' */
 
-/* Module declarations from 'trends.c_kepler._kepler' */
+/* Module declarations from '_kepler' */
 static PyTypeObject *__pyx_array_type = 0;
 static PyTypeObject *__pyx_MemviewEnum_type = 0;
 static PyTypeObject *__pyx_memoryview_type = 0;
@@ -2211,12 +2211,12 @@ static void __pyx_memoryview_slice_assign_scalar(__Pyx_memviewslice *, int, size
 static void __pyx_memoryview__slice_assign_scalar(char *, Py_ssize_t *, Py_ssize_t *, int, size_t, void *); /*proto*/
 static PyObject *__pyx_unpickle_Enum__set_state(struct __pyx_MemviewEnum_obj *, PyObject *); /*proto*/
 static __Pyx_TypeInfo __Pyx_TypeInfo_double = { "double", NULL, sizeof(double), { 0 }, 0, 'R', 0, 0 };
-static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_6trends_8c_kepler_7_kepler_DTYPE_t = { "DTYPE_t", NULL, sizeof(__pyx_t_6trends_8c_kepler_7_kepler_DTYPE_t), { 0 }, 0, 'R', 0, 0 };
-#define __Pyx_MODULE_NAME "trends.c_kepler._kepler"
-extern int __pyx_module_is_main_trends__c_kepler___kepler;
-int __pyx_module_is_main_trends__c_kepler___kepler = 0;
+static __Pyx_TypeInfo __Pyx_TypeInfo_nn___pyx_t_7_kepler_DTYPE_t = { "DTYPE_t", NULL, sizeof(__pyx_t_7_kepler_DTYPE_t), { 0 }, 0, 'R', 0, 0 };
+#define __Pyx_MODULE_NAME "_kepler"
+extern int __pyx_module_is_main__kepler;
+int __pyx_module_is_main__kepler = 0;
 
-/* Implementation of 'trends.c_kepler._kepler' */
+/* Implementation of '_kepler' */
 static PyObject *__pyx_builtin_range;
 static PyObject *__pyx_builtin_ImportError;
 static PyObject *__pyx_builtin_ValueError;
@@ -2269,6 +2269,7 @@ static const char __pyx_k_start[] = "start";
 static const char __pyx_k_encode[] = "encode";
 static const char __pyx_k_format[] = "format";
 static const char __pyx_k_import[] = "__import__";
+static const char __pyx_k_kepler[] = "_kepler";
 static const char __pyx_k_name_2[] = "__name__";
 static const char __pyx_k_pickle[] = "pickle";
 static const char __pyx_k_reduce[] = "__reduce__";
@@ -2314,7 +2315,6 @@ static const char __pyx_k_contiguous_and_direct[] = "<contiguous and direct>";
 static const char __pyx_k_MemoryView_of_r_object[] = "<MemoryView of %r object>";
 static const char __pyx_k_MemoryView_of_r_at_0x_x[] = "<MemoryView of %r at 0x%x>";
 static const char __pyx_k_contiguous_and_indirect[] = "<contiguous and indirect>";
-static const char __pyx_k_trends_c_kepler__kepler[] = "trends.c_kepler._kepler";
 static const char __pyx_k_Cannot_index_with_type_s[] = "Cannot index with type '%s'";
 static const char __pyx_k_Invalid_shape_in_axis_d_d[] = "Invalid shape in axis %d: %d.";
 static const char __pyx_k_itemsize_0_for_cython_array[] = "itemsize <= 0 for cython.array";
@@ -2392,6 +2392,7 @@ static PyObject *__pyx_n_s_import;
 static PyObject *__pyx_n_s_itemsize;
 static PyObject *__pyx_kp_s_itemsize_0_for_cython_array;
 static PyObject *__pyx_n_s_k;
+static PyObject *__pyx_n_s_kepler;
 static PyObject *__pyx_n_s_kepler_array;
 static PyObject *__pyx_kp_s_kepler_pyx;
 static PyObject *__pyx_n_s_main;
@@ -2404,8 +2405,8 @@ static PyObject *__pyx_n_s_new;
 static PyObject *__pyx_kp_s_no_default___reduce___due_to_non;
 static PyObject *__pyx_n_s_np;
 static PyObject *__pyx_n_s_numpy;
-static PyObject *__pyx_kp_s_numpy_core_multiarray_failed_to;
-static PyObject *__pyx_kp_s_numpy_core_umath_failed_to_impor;
+static PyObject *__pyx_kp_u_numpy_core_multiarray_failed_to;
+static PyObject *__pyx_kp_u_numpy_core_umath_failed_to_impor;
 static PyObject *__pyx_n_s_obj;
 static PyObject *__pyx_n_s_om;
 static PyObject *__pyx_n_s_pack;
@@ -2441,13 +2442,12 @@ static PyObject *__pyx_n_s_struct;
 static PyObject *__pyx_n_s_t;
 static PyObject *__pyx_n_s_test;
 static PyObject *__pyx_n_s_tp;
-static PyObject *__pyx_n_s_trends_c_kepler__kepler;
 static PyObject *__pyx_kp_s_unable_to_allocate_array_data;
 static PyObject *__pyx_kp_s_unable_to_allocate_shape_and_str;
 static PyObject *__pyx_n_s_unpack;
 static PyObject *__pyx_n_s_update;
-static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_M, __Pyx_memviewslice __pyx_v_e); /* proto */
-static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_t, double __pyx_v_per, double __pyx_v_tp, double __pyx_v_e, double __pyx_v_om, double __pyx_v_k); /* proto */
+static PyObject *__pyx_pf_7_kepler_kepler_array(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_M, __Pyx_memviewslice __pyx_v_e); /* proto */
+static PyObject *__pyx_pf_7_kepler_2rv_drive_array(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_t, double __pyx_v_per, double __pyx_v_tp, double __pyx_v_e, double __pyx_v_om, double __pyx_v_k); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array___cinit__(struct __pyx_array_obj *__pyx_v_self, PyObject *__pyx_v_shape, Py_ssize_t __pyx_v_itemsize, PyObject *__pyx_v_format, PyObject *__pyx_v_mode, int __pyx_v_allocate_buffer); /* proto */
 static int __pyx_array___pyx_pf_15View_dot_MemoryView_5array_2__getbuffer__(struct __pyx_array_obj *__pyx_v_self, Py_buffer *__pyx_v_info, int __pyx_v_flags); /* proto */
 static void __pyx_array___pyx_pf_15View_dot_MemoryView_5array_4__dealloc__(struct __pyx_array_obj *__pyx_v_self); /* proto */
@@ -2531,7 +2531,7 @@ static PyObject *__pyx_codeobj__24;
 static PyObject *__pyx_codeobj__31;
 /* Late includes */
 
-/* "trends/c_kepler/_kepler.pyx":24
+/* "_kepler.pyx":24
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def kepler_array(double [:,] M, double [:,] e):             # <<<<<<<<<<<<<<
@@ -2540,9 +2540,9 @@ static PyObject *__pyx_codeobj__31;
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6trends_8c_kepler_7_kepler_1kepler_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_6trends_8c_kepler_7_kepler_1kepler_array = {"kepler_array", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_6trends_8c_kepler_7_kepler_1kepler_array, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6trends_8c_kepler_7_kepler_1kepler_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7_kepler_1kepler_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_7_kepler_1kepler_array = {"kepler_array", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7_kepler_1kepler_array, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_7_kepler_1kepler_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   __Pyx_memviewslice __pyx_v_M = { 0, 0, { 0 }, { 0 }, { 0 } };
   __Pyx_memviewslice __pyx_v_e = { 0, 0, { 0 }, { 0 }, { 0 } };
   int __pyx_lineno = 0;
@@ -2593,18 +2593,18 @@ static PyObject *__pyx_pw_6trends_8c_kepler_7_kepler_1kepler_array(PyObject *__p
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("kepler_array", 1, 2, 2, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 24, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("trends.c_kepler._kepler.kepler_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("_kepler.kepler_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
-  __pyx_r = __pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(__pyx_self, __pyx_v_M, __pyx_v_e);
+  __pyx_r = __pyx_pf_7_kepler_kepler_array(__pyx_self, __pyx_v_M, __pyx_v_e);
 
   /* function exit code */
   __Pyx_RefNannyFinishContext();
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_M, __Pyx_memviewslice __pyx_v_e) {
+static PyObject *__pyx_pf_7_kepler_kepler_array(CYTHON_UNUSED PyObject *__pyx_self, __Pyx_memviewslice __pyx_v_M, __Pyx_memviewslice __pyx_v_e) {
   int __pyx_v_size;
   int __pyx_v_i;
   PyArrayObject *__pyx_v_E = 0;
@@ -2630,7 +2630,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
   __pyx_pybuffernd_E.data = NULL;
   __pyx_pybuffernd_E.rcbuffer = &__pyx_pybuffer_E;
 
-  /* "trends/c_kepler/_kepler.pyx":27
+  /* "_kepler.pyx":27
  *     cdef int size, i
  * 
  *     size = M.shape[0]             # <<<<<<<<<<<<<<
@@ -2639,7 +2639,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
  */
   __pyx_v_size = (__pyx_v_M.shape[0]);
 
-  /* "trends/c_kepler/_kepler.pyx":29
+  /* "_kepler.pyx":29
  *     size = M.shape[0]
  *     cdef np.ndarray[double, ndim=1] E = \
  *         np.ndarray(shape=(size,), dtype=np.float64)             # <<<<<<<<<<<<<<
@@ -2678,7 +2678,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
   __pyx_v_E = ((PyArrayObject *)__pyx_t_2);
   __pyx_t_2 = 0;
 
-  /* "trends/c_kepler/_kepler.pyx":31
+  /* "_kepler.pyx":31
  *         np.ndarray(shape=(size,), dtype=np.float64)
  * 
  *     for i in range(size):             # <<<<<<<<<<<<<<
@@ -2690,7 +2690,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
   for (__pyx_t_6 = 0; __pyx_t_6 < __pyx_t_5; __pyx_t_6+=1) {
     __pyx_v_i = __pyx_t_6;
 
-    /* "trends/c_kepler/_kepler.pyx":32
+    /* "_kepler.pyx":32
  * 
  *     for i in range(size):
  *         E[i] = kepler(M[i], e[i])             # <<<<<<<<<<<<<<
@@ -2706,7 +2706,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
     *__Pyx_BufPtrStrided1d(double *, __pyx_pybuffernd_E.rcbuffer->pybuffer.buf, __pyx_t_9, __pyx_pybuffernd_E.diminfo[0].strides) = kepler((*((double *) ( /* dim=0 */ (__pyx_v_M.data + __pyx_t_7 * __pyx_v_M.strides[0]) ))), (*((double *) ( /* dim=0 */ (__pyx_v_e.data + __pyx_t_8 * __pyx_v_e.strides[0]) ))));
   }
 
-  /* "trends/c_kepler/_kepler.pyx":34
+  /* "_kepler.pyx":34
  *         E[i] = kepler(M[i], e[i])
  * 
  *     return E             # <<<<<<<<<<<<<<
@@ -2718,7 +2718,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
   __pyx_r = ((PyObject *)__pyx_v_E);
   goto __pyx_L0;
 
-  /* "trends/c_kepler/_kepler.pyx":24
+  /* "_kepler.pyx":24
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def kepler_array(double [:,] M, double [:,] e):             # <<<<<<<<<<<<<<
@@ -2737,7 +2737,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
     __Pyx_ErrFetch(&__pyx_type, &__pyx_value, &__pyx_tb);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_E.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("trends.c_kepler._kepler.kepler_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("_kepler.kepler_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -2751,7 +2751,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
   return __pyx_r;
 }
 
-/* "trends/c_kepler/_kepler.pyx":38
+/* "_kepler.pyx":38
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def rv_drive_array(np.ndarray[DTYPE_t, ndim=1] t, double per, double tp,             # <<<<<<<<<<<<<<
@@ -2760,9 +2760,9 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_kepler_array(CYTHON_UNUSED 
  */
 
 /* Python wrapper */
-static PyObject *__pyx_pw_6trends_8c_kepler_7_kepler_3rv_drive_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
-static PyMethodDef __pyx_mdef_6trends_8c_kepler_7_kepler_3rv_drive_array = {"rv_drive_array", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_6trends_8c_kepler_7_kepler_3rv_drive_array, METH_VARARGS|METH_KEYWORDS, 0};
-static PyObject *__pyx_pw_6trends_8c_kepler_7_kepler_3rv_drive_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
+static PyObject *__pyx_pw_7_kepler_3rv_drive_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds); /*proto*/
+static PyMethodDef __pyx_mdef_7_kepler_3rv_drive_array = {"rv_drive_array", (PyCFunction)(void*)(PyCFunctionWithKeywords)__pyx_pw_7_kepler_3rv_drive_array, METH_VARARGS|METH_KEYWORDS, 0};
+static PyObject *__pyx_pw_7_kepler_3rv_drive_array(PyObject *__pyx_self, PyObject *__pyx_args, PyObject *__pyx_kwds) {
   PyArrayObject *__pyx_v_t = 0;
   double __pyx_v_per;
   double __pyx_v_tp;
@@ -2857,12 +2857,12 @@ static PyObject *__pyx_pw_6trends_8c_kepler_7_kepler_3rv_drive_array(PyObject *_
   __pyx_L5_argtuple_error:;
   __Pyx_RaiseArgtupleInvalid("rv_drive_array", 1, 6, 6, PyTuple_GET_SIZE(__pyx_args)); __PYX_ERR(0, 38, __pyx_L3_error)
   __pyx_L3_error:;
-  __Pyx_AddTraceback("trends.c_kepler._kepler.rv_drive_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("_kepler.rv_drive_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __Pyx_RefNannyFinishContext();
   return NULL;
   __pyx_L4_argument_unpacking_done:;
   if (unlikely(!__Pyx_ArgTypeTest(((PyObject *)__pyx_v_t), __pyx_ptype_5numpy_ndarray, 1, "t", 0))) __PYX_ERR(0, 38, __pyx_L1_error)
-  __pyx_r = __pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(__pyx_self, __pyx_v_t, __pyx_v_per, __pyx_v_tp, __pyx_v_e, __pyx_v_om, __pyx_v_k);
+  __pyx_r = __pyx_pf_7_kepler_2rv_drive_array(__pyx_self, __pyx_v_t, __pyx_v_per, __pyx_v_tp, __pyx_v_e, __pyx_v_om, __pyx_v_k);
 
   /* function exit code */
   goto __pyx_L0;
@@ -2873,7 +2873,7 @@ static PyObject *__pyx_pw_6trends_8c_kepler_7_kepler_3rv_drive_array(PyObject *_
   return __pyx_r;
 }
 
-static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_t, double __pyx_v_per, double __pyx_v_tp, double __pyx_v_e, double __pyx_v_om, double __pyx_v_k) {
+static PyObject *__pyx_pf_7_kepler_2rv_drive_array(CYTHON_UNUSED PyObject *__pyx_self, PyArrayObject *__pyx_v_t, double __pyx_v_per, double __pyx_v_tp, double __pyx_v_e, double __pyx_v_om, double __pyx_v_k) {
   int __pyx_v_size;
   int __pyx_v_i;
   PyArrayObject *__pyx_v_rv = 0;
@@ -2908,11 +2908,11 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
   __pyx_pybuffernd_t.rcbuffer = &__pyx_pybuffer_t;
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_t.rcbuffer->pybuffer, (PyObject*)__pyx_v_t, &__Pyx_TypeInfo_nn___pyx_t_6trends_8c_kepler_7_kepler_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 38, __pyx_L1_error)
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_t.rcbuffer->pybuffer, (PyObject*)__pyx_v_t, &__Pyx_TypeInfo_nn___pyx_t_7_kepler_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES, 1, 0, __pyx_stack) == -1)) __PYX_ERR(0, 38, __pyx_L1_error)
   }
   __pyx_pybuffernd_t.diminfo[0].strides = __pyx_pybuffernd_t.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_t.diminfo[0].shape = __pyx_pybuffernd_t.rcbuffer->pybuffer.shape[0];
 
-  /* "trends/c_kepler/_kepler.pyx":41
+  /* "_kepler.pyx":41
  *                    double e, double om, double k):
  *     cdef int size, i
  *     size = t.shape[0]             # <<<<<<<<<<<<<<
@@ -2921,7 +2921,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
  */
   __pyx_v_size = (__pyx_v_t->dimensions[0]);
 
-  /* "trends/c_kepler/_kepler.pyx":43
+  /* "_kepler.pyx":43
  *     size = t.shape[0]
  * 
  *     cdef np.ndarray[DTYPE_t, ndim=1] rv = t.copy()             # <<<<<<<<<<<<<<
@@ -2949,7 +2949,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
   __pyx_t_4 = ((PyArrayObject *)__pyx_t_1);
   {
     __Pyx_BufFmt_StackElem __pyx_stack[1];
-    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_rv.rcbuffer->pybuffer, (PyObject*)__pyx_t_4, &__Pyx_TypeInfo_nn___pyx_t_6trends_8c_kepler_7_kepler_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
+    if (unlikely(__Pyx_GetBufferAndValidate(&__pyx_pybuffernd_rv.rcbuffer->pybuffer, (PyObject*)__pyx_t_4, &__Pyx_TypeInfo_nn___pyx_t_7_kepler_DTYPE_t, PyBUF_FORMAT| PyBUF_STRIDES| PyBUF_WRITABLE, 1, 0, __pyx_stack) == -1)) {
       __pyx_v_rv = ((PyArrayObject *)Py_None); __Pyx_INCREF(Py_None); __pyx_pybuffernd_rv.rcbuffer->pybuffer.buf = NULL;
       __PYX_ERR(0, 43, __pyx_L1_error)
     } else {__pyx_pybuffernd_rv.diminfo[0].strides = __pyx_pybuffernd_rv.rcbuffer->pybuffer.strides[0]; __pyx_pybuffernd_rv.diminfo[0].shape = __pyx_pybuffernd_rv.rcbuffer->pybuffer.shape[0];
@@ -2959,7 +2959,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
   __pyx_v_rv = ((PyArrayObject *)__pyx_t_1);
   __pyx_t_1 = 0;
 
-  /* "trends/c_kepler/_kepler.pyx":44
+  /* "_kepler.pyx":44
  * 
  *     cdef np.ndarray[DTYPE_t, ndim=1] rv = t.copy()
  *     cdef double cosom = cos(om)             # <<<<<<<<<<<<<<
@@ -2968,7 +2968,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
  */
   __pyx_v_cosom = cos(__pyx_v_om);
 
-  /* "trends/c_kepler/_kepler.pyx":45
+  /* "_kepler.pyx":45
  *     cdef np.ndarray[DTYPE_t, ndim=1] rv = t.copy()
  *     cdef double cosom = cos(om)
  *     cdef double sinom = sin(om)             # <<<<<<<<<<<<<<
@@ -2977,7 +2977,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
  */
   __pyx_v_sinom = sin(__pyx_v_om);
 
-  /* "trends/c_kepler/_kepler.pyx":46
+  /* "_kepler.pyx":46
  *     cdef double cosom = cos(om)
  *     cdef double sinom = sin(om)
  *     for i in range(size):             # <<<<<<<<<<<<<<
@@ -2989,7 +2989,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
   for (__pyx_t_7 = 0; __pyx_t_7 < __pyx_t_6; __pyx_t_7+=1) {
     __pyx_v_i = __pyx_t_7;
 
-    /* "trends/c_kepler/_kepler.pyx":47
+    /* "_kepler.pyx":47
  *     cdef double sinom = sin(om)
  *     for i in range(size):
  *         rv[i] = rv_drive(t[i], per, tp, e, cosom, sinom, k)             # <<<<<<<<<<<<<<
@@ -3000,10 +3000,10 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
     if (__pyx_t_8 < 0) __pyx_t_8 += __pyx_pybuffernd_t.diminfo[0].shape;
     __pyx_t_9 = __pyx_v_i;
     if (__pyx_t_9 < 0) __pyx_t_9 += __pyx_pybuffernd_rv.diminfo[0].shape;
-    *__Pyx_BufPtrStrided1d(__pyx_t_6trends_8c_kepler_7_kepler_DTYPE_t *, __pyx_pybuffernd_rv.rcbuffer->pybuffer.buf, __pyx_t_9, __pyx_pybuffernd_rv.diminfo[0].strides) = rv_drive((*__Pyx_BufPtrStrided1d(__pyx_t_6trends_8c_kepler_7_kepler_DTYPE_t *, __pyx_pybuffernd_t.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_t.diminfo[0].strides)), __pyx_v_per, __pyx_v_tp, __pyx_v_e, __pyx_v_cosom, __pyx_v_sinom, __pyx_v_k);
+    *__Pyx_BufPtrStrided1d(__pyx_t_7_kepler_DTYPE_t *, __pyx_pybuffernd_rv.rcbuffer->pybuffer.buf, __pyx_t_9, __pyx_pybuffernd_rv.diminfo[0].strides) = rv_drive((*__Pyx_BufPtrStrided1d(__pyx_t_7_kepler_DTYPE_t *, __pyx_pybuffernd_t.rcbuffer->pybuffer.buf, __pyx_t_8, __pyx_pybuffernd_t.diminfo[0].strides)), __pyx_v_per, __pyx_v_tp, __pyx_v_e, __pyx_v_cosom, __pyx_v_sinom, __pyx_v_k);
   }
 
-  /* "trends/c_kepler/_kepler.pyx":49
+  /* "_kepler.pyx":49
  *         rv[i] = rv_drive(t[i], per, tp, e, cosom, sinom, k)
  * 
  *     return rv             # <<<<<<<<<<<<<<
@@ -3014,7 +3014,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
   __pyx_r = ((PyObject *)__pyx_v_rv);
   goto __pyx_L0;
 
-  /* "trends/c_kepler/_kepler.pyx":38
+  /* "_kepler.pyx":38
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def rv_drive_array(np.ndarray[DTYPE_t, ndim=1] t, double per, double tp,             # <<<<<<<<<<<<<<
@@ -3034,7 +3034,7 @@ static PyObject *__pyx_pf_6trends_8c_kepler_7_kepler_2rv_drive_array(CYTHON_UNUS
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_rv.rcbuffer->pybuffer);
     __Pyx_SafeReleaseBuffer(&__pyx_pybuffernd_t.rcbuffer->pybuffer);
   __Pyx_ErrRestore(__pyx_type, __pyx_value, __pyx_tb);}
-  __Pyx_AddTraceback("trends.c_kepler._kepler.rv_drive_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
+  __Pyx_AddTraceback("_kepler.rv_drive_array", __pyx_clineno, __pyx_lineno, __pyx_filename);
   __pyx_r = NULL;
   goto __pyx_L2;
   __pyx_L0:;
@@ -17204,7 +17204,7 @@ static PyBufferProcs __pyx_tp_as_buffer_array = {
 
 static PyTypeObject __pyx_type___pyx_array = {
   PyVarObject_HEAD_INIT(0, 0)
-  "trends.c_kepler._kepler.array", /*tp_name*/
+  "_kepler.array", /*tp_name*/
   sizeof(struct __pyx_array_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_array, /*tp_dealloc*/
@@ -17323,7 +17323,7 @@ static PyMethodDef __pyx_methods_Enum[] = {
 
 static PyTypeObject __pyx_type___pyx_MemviewEnum = {
   PyVarObject_HEAD_INIT(0, 0)
-  "trends.c_kepler._kepler.Enum", /*tp_name*/
+  "_kepler.Enum", /*tp_name*/
   sizeof(struct __pyx_MemviewEnum_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_Enum, /*tp_dealloc*/
@@ -17584,7 +17584,7 @@ static PyBufferProcs __pyx_tp_as_buffer_memoryview = {
 
 static PyTypeObject __pyx_type___pyx_memoryview = {
   PyVarObject_HEAD_INIT(0, 0)
-  "trends.c_kepler._kepler.memoryview", /*tp_name*/
+  "_kepler.memoryview", /*tp_name*/
   sizeof(struct __pyx_memoryview_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc_memoryview, /*tp_dealloc*/
@@ -17722,7 +17722,7 @@ static struct PyGetSetDef __pyx_getsets__memoryviewslice[] = {
 
 static PyTypeObject __pyx_type___pyx_memoryviewslice = {
   PyVarObject_HEAD_INIT(0, 0)
-  "trends.c_kepler._kepler._memoryviewslice", /*tp_name*/
+  "_kepler._memoryviewslice", /*tp_name*/
   sizeof(struct __pyx_memoryviewslice_obj), /*tp_basicsize*/
   0, /*tp_itemsize*/
   __pyx_tp_dealloc__memoryviewslice, /*tp_dealloc*/
@@ -17900,6 +17900,7 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_itemsize, __pyx_k_itemsize, sizeof(__pyx_k_itemsize), 0, 0, 1, 1},
   {&__pyx_kp_s_itemsize_0_for_cython_array, __pyx_k_itemsize_0_for_cython_array, sizeof(__pyx_k_itemsize_0_for_cython_array), 0, 0, 1, 0},
   {&__pyx_n_s_k, __pyx_k_k, sizeof(__pyx_k_k), 0, 0, 1, 1},
+  {&__pyx_n_s_kepler, __pyx_k_kepler, sizeof(__pyx_k_kepler), 0, 0, 1, 1},
   {&__pyx_n_s_kepler_array, __pyx_k_kepler_array, sizeof(__pyx_k_kepler_array), 0, 0, 1, 1},
   {&__pyx_kp_s_kepler_pyx, __pyx_k_kepler_pyx, sizeof(__pyx_k_kepler_pyx), 0, 0, 1, 0},
   {&__pyx_n_s_main, __pyx_k_main, sizeof(__pyx_k_main), 0, 0, 1, 1},
@@ -17912,8 +17913,8 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_kp_s_no_default___reduce___due_to_non, __pyx_k_no_default___reduce___due_to_non, sizeof(__pyx_k_no_default___reduce___due_to_non), 0, 0, 1, 0},
   {&__pyx_n_s_np, __pyx_k_np, sizeof(__pyx_k_np), 0, 0, 1, 1},
   {&__pyx_n_s_numpy, __pyx_k_numpy, sizeof(__pyx_k_numpy), 0, 0, 1, 1},
-  {&__pyx_kp_s_numpy_core_multiarray_failed_to, __pyx_k_numpy_core_multiarray_failed_to, sizeof(__pyx_k_numpy_core_multiarray_failed_to), 0, 0, 1, 0},
-  {&__pyx_kp_s_numpy_core_umath_failed_to_impor, __pyx_k_numpy_core_umath_failed_to_impor, sizeof(__pyx_k_numpy_core_umath_failed_to_impor), 0, 0, 1, 0},
+  {&__pyx_kp_u_numpy_core_multiarray_failed_to, __pyx_k_numpy_core_multiarray_failed_to, sizeof(__pyx_k_numpy_core_multiarray_failed_to), 0, 1, 0, 0},
+  {&__pyx_kp_u_numpy_core_umath_failed_to_impor, __pyx_k_numpy_core_umath_failed_to_impor, sizeof(__pyx_k_numpy_core_umath_failed_to_impor), 0, 1, 0, 0},
   {&__pyx_n_s_obj, __pyx_k_obj, sizeof(__pyx_k_obj), 0, 0, 1, 1},
   {&__pyx_n_s_om, __pyx_k_om, sizeof(__pyx_k_om), 0, 0, 1, 1},
   {&__pyx_n_s_pack, __pyx_k_pack, sizeof(__pyx_k_pack), 0, 0, 1, 1},
@@ -17949,7 +17950,6 @@ static __Pyx_StringTabEntry __pyx_string_tab[] = {
   {&__pyx_n_s_t, __pyx_k_t, sizeof(__pyx_k_t), 0, 0, 1, 1},
   {&__pyx_n_s_test, __pyx_k_test, sizeof(__pyx_k_test), 0, 0, 1, 1},
   {&__pyx_n_s_tp, __pyx_k_tp, sizeof(__pyx_k_tp), 0, 0, 1, 1},
-  {&__pyx_n_s_trends_c_kepler__kepler, __pyx_k_trends_c_kepler__kepler, sizeof(__pyx_k_trends_c_kepler__kepler), 0, 0, 1, 1},
   {&__pyx_kp_s_unable_to_allocate_array_data, __pyx_k_unable_to_allocate_array_data, sizeof(__pyx_k_unable_to_allocate_array_data), 0, 0, 1, 0},
   {&__pyx_kp_s_unable_to_allocate_shape_and_str, __pyx_k_unable_to_allocate_shape_and_str, sizeof(__pyx_k_unable_to_allocate_shape_and_str), 0, 0, 1, 0},
   {&__pyx_n_s_unpack, __pyx_k_unpack, sizeof(__pyx_k_unpack), 0, 0, 1, 1},
@@ -17982,7 +17982,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_umath() except -1:
  */
-  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_s_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple_)) __PYX_ERR(1, 947, __pyx_L1_error)
+  __pyx_tuple_ = PyTuple_Pack(1, __pyx_kp_u_numpy_core_multiarray_failed_to); if (unlikely(!__pyx_tuple_)) __PYX_ERR(1, 947, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple_);
   __Pyx_GIVEREF(__pyx_tuple_);
 
@@ -17993,7 +17993,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
  * 
  * cdef inline int import_ufunc() except -1:
  */
-  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_s_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 953, __pyx_L1_error)
+  __pyx_tuple__2 = PyTuple_Pack(1, __pyx_kp_u_numpy_core_umath_failed_to_impor); if (unlikely(!__pyx_tuple__2)) __PYX_ERR(1, 953, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_tuple__2);
   __Pyx_GIVEREF(__pyx_tuple__2);
 
@@ -18189,7 +18189,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GOTREF(__pyx_tuple__20);
   __Pyx_GIVEREF(__pyx_tuple__20);
 
-  /* "trends/c_kepler/_kepler.pyx":24
+  /* "_kepler.pyx":24
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def kepler_array(double [:,] M, double [:,] e):             # <<<<<<<<<<<<<<
@@ -18201,7 +18201,7 @@ static CYTHON_SMALL_CODE int __Pyx_InitCachedConstants(void) {
   __Pyx_GIVEREF(__pyx_tuple__21);
   __pyx_codeobj__22 = (PyObject*)__Pyx_PyCode_New(2, 0, 5, 0, CO_OPTIMIZED|CO_NEWLOCALS, __pyx_empty_bytes, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_tuple__21, __pyx_empty_tuple, __pyx_empty_tuple, __pyx_kp_s_kepler_pyx, __pyx_n_s_kepler_array, 24, __pyx_empty_bytes); if (unlikely(!__pyx_codeobj__22)) __PYX_ERR(0, 24, __pyx_L1_error)
 
-  /* "trends/c_kepler/_kepler.pyx":38
+  /* "_kepler.pyx":38
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def rv_drive_array(np.ndarray[DTYPE_t, ndim=1] t, double per, double tp,             # <<<<<<<<<<<<<<
@@ -18650,14 +18650,14 @@ if (!__Pyx_RefNanny) {
   #if PY_MAJOR_VERSION < 3 && (__PYX_DEFAULT_STRING_ENCODING_IS_ASCII || __PYX_DEFAULT_STRING_ENCODING_IS_DEFAULT)
   if (__Pyx_init_sys_getdefaultencoding_params() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
-  if (__pyx_module_is_main_trends__c_kepler___kepler) {
+  if (__pyx_module_is_main__kepler) {
     if (PyObject_SetAttr(__pyx_m, __pyx_n_s_name_2, __pyx_n_s_main) < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   }
   #if PY_MAJOR_VERSION >= 3
   {
     PyObject *modules = PyImport_GetModuleDict(); if (unlikely(!modules)) __PYX_ERR(0, 1, __pyx_L1_error)
-    if (!PyDict_GetItemString(modules, "trends.c_kepler._kepler")) {
-      if (unlikely(PyDict_SetItemString(modules, "trends.c_kepler._kepler", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
+    if (!PyDict_GetItemString(modules, "_kepler")) {
+      if (unlikely(PyDict_SetItemString(modules, "_kepler", __pyx_m) < 0)) __PYX_ERR(0, 1, __pyx_L1_error)
     }
   }
   #endif
@@ -18678,7 +18678,7 @@ if (!__Pyx_RefNanny) {
   if (__Pyx_patch_abc() < 0) __PYX_ERR(0, 1, __pyx_L1_error)
   #endif
 
-  /* "trends/c_kepler/_kepler.pyx":4
+  /* "_kepler.pyx":4
  * from __future__ import absolute_import
  * cimport numpy as np
  * import numpy as np             # <<<<<<<<<<<<<<
@@ -18690,7 +18690,7 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_np, __pyx_t_1) < 0) __PYX_ERR(0, 4, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_1); __pyx_t_1 = 0;
 
-  /* "trends/c_kepler/_kepler.pyx":11
+  /* "_kepler.pyx":11
  * # if you want to use the Numpy-C-API from Cython
  * # (not strictly necessary for this example, but good practice)
  * np.import_array()             # <<<<<<<<<<<<<<
@@ -18699,7 +18699,7 @@ if (!__Pyx_RefNanny) {
  */
   __pyx_t_2 = __pyx_f_5numpy_import_array(); if (unlikely(__pyx_t_2 == ((int)-1))) __PYX_ERR(0, 11, __pyx_L1_error)
 
-  /* "trends/c_kepler/_kepler.pyx":19
+  /* "_kepler.pyx":19
  *     double rv_drive(double t, double per, double tp, double e, double cosom, double sinom, double k )
  * 
  * DTYPE = np.float64             # <<<<<<<<<<<<<<
@@ -18714,31 +18714,31 @@ if (!__Pyx_RefNanny) {
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_DTYPE, __pyx_t_3) < 0) __PYX_ERR(0, 19, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "trends/c_kepler/_kepler.pyx":24
+  /* "_kepler.pyx":24
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def kepler_array(double [:,] M, double [:,] e):             # <<<<<<<<<<<<<<
  *     cdef int size, i
  * 
  */
-  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_6trends_8c_kepler_7_kepler_1kepler_array, NULL, __pyx_n_s_trends_c_kepler__kepler); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 24, __pyx_L1_error)
+  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_7_kepler_1kepler_array, NULL, __pyx_n_s_kepler); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_kepler_array, __pyx_t_3) < 0) __PYX_ERR(0, 24, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "trends/c_kepler/_kepler.pyx":38
+  /* "_kepler.pyx":38
  * # create the wrapper code, with numpy type annotations
  * @cython.boundscheck(False)
  * def rv_drive_array(np.ndarray[DTYPE_t, ndim=1] t, double per, double tp,             # <<<<<<<<<<<<<<
  *                    double e, double om, double k):
  *     cdef int size, i
  */
-  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_6trends_8c_kepler_7_kepler_3rv_drive_array, NULL, __pyx_n_s_trends_c_kepler__kepler); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
+  __pyx_t_3 = PyCFunction_NewEx(&__pyx_mdef_7_kepler_3rv_drive_array, NULL, __pyx_n_s_kepler); if (unlikely(!__pyx_t_3)) __PYX_ERR(0, 38, __pyx_L1_error)
   __Pyx_GOTREF(__pyx_t_3);
   if (PyDict_SetItem(__pyx_d, __pyx_n_s_rv_drive_array, __pyx_t_3) < 0) __PYX_ERR(0, 38, __pyx_L1_error)
   __Pyx_DECREF(__pyx_t_3); __pyx_t_3 = 0;
 
-  /* "trends/c_kepler/_kepler.pyx":1
+  /* "_kepler.pyx":1
  * # cimport the Cython declarations for numpy             # <<<<<<<<<<<<<<
  * from __future__ import absolute_import
  * cimport numpy as np
@@ -18909,11 +18909,11 @@ if (!__Pyx_RefNanny) {
   __Pyx_XDECREF(__pyx_t_3);
   if (__pyx_m) {
     if (__pyx_d) {
-      __Pyx_AddTraceback("init trends.c_kepler._kepler", __pyx_clineno, __pyx_lineno, __pyx_filename);
+      __Pyx_AddTraceback("init _kepler", __pyx_clineno, __pyx_lineno, __pyx_filename);
     }
     Py_CLEAR(__pyx_m);
   } else if (!PyErr_Occurred()) {
-    PyErr_SetString(PyExc_ImportError, "init trends.c_kepler._kepler");
+    PyErr_SetString(PyExc_ImportError, "init _kepler");
   }
   __pyx_L0:;
   __Pyx_RefNannyFinishContext();

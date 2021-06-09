@@ -5,9 +5,6 @@ cimport numpy as np
 import helper_functions as hlp
 
 import radvel as rv
-#import sys
-#print(sys.path)
-#print('YABBBBBAAAAAAAA')
 
 from c_kepler import _kepler as ck
 
@@ -19,7 +16,7 @@ from constants import *
 cdef class Giant:
     cdef str star_name
     cdef double m_star, gamma_dot, gamma_dot_err, gamma_dotdot, gamma_dotdot_err, parallax, pm_anom_data, pm_anom_data_err, d_star, tp
-    cdef int num_points, grid_num, plot_num
+    cdef int num_points, t_num, grid_num, plot_num
     cdef np.ndarray a_list, m_list, per_list, e_list, cosi_list, i_list, sini_list, M_anom_list, E_anom_list, T_anom_list, om_list
     cdef public Om_list, a_inds, m_inds, a_inds_plot, m_inds_plot, chi_sq_list_rv, prob_list_rv, rv_bounds_array, rv_plot_array
     cdef np.ndarray E_prog, E_prog_list, T_prog
@@ -52,6 +49,7 @@ cdef class Giant:
         m_min, m_max = m_lim
         
         self.num_points = num_points
+        self.t_num = t_num
         self.grid_num = grid_num
         self.plot_num = plot_num
         # These semimajor axes are distances between the planet and the barycenter of the system. The star is on its own orbit, which we will get later.
@@ -101,15 +99,21 @@ cdef class Giant:
         
         return
     
+    
     def rv_post(self):
+
+        #cdef np.ndarray[double] dot_term_list    = np.zeros((self.num_points,))
+        #cdef np.ndarray[double] dotdot_term_list = np.zeros((self.num_points,))
         
-        m_tot_list = (self.m_star+self.m_list*(c.M_jup/c.M_sun).value)
+        m_tot_list = (self.m_star+self.m_list*(M_jup/M_sun))
         
         # Get the first and second derivatives of the RV curve
         gamma_dot, gamma_dotdot = hlp.gamma(self.a_list, self.m_list, self.per_list, self.e_list, self.i_list, self.om_list, self.M_anom_list)
         
+        # To get χ^2, we need the gdot and gddot (differences/errors)^2
         dot_term_list = ((gamma_dot-self.gamma_dot)/(self.gamma_dot_err))**2
         dotdot_term_list = ((gamma_dotdot-self.gamma_dotdot)/(self.gamma_dotdot_err))**2
+        
         
         # Why three arrays to store probabilities? self.prob_list_rv is a 1D list that will be multiplied with its astrometry counterpart to get a the total (rv+astro) marginalized posterior. rv_bounds_array is a 2D array of the rv probabilities, binned according to a and M. It will be used to find the 1-sigma bounds on a an M. rv_plot_array is similar, but it will be used for plotting the 2D probability surface instead of finding bounds. The only difference between the last two is the number of points used to create the 2D grid.
         
@@ -147,7 +151,7 @@ cdef class Giant:
         return
         
         
-
+    @profile
     def astro_post(self):
 
         ##########
@@ -162,7 +166,7 @@ cdef class Giant:
         time_endpoints = np.array([[hip_times[0], gaia_times[0]], [hip_times[1], gaia_times[1]]])
 
         # Walk through mean anomaly over the HIP/Gaia missions. The mean anomaly array (final shape (per_num, 2, t_num)) contains a mean anomaly for n = (t_num) points along every one of the (per_num) periods, for both Hipparcos and Gaia.
-        M_anom_progression = (2*np.pi/per_array)*(np.linspace(time_endpoints[0], time_endpoints[1], 100) - hip_times[0])[None, :, :]
+        M_anom_progression = (2*np.pi/per_array)*(np.linspace(time_endpoints[0], time_endpoints[1], self.t_num) - hip_times[0])[None, :, :]
         M_anom_progression = np.swapaxes(M_anom_progression, 1,2)
         
         
@@ -180,6 +184,10 @@ cdef class Giant:
         prob_list = []
         astro_bounds_array = np.zeros((self.grid_num, self.grid_num))
         astro_plot_array   = np.zeros((self.plot_num, self.plot_num))
+        
+        # Line to speed up E_prog loop below, but seems to slow it down
+        # cdef np.ndarray[double, ndim=1] E_prog = np.ndarray(shape=(100,))
+        
         for i in range(self.num_points):
 
             M_2d = M_anom_progression[i]
@@ -197,6 +205,8 @@ cdef class Giant:
             
 
             E_prog_list = []
+            
+            
             for j in range(2):
                 
                 M_1d = M_2d[j]

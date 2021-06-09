@@ -1,4 +1,7 @@
 /analysis
+/build
+/cython_practice
+
 /trends/c_kepler/build
 *.c
 
