@@ -6,7 +6,7 @@ from distutils.extension import Extension
 # Because of the trends/ at the beginning of the path, this needs to be run from the top-level directory.
 # Is there a way to allow it to be run from both? Maybe, check with Erik.
 extensions = [
-    Extension("cy_class", ["cy_class.pyx"])
+    Extension("example_cython", ["example_cython.pyx"])
 ]
 
 setup(

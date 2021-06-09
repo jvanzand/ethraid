@@ -5,6 +5,7 @@ import re
 """
 Modified by Judah to make changes to Kepler solver
 """
+from Cython.Build import cythonize
 
 
 class build_ext(_build_ext):
@@ -33,7 +34,7 @@ for line in open('radvel_requirements.txt', 'r').readlines():
 setup(
     packages=find_packages(),
     setup_requires=['numpy', 'cython'],
-    ext_modules=extensions,
+    ext_modules=cythonize(extensions, language_level=3, annotate=False),
     cmdclass={'build_ext': build_ext},
     data_files=[
         (
