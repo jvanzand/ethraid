@@ -187,6 +187,9 @@ cdef class Giant:
         
         # Line to speed up E_prog loop below, but seems to slow it down
         # cdef np.ndarray[double, ndim=1] E_prog = np.ndarray(shape=(100,))
+        cdef int i
+        cdef np.ndarray[double, ndim=2] E_prog_list = np.ndarray(shape=(2, self.t_num))
+        #cdef np.ndarray[double, ndim=2] T_prog = np.ndarray(shape=(self.t_num, 2))
         
         for i in range(self.num_points):
 
@@ -204,20 +207,17 @@ cdef class Giant:
             inc = self.i_list[i]
             
 
-            E_prog_list = []
-            
-            
             for j in range(2):
                 
                 M_1d = M_2d[j]
+                
+                # Much faster than hlp.kepler(M_1d, e_arr[0])
                 E_prog = rv._kepler.kepler_array(M_1d, e)
-                # E_prog = hlp.kepler(M_1d, e_arr[0])
 
                 
-                E_prog_list.append(E_prog)
+                E_prog_list[j] = E_prog
             
             # E_prog_list is a (2,100) array with an eccentric anomaly for each of 100 times in both the Hip and Gaia eras.
-            E_prog_list = np.array(E_prog_list)
             
 
             # Convert the eccentric anomalies into true anomalies and add on T_anom_array, the random starting true anomalies. Transpose so this has shape (t_num, 2). The length-2 axis holds Hipparcos vs. Gaia true anomalies.
