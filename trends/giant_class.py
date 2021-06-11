@@ -117,11 +117,12 @@ class Giant(object):
         
         rv_bounds_array = np.zeros((self.grid_num, self.grid_num))
         rv_plot_array   = np.zeros((self.plot_num, self.plot_num))
-        
+
         for i in range(self.num_points):
             # In case we want 1-sigma bounds for RVs only
             a_i = self.a_inds[i]
             m_i = self.m_inds[i]
+            # print(a_i, m_i, self.prob_list_rv[i])
             rv_bounds_array[m_i, a_i] += self.prob_list_rv[i]
 
             # For plotting
@@ -137,7 +138,6 @@ class Giant(object):
         return
         
         
-    @profile
     def astro_post(self):
 
         ##########

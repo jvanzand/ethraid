@@ -87,6 +87,7 @@ def main(save_data=False):
 
 
     bounds = hlp.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+    bounds = hlp.bounds_1D(my_planet.rv_bounds_array, [m_lim, a_lim], interp_num = 1e4)
     print('a_lim, m_lim = ', bounds[0], bounds[1])
     ##################################################
     fig, ax = plt.subplots(figsize=(12,12))
@@ -111,6 +112,8 @@ def main(save_data=False):
     plt.text((1/3)*(min_index_a-1), (1/3)*plot_num, 'Visible curvature', size=restricted_region_label_size, rotation=90)
 
     tick_array = np.linspace(0, plot_num-1, tick_num).astype(int)
+
+    
     plt.xticks(tick_array, [np.round(a_list[i], 1) for i in tick_array], size=tick_size)
     plt.yticks(tick_array, [np.round(m_list[i], 1) for i in tick_array ], size=tick_size)
     
@@ -121,7 +124,7 @@ def main(save_data=False):
     
     fig.tight_layout()
     fig.savefig('5thCompConstraints_RV_astr.png')
-    # plt.show()
+    plt.show()
     
     return
 
