@@ -3,6 +3,7 @@
 /cython_practice
 
 /trends/c_kepler/build
+/trends/__pycache__
 *.c
 *.pyc
 *.so
