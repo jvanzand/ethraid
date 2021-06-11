@@ -54,7 +54,7 @@ cdef class Giant:
         self.plot_num = plot_num
         # These semimajor axes are distances between the planet and the barycenter of the system. The star is on its own orbit, which we will get later.
         self.a_list = loguniform.rvs(a_min, a_max, size=num_points)
-        self.m_list= loguniform.rvs(m_min, m_max, size=num_points)
+        self.m_list = loguniform.rvs(m_min, m_max, size=num_points)
         
         # Match up a_list and m_list and get the period for each pair.
         self.per_list = hlp.P(self.a_list, (self.m_star+self.m_list*(c.M_jup/c.M_sun).value))
@@ -144,14 +144,14 @@ cdef class Giant:
 
             if int(i%(int(self.num_points/100))) == 0:
                   print(int(i / (self.num_points/100)), '% ')#, self.prob_list_rv[i])
-
-        self.rv_bounds_array = rv_bounds_array/rv_bounds_array.sum()
+                  
+        self.rv_bounds_array = rv_bounds_array
+        #self.rv_bounds_array = rv_bounds_array/rv_bounds_array.sum()
         self.rv_plot_array   = rv_plot_array/rv_plot_array.sum()
         
         return
         
         
-    @profile
     def astro_post(self):
 
         ##########

@@ -15,7 +15,7 @@ import trends.giant_class as gc
 
 # @profile
 def main(save_data=False): 
-    grid_num = 30
+    grid_num = 10
     plot_num = 30
     tick_num = 6
     
@@ -53,6 +53,7 @@ def main(save_data=False):
     post_rv = my_planet.rv_post()
     post_astro = my_planet.astro_post()
     post_tot = my_planet.rv_astro_post()
+
 
     
     post_rv_plot    = my_planet.rv_plot_array
