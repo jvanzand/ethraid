@@ -12,7 +12,6 @@ from scipy.stats import loguniform, beta
 
 from constants import *
 
-
 cdef class Giant:
     cdef str star_name
     cdef double m_star, gamma_dot, gamma_dot_err, gamma_dotdot, gamma_dotdot_err, parallax, pm_anom_data, pm_anom_data_err, d_star, tp
@@ -37,7 +36,7 @@ cdef class Giant:
         self.pm_anom_data_err = pm_anom_data_err
         
 
-    
+
     def make_arrays(self, a_lim = (1.9, 1e2), m_lim = (1.5, 1e2), grid_num = 100, num_points = int(3e5), t_num = 100, plot_num = 30, e = 0, tp = 0, om = 0):
         
         
@@ -99,7 +98,7 @@ cdef class Giant:
         
         return
     
-    
+
     def rv_post(self):
 
         #cdef np.ndarray[double] dot_term_list    = np.zeros((self.num_points,))
@@ -206,7 +205,7 @@ cdef class Giant:
             om = self.om_list[i]
             inc = self.i_list[i]
             
-
+            # E_prog_list is initialized above with cdef
             for j in range(2):
                 
                 M_1d = M_2d[j]
@@ -229,6 +228,10 @@ cdef class Giant:
             #                                                              (np.sin(om+T_prog)*np.sin(inc))])
             
             rot_matrix = hlp.rot_matrix(inc, om, Om)
+            
+            print(np.shape(rot_matrix))
+            print(type(rot_matrix))
+            dfdf
         
             ######################## Angular Positions ##########################
             # At each of these true anomalies, we need to know the angular separation from barycenter! So first use the r equation on these T_anoms to get r_planet
