@@ -31,7 +31,8 @@ def kepler_array(double [:,] M, double [:,] e):
     for i in range(size):
         E[i] = kepler(M[i], e[i])
 
-    return E 
+    return E
+
 
 # create the wrapper code, with numpy type annotations
 @cython.boundscheck(False)
