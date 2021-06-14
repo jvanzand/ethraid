@@ -91,7 +91,7 @@ class Giant(object):
         
         
         return
-    
+
     def rv_post(self):
         
         m_tot_list = (self.m_star+self.m_list*(c.M_jup/c.M_sun).value)
