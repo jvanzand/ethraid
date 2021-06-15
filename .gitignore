@@ -5,6 +5,8 @@
 /trends/c_kepler/build
 /trends/__pycache__
 *.c
+!trends/c_kepler/kepler.c
+!no_classes/c_kepler/kepler.c
 *.pyc
 *.so
 *.png
