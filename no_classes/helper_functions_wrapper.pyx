@@ -3,7 +3,7 @@ from kern_profiler_dummy import *
 import numpy as np
 cimport numpy as np
 import cython
-from libc.math cimport sin, cos, tan
+from libc.math cimport sin, cos, tan, atan
 
 
 import scipy as sp
@@ -82,51 +82,61 @@ def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, np
     gamma_dot (m/s/d)
     gamma_ddot (m/s/d^2)
     """
-    cdef int size, j
+    cdef int size, j, k
 
     size = a.shape[0]
 
-    #cdef double [:,:] gammas = [[] for i in range(size)]
-    #cdef np.ndarray[pair[double, double], ndim=1] gammas = np.ndarray(shape=(size, 2))
+
     cdef np.ndarray[double, ndim=1] gamma_dot = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    nu = np.ndarray(shape=(size,), dtype=np.float64)
-
-    Mp = Mp*M_jup
-    a = a*au
+                                    gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64)
+                                    #nu = np.ndarray(shape=(size,), dtype=np.float64)
+    cdef double cms2msday, cos_E, cos_nu, sin_nu_om, sin_E
+    
+    for k in range(size):
+        Mp[k] = Mp[k]*M_jup
+        a[k] = a[k]*au
+    
+    cms2msday = (1/100) * (24*3600)
     
     
-    #cdef double nu, E_dot, nu_dot, prefac, gd_t1, gd_t2, gamma_dot, gdd_t1, gdd_t2, gamma_ddot
+    cdef double nu, E_dot, nu_dot, prefac, gd_t1, gd_t2, gd_t1_dot, gd_t2_dot, gdd_t1, gdd_t2
+    
+    for j in range(size):
+        nu = 2*atan(((1+e[j])/(1-e[j]))**0.5*tan(E[j]/2))
+        
+        cos_E = cos(E[j])
+        cos_nu = cos(nu)
+        sin_nu_om = sin(nu+om[j])
+        sin_E = sin(E[j])
 
-    nu = 2*np.arctan(((1+e)/(1-e))**0.5*np.tan(E/2))
+        # Differentiate Kepler's equation in time to get E_dot
+        # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
+        E_dot = (2*pi/per[j])/(1-e[j]*cos_E)
+        nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e[j])/(1-e[j]))**0.5 * cos(E[j]/2)**-2 * E_dot
 
-    # Differentiate Kepler's equation in time to get E_dot
-    # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
-    E_dot = (2*pi/per)/(1-e*np.cos(E))
-    nu_dot = (1+np.tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * np.cos(E/2)**-2 * E_dot
-
-    # Convert prefac units from cm/s^2 to m/s/day
-    # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-    prefac = -(Mp*G*np.sin(i))/(a**2*(1-e)) * (1/100) * (24*3600)
-
-
-    gd_t1 = (1+np.cos(nu))/(1+np.cos(E))
-    gd_t2 = np.sin(nu+om)/(1-e*np.cos(E))
-
-
-    gamma_dot = prefac*gd_t1*gd_t2
-
-    gd_t1_dot = ((1+np.cos(nu))*np.sin(E) * E_dot - (1+np.cos(E))*np.sin(nu)*nu_dot) / (1+np.cos(E))**2
-    gd_t2_dot = ((1-e*np.cos(E))*np.cos(nu+om) * nu_dot - np.sin(nu+om)*e*np.sin(E)*E_dot) / (1-e*np.cos(E))**2
+        # Convert prefac units from cm/s^2 to m/s/day
+        # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
+        prefac = -(Mp[j]*G*sin(i[j]))/(a[j]**2*(1-e[j])) * cms2msday
 
 
-    gdd_t1 = gd_t2 * gd_t1_dot
-    gdd_t2 = gd_t1 * gd_t2_dot
+        gd_t1 = (1+cos_nu)/(1+cos_E)
+        gd_t2 = sin_nu_om/(1-e[j]*cos_E)
 
-    gamma_ddot = prefac*(gdd_t1+gdd_t2)
+
+        gamma_dot[j] = prefac*gd_t1*gd_t2
+
+        gd_t1_dot = ((1+cos_nu)*sin_E * E_dot - (1+cos_E)*sin(nu)*nu_dot) / (1+cos_E)**2
+        gd_t2_dot = ((1-e[j]*cos_E)*cos(nu+om[j]) * nu_dot - sin_nu_om*e[j]*sin_E*E_dot) / (1-e[j]*cos_E)**2
+
+
+        gdd_t1 = gd_t2 * gd_t1_dot
+        gdd_t2 = gd_t1 * gd_t2_dot
+
+        gamma_ddot[j] = prefac*(gdd_t1+gdd_t2)
     
 
     return gamma_dot, gamma_ddot
+    
 
 def rv_post_dense_loop(double gammadot, double gammadot_err, double gammaddot, double gammaddot_err, double [:] gammadot_list, double [:] gammaddot_list, long [:] a_inds, long [:] m_inds, int grid_num):
     
