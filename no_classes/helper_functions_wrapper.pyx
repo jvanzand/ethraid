@@ -48,7 +48,10 @@ def P(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mtotal):
     #double gamma(double a, double Mp, double per, double e, double i, double om, double E)
     
 
-def gamma(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, np.ndarray[double, ndim=1] E_anom):
+def gamma(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
+          np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
+          np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
+          np.ndarray[double, ndim=1] E_anom):
     """
     Outsources intensive calculations to helper_functions.pyx's compiled .so file. 
     Unfortunately, this is slower than gamma_direct below. I think I need to import the functions from helper_functions.c, but this throws errors that I haven't figured out.
@@ -69,7 +72,10 @@ def gamma(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, np.ndarra
     
 
 #@profile
-def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, np.ndarray[double, ndim=1] E):
+def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
+                 np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
+                 np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
+                 np.ndarray[double, ndim=1] E):
     """
     Function to analytically calculate the first and second derivatives of the RV curve at a given point in the orbit.
     All arguments can be given as arrays (of compatible dimensions). M_anom and e in particular must be lists to work with the
@@ -138,7 +144,10 @@ def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, np
     return gamma_dot, gamma_ddot
     
 
-def rv_post_dense_loop(double gammadot, double gammadot_err, double gammaddot, double gammaddot_err, double [:] gammadot_list, double [:] gammaddot_list, long [:] a_inds, long [:] m_inds, int grid_num):
+def rv_post_dense_loop(double gammadot, double gammadot_err, 
+                       double gammaddot, double gammaddot_err, 
+                       double [:] gammadot_list, double [:] gammaddot_list, 
+                       long [:] a_inds, long [:] m_inds, int grid_num):
     
     cdef int i, size, a_i, m_i  #Typing a_i and m_i slows it down? Double check.
     cdef double chi_sq
@@ -162,7 +171,10 @@ def rv_post_dense_loop(double gammadot, double gammadot_err, double gammaddot, d
     return rv_bounds_array
 
 
-def astro_post_dense_loop(double delta_mu, double delta_mu_err, double m_star, np.ndarray[double, ndim=1] a, double [:] m, double [:] per, double [:] e, double [:] i, double [:] om, double [:] T_anom_0, int num_points, int grid_num, long [:] a_inds, long [:] m_inds, int t_num):
+def astro_post_dense_loop(double delta_mu, double delta_mu_err, double m_star, 
+                        np.ndarray[double, ndim=1] a, double [:] m, double [:] per,
+                         double [:] e, double [:] i, double [:] om, double [:] T_anom_0, 
+                         int num_points, int grid_num, long [:] a_inds, long [:] m_inds, int t_num):
     """
     M_anom_prog is not randomly-sampled. It is a deterministic list, based on elapsed time and per (which is sampled).
     It also has 2 dimensions: t_num and per_num (one array of mean anomalies through t_num for each per_num)
@@ -333,10 +345,8 @@ def gamma_T(a, Mp, per, e, i, om, nu):
     prefac = -(Mp*G*np.sin(i))/(a**2*(1-e)) * (1/100) * (24*3600)
 
 
-
     gd_t1 = (1+np.cos(nu))/(1+np.cos(E))
     gd_t2 = np.sin(nu+om)/(1-e*np.cos(E))
-
 
     gamma_dot = prefac*gd_t1*gd_t2
 
@@ -544,8 +554,10 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
 
 def value2index(value, index_space, value_space):
     """
-    The inverse of index2value: take a value on a log scale and convert it to an index. index_space and value_space are expected
-    as tuples of the form (min_value, max_value).
+    The inverse of index2value: take a value on a 
+    log scale and convert it to an index. index_space 
+    and value_space are expected as tuples of the form 
+    (min_value, max_value).
     """
 
     value = np.array(value)
@@ -562,9 +574,12 @@ def value2index(value, index_space, value_space):
 
 def index2value(index, index_space, value_space):
     """
-    The axis values for a plotted array are just the array indices. I want to convert these to Msini and a values, and on a log
-    scale. This function takes a single index from a linear index range, and converts it to a parameter value in log space.
-    index_space and value_space are expected as tuples of the form (min_value, max_value). index is in the range of index_space.
+    The axis values for a plotted array are just the array indices. 
+    I want to convert these to Msini and a values, and on a log
+    scale. This function takes a single index from a linear index range, 
+    and converts it to a parameter value in log space. index_space and 
+    value_space are expected as tuples of the form (min_value, max_value). 
+    index is in the range of index_space.
     """
     index = np.array(index)
 
@@ -581,8 +596,84 @@ def index2value(index, index_space, value_space):
 
     return value
 
+@profile
+def gamma_direct_FAST(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
+                      np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
+                      np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
+                      np.ndarray[double, ndim=1] E):
+    """
+    Function to analytically calculate the first and second derivatives of the RV 
+    curve at a given point in the orbit. All arguments can be given as arrays 
+    (of compatible dimensions). M_anom and e in particular must be lists to work with the
+    C-based kepler solver.
+    Mp is expected in Jupiter masses.
+    a is expected in au
+    per is expected in days
+
+    Returns:
+    gamma_dot (m/s/d)
+    gamma_ddot (m/s/d^2)
+    """
+    cdef int size
+
+    size = a.shape[0]
 
 
+    cdef np.ndarray[double, ndim=1] gamma_dot  = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #nu         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #nu_dot     = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #cos_E         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #cos_nu         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #sin_nu_om         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #sin_E         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #E_dot         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #prefac         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #gd_t1         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #gd_t2         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #gd_t1_dot         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #gd_t2_dot         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #gdd_t1         = np.ndarray(shape=(size,), dtype=np.float64),\
+                                    #gdd_t2         = np.ndarray(shape=(size,), dtype=np.float64)
+
+    Mp = Mp*M_jup
+    a = a*au
+
+
+    nu = 2*np.arctan(((1+e)/(1-e))**0.5*np.tan(E/2))
+
+    cos_E = np.cos(E)
+    cos_nu = np.cos(nu)
+    sin_nu_om = np.sin(nu+om)
+    sin_E = np.sin(E)
+
+    # Differentiate Kepler's equation in time to get E_dot
+    # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
+    E_dot = (2*pi/per)/(1-e*cos_E)
+    nu_dot = (1+np.tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * np.cos(E/2)**-2 * E_dot
+
+    # Convert prefac units from cm/s^2 to m/s/day
+    # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
+    prefac = -(Mp*G*np.sin(i))/(a**2*(1-e)) * (1/100) * (24*3600)
+
+
+    gd_t1 = (1+cos_nu)/(1+cos_E)
+    gd_t2 = sin_nu_om/(1-e*cos_E)
+
+
+    gamma_dot = prefac*gd_t1*gd_t2
+
+    gd_t1_dot = ((1+cos_nu)*sin_E * E_dot - (1+cos_E)*np.sin(nu)*nu_dot) / (1+cos_E)**2
+    gd_t2_dot = ((1-e*cos_E)*np.cos(nu+om) * nu_dot - sin_nu_om*e*sin_E*E_dot) / (1-e*cos_E)**2
+
+
+    gdd_t1 = gd_t2 * gd_t1_dot
+    gdd_t2 = gd_t1 * gd_t2_dot
+
+    gamma_ddot = prefac*(gdd_t1+gdd_t2)
+
+
+    return gamma_dot, gamma_ddot
 
 
 
