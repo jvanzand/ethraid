@@ -15,10 +15,11 @@
 
 # Output of kern profiler
 *.lprof
+*.prof
 *.html
 
-.o
-.DS_Store
+*.o
+*.DS_Store
 
 ###########################################
 
