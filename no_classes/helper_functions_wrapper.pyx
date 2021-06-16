@@ -48,13 +48,14 @@ def P(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mtotal):
     #double gamma(double a, double Mp, double per, double e, double i, double om, double E)
     
 
-def gamma(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
+def gamma_array(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
           np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
           np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
           np.ndarray[double, ndim=1] E_anom):
     """
-    Outsources intensive calculations to helper_functions.pyx's compiled .so file. 
-    Unfortunately, this is slower than gamma_direct below. I think I need to import the functions from helper_functions.c, but this throws errors that I haven't figured out.
+    Outsources intensive calculations to the pure-cython gamma function. 
+    Unfortunately, this is slower than gamma_direct_FAST below, which uses numpy and runs in ~0.5x the time.
+    I think I need to import the functions from helper_functions.c, but this throws errors that I haven't figured out.
     """
     cdef int size, j
     
@@ -65,16 +66,61 @@ def gamma(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp,
                                     gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64)
     
     for j in range(size):
-       gamma_dot[j], gamma_ddot[j]  = hlp.gamma(a[j], Mp[j], per[j], e[j], i[j], om[j], E_anom[j])
+       gamma_dot[j], gamma_ddot[j]  = gamma(a[j], Mp[j], per[j], e[j], i[j], om[j], E_anom[j])
         
+
+    return gamma_dot, gamma_ddot
+
+@cython.cdivision(True)
+@cython.boundscheck(False)
+cdef (double, double) gamma(double a, double Mp, double per, double e, double i, double om, double E):
+
+    cdef double Mp_units, a_units, nu, E_dot, nu_dot, prefac, gd_t1, gd_t2, gamma_dot, gd_t1_dot, gd_t2_dot, gdd_t1, gdd_t2, gamma_ddot
+
+    Mp_units = Mp*M_jup
+    a_units = a*au
+
+    nu = 2*atan(((1+e)/(1-e))**0.5*tan(E/2))
+    
+    cos_E = cos(E)
+    cos_nu = cos(nu)
+    sin_nu_om = sin(nu+om)
+    sin_E = sin(E)
+
+    # Differentiate Kepler's equation in time to get E_dot
+    # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
+    E_dot = (2*pi/per)/(1-e*cos_E)
+    nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * cos(E/2)**-2 * E_dot
+
+    # Convert prefac units from cm/s^2 to m/s/day
+    # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
+    prefac = -(Mp_units*G*sin(i))/(a_units**2*(1-e)) * 864 # Save calculation of 24*3600 / 100
+
+
+    gd_t1 = (1+cos_nu)/(1+cos_E)
+    gd_t2 = sin_nu_om/(1-e*cos_E)
+
+
+    gamma_dot = prefac*gd_t1*gd_t2
+
+    gd_t1_dot = ((1+cos_nu)*sin_E * E_dot - (1+cos_E)*sin(nu)*nu_dot) / (1+cos_E)**2
+    gd_t2_dot = ((1-e*cos_E)*cos(nu+om) * nu_dot - sin_nu_om*e*sin_E*E_dot) / (1-e*cos_E)**2
+
+
+    gdd_t1 = gd_t2 * gd_t1_dot
+    gdd_t2 = gd_t1 * gd_t2_dot
+
+    gamma_ddot = prefac*(gdd_t1+gdd_t2)
 
     return gamma_dot, gamma_ddot
     
 
 #@profile
+#@cython.cdivision(True)
+#@cython.boundscheck(False)
 def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
                  np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
-                 np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
+                 np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om,
                  np.ndarray[double, ndim=1] E):
     """
     Function to analytically calculate the first and second derivatives of the RV curve at a given point in the orbit.
@@ -92,10 +138,9 @@ def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp,
 
     size = a.shape[0]
 
-
     cdef np.ndarray[double, ndim=1] gamma_dot = np.ndarray(shape=(size,), dtype=np.float64),\
                                     gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64)
-                                    #nu = np.ndarray(shape=(size,), dtype=np.float64)
+                                    
     cdef double cms2msday, cos_E, cos_nu, sin_nu_om, sin_E
     
     for k in range(size):
@@ -143,7 +188,8 @@ def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp,
 
     return gamma_dot, gamma_ddot
     
-
+@cython.cdivision(True)
+@cython.boundscheck(False)
 def rv_post_dense_loop(double gammadot, double gammadot_err, 
                        double gammaddot, double gammaddot_err, 
                        double [:] gammadot_list, double [:] gammaddot_list, 
@@ -302,136 +348,7 @@ def r_dot(nu, a, P, e):
 
     return num/denom
 
-def deriv(y_array, x_array):
-    """
-    Computes an array of first derivative values. y_array and x_array must be the same length.
-    The derivative at each point is estimated by finding the slope between the point after and
-    the point before. This means that the array of derivatives will have 2 fewer elements than
-    y_array and x_array.
-    """
 
-    y_array = np.array(y_array)
-    x_array = np.array(x_array)
-
-    deriv_array = (y_array[2:] - y_array[0:-2])/(x_array[2:] - x_array[0:-2])
-
-    return deriv_array
-
-
-def gamma_T(a, Mp, per, e, i, om, nu):
-    """
-    ## This function does NOT solve Kepler's equation! It requires nu to be provided directly.
-    Function to analytically calculate the first and second derivatives of the RV curve at a given point in the orbit.
-    Mp is expected in Jupiter masses.
-    a is expected in au
-    per is expected in days
-
-    Returns:
-    gamma_dot (m/s/d)
-    gamma_ddot (m/s/d^2)
-    """
-
-    Mp = Mp * c.M_jup.cgs.value
-    G = c.G.cgs.value
-    a = a*c.au.cgs.value
-
-    E = 2*np.arctan(np.sqrt((1-e)/(1+e))*np.tan(nu/2))
-
-    E_dot = (2*np.pi/per)/(1-e*np.cos(E))
-    nu_dot = (1+np.tan(nu/2)**2)**-1 * np.sqrt((1+e)/(1-e)) * np.cos(E/2)**-2 * E_dot
-
-    # Convert prefac units from cm/s^2 to m/s/day
-    # Negative just depends on choice of reference direction. I  am being consistent with radvel rv_drive function.
-    prefac = -(Mp*G*np.sin(i))/(a**2*(1-e)) * (1/100) * (24*3600)
-
-
-    gd_t1 = (1+np.cos(nu))/(1+np.cos(E))
-    gd_t2 = np.sin(nu+om)/(1-e*np.cos(E))
-
-    gamma_dot = prefac*gd_t1*gd_t2
-
-    gd_t1_dot = ((1+np.cos(nu))*np.sin(E) * E_dot - (1+np.cos(E))*np.sin(nu)*nu_dot) / (1+np.cos(E))**2
-    gd_t2_dot = ((1-e*np.cos(E))*np.cos(nu+om) * nu_dot - np.sin(nu+om)*e*np.sin(E)*E_dot) / (1-e*np.cos(E))**2
-
-    # gdd_t1 = gd_t2 * ((1+np.cos(nu))*np.sin(E) * E_dot - (1+np.cos(E))*np.sin(nu)*nu_dot) / (1+np.cos(E))**2
-    # gdd_t2 = gd_t1  * ((1-e*np.cos(E))*np.cos(nu+om) * nu_dot - np.sin(nu+om)*e*np.sin(E)*E_dot) / (1-e*np.cos(E))**2
-
-    gdd_t1 = gd_t2 * gd_t1_dot
-    gdd_t2 = gd_t1 * gd_t2_dot
-
-    gamma_ddot = prefac*(gdd_t1+gdd_t2)
-
-    return gamma_dot, gamma_ddot
-
-def kepler(Marr, eccarr):
-    """
-    Solve Kepler's Equation using a modified Newton-Raphson method
-    Args:
-        Marr (array): input Mean anomaly
-        eccarr (array): eccentricity
-    Returns:
-        array: eccentric anomaly
-
-    From Radvel package. Adapted here to accept non-equal-length Marr and eccarr
-    """
-    # if not isinstance(Marr, np.ndarray):
-    #     Marr = np.array([Marr])
-    #     eccarr = np.array([eccarr for i in range(len(Marr))])
-    #
-    #
-    # if isinstance(eccarr, float):
-    #     eccarr =np.array([eccarr for i in range(len(Marr))])
-
-
-
-    conv = 1.0e-12  # convergence criterion
-    k = 0.85
-
-
-    Earr = Marr + np.sign(np.sin(Marr)) * k * eccarr  # first guess at E
-
-    # fiarr should go to zero when converges
-    fiarr = ( Earr - eccarr * np.sin(Earr) - Marr)
-
-    convd = np.where(np.abs(fiarr) > conv)[0]  # which indices have not converged
-    nd = len(convd)  # number of unconverged elements
-    count = 0
-
-    while nd > 0:  # while unconverged elements exist
-        count += 1
-
-        M = Marr[convd]  # just the unconverged elements ...
-        ecc = eccarr[convd]
-        E = Earr[convd]
-
-        fi = fiarr[convd]  # fi = E - e*np.sin(E)-M    ; should go to 0
-        fip = 1 - ecc * np.cos(E)  # d/dE(fi) ;i.e.,  fi^(prime)
-        fipp = ecc * np.sin(E)  # d/dE(d/dE(fi)) ;i.e.,  fi^(\prime\prime)
-        fippp = 1 - fip  # d/dE(d/dE(d/dE(fi))) ;i.e.,  fi^(\prime\prime\prime)
-
-        ##
-        # fipppp = -fipp
-        # fi5 = -fippp
-        ##
-
-        # first, second, and third order corrections to E
-        d1 = -fi / fip
-        d2 = -fi / (fip + d1 * fipp / 2.0)
-        d3 = -fi / (fip + d2 * fipp / 2.0 + d2 * d2 * fippp / 6.0)
-        ##
-        # d4 = -fi / (fip + d3 * fipp / 2.0 + d3 * d3 * fippp / 6.0 + d3*d3*d3*fipppp / 24.0)
-        # d5 = -fi / (fip + d4 * fipp / 2.0 + d4 * d4 * fippp / 6.0 + d4*d4*d4*fipppp / 24.0 + d4*d4*d4*d4*fi5 / 120.0)
-        ##
-        E = E + d3
-        Earr[convd] = E
-        fiarr = ( Earr - eccarr * np.sin( Earr ) - Marr) # how well did we do?
-        convd = np.abs(fiarr) > conv  # test for convergence
-        nd = np.sum(convd is True)
-
-    if Earr.size > 1:
-        return Earr
-    else:
-        return Earr[0]
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
     """
@@ -596,7 +513,9 @@ def index2value(index, index_space, value_space):
 
     return value
 
-
+#@profile
+@cython.cdivision(True)
+@cython.boundscheck(False)
 def gamma_direct_FAST(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
                       np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
                       np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
@@ -654,7 +573,7 @@ def gamma_direct_FAST(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] M
 
     # Convert prefac units from cm/s^2 to m/s/day
     # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-    prefac = -(Mp*G*np.sin(i))/(a**2*(1-e)) * (1/100) * (24*3600)
+    prefac = -(Mp*G*np.sin(i))/(a**2*(1-e)) * 864 # Save time on (24*3600)/100
 
 
     gd_t1 = (1+cos_nu)/(1+cos_E)
