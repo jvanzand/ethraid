@@ -8,8 +8,6 @@ import numpy as np
 
 import radvel as rv
 
-from c_kepler import _kepler as ck
-
 from scipy.stats import loguniform, beta
 
 # import post_functions_python as  pfp
@@ -63,9 +61,9 @@ post_rv    = pfp.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_sta
 
 
 # import matplotlib.pyplot as plt
-# importmatplotlib.patches as ptch
-
-# plt.imshow(post_astro, origin='lower')
+# import matplotlib.patches as ptch
+#
+# plt.imshow(post_rv, origin='lower')
 # plt.show()
 # # The priors for minimum period and planet mass. min_per is 4xbaseline because we see ~no curvature yet.
 # rv_baseline = 430.2527364352718

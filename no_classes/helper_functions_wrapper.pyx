@@ -596,7 +596,7 @@ def index2value(index, index_space, value_space):
 
     return value
 
-@profile
+
 def gamma_direct_FAST(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
                       np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
                       np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 

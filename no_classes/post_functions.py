@@ -4,11 +4,15 @@ import matplotlib.pyplot as plt
 import astropy.constants as c
 import numpy as np
 
+
+import sys
+
+sys.path.append(sys.path[0]+'/..')
+from c_kepler import _kepler as ck
+print('imported kepler')
 import helper_functions_wrapper as hlpw
 
 import radvel as rv
-
-from c_kepler import _kepler as ck
 
 from scipy.stats import loguniform, beta
 

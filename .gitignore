@@ -1,6 +1,5 @@
 /analysis
 /build
-/cython_practice
 
 /trends/c_kepler/build
 /trends/__pycache__
@@ -24,8 +23,8 @@
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
-*.py[cod]
-*$py.class
+#*.py[cod]
+#*$py.class
 
 # C extensions
 *.so

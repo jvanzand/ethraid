@@ -32,22 +32,7 @@ def kepler_array(double [:,] M, double [:,] e):
         E[i] = kepler(M[i], e[i])
 
     return E
-    
-#################################
 
-# Copied/modified by Judah. I haven't figured out how to import directly from a .c file.
-# This wrapper will be slower, but should work for now.
-
-#@cython.boundscheck(False)
-cpdef double kepler_single(double M, double e):
-    cdef double E
-    
-    E = 7
-    E = kepler(M, e)
-
-    return E
-
-#################################
 
 # create the wrapper code, with numpy type annotations
 @cython.boundscheck(False)
