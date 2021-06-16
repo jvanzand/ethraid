@@ -6,7 +6,7 @@
 
 
 *.c
-!trends/c_kepler/kepler.c
+!c_kepler/kepler.c
 !no_classes/c_kepler/kepler.c
 *.pyc
 *.so
