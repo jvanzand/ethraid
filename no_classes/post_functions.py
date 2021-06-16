@@ -33,7 +33,7 @@ pc = 3.085677581467192e+18 # 1 parsec in cm
 parallax = 18.62 #mas
 d_star = (1/parallax)*pc*1000
 
-# @profile
+
 def make_arrays(m_star, a_lim, m_lim, grid_num, num_points):
     
     np.random.seed(0)
@@ -51,9 +51,9 @@ def make_arrays(m_star, a_lim, m_lim, grid_num, num_points):
     # Match up a_list and m_list and get the period for each pair (in days).
     per_list = hlpw.P(a_list, m_star+m_list*(M_jup/M_sun) )
     
-    # Eccentricities drawn from a beta distribution. First create a randomized list of probabilities between 0 and 1, then use those probabilities to sample the inverse-CDF of the beta distribution. In essence, for a given cumulative probability, what is the eccentricity? Eccentricities favored by the pdf are more likely to be picked, as desired. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014)
-    e_list = beta(0.867, 3.03).ppf(np.random.uniform(0, 0.99, num_points))
-
+    # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014)
+    e_list = beta(0.867, 3.03).rvs(num_points)
+    
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
@@ -92,9 +92,9 @@ def rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, a_list, m_
     gammadot_list  = np.empty(num_points)
     gammaddot_list = np.empty(num_points)
 
-    # gammadot_list, gammaddot_list = hlpw.gamma(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
+    gammadot_list, gammaddot_list = hlpw.gamma_array(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
     # gammadot_list, gammaddot_list = hlpw.gamma_direct(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
-    gammadot_list, gammaddot_list = hlpw.gamma_direct_FAST(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
+    # gammadot_list, gammaddot_list = hlpw.gamma_direct_FAST(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
               
     rv_bounds_memview = hlpw.rv_post_dense_loop(gammadot, gammadot_err, gammaddot, gammaddot_err, gammadot_list, gammaddot_list, a_inds, m_inds, grid_num)
 

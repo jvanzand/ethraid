@@ -29,5 +29,5 @@ extensions = [
 ##############################
 
 setup(
-    ext_modules = cythonize(extensions, language_level='3', annotate=False)
+    ext_modules = cythonize(extensions, language_level='3', annotate=True)
 )
