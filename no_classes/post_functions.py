@@ -6,8 +6,10 @@ import numpy as np
 
 
 import sys
+sys.path.append('../')
 
-sys.path.append(sys.path[0]+'/..')
+
+
 from c_kepler import _kepler as ck
 print('imported kepler')
 import helper_functions_wrapper as hlpw
@@ -82,7 +84,7 @@ def make_arrays(m_star, a_lim, m_lim, grid_num, num_points):
     
     return a_list, m_list, per_list, e_list, i_list, om_list, M_anom_list, E_anom_list, T_anom_list, a_inds, m_inds
 
-
+@profile
 def rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list, num_points, grid_num, a_inds, m_inds):
     
     m_tot_list = (m_star+m_list*(M_jup/M_sun))
