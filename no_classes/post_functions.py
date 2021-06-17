@@ -85,7 +85,8 @@ def make_arrays(m_star, a_lim, m_lim, grid_num, num_points):
     return a_list, m_list, per_list, e_list, i_list, om_list, M_anom_list, E_anom_list, T_anom_list, a_inds, m_inds
 
 @profile
-def rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list, num_points, grid_num, a_inds, m_inds):
+def rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, a_list, m_list, per_list,
+             e_list, i_list, om_list, E_anom_list, num_points, grid_num, a_inds, m_inds):
     
     m_tot_list = (m_star+m_list*(M_jup/M_sun))
 
@@ -96,7 +97,10 @@ def rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, a_list, m_
     # gammadot_list, gammaddot_list = hlpw.gamma_direct(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
     # gammadot_list, gammaddot_list = hlpw.gamma_direct_FAST(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
               
-    rv_bounds_memview = hlpw.rv_post_dense_loop(gammadot, gammadot_err, gammaddot, gammaddot_err, gammadot_list, gammaddot_list, a_inds, m_inds, grid_num)
+    rv_bounds_memview = hlpw.rv_post_dense_loop(gammadot, gammadot_err, 
+                                                gammaddot, gammaddot_err, 
+                                                gammadot_list, gammaddot_list, 
+                                                a_inds, m_inds, grid_num)
 
 
     # Weird situation with a single NaN showing up here. It may have come from the Kepler solver somehow, but I just set all NaNs to 0
@@ -108,7 +112,9 @@ def rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, a_list, m_
     return rv_bounds_array
 
 
-def astro_post(delta_mu, delta_mu_err, m_star, a_list, m_list, per_list, e_list, i_list, om_list, T_anom_list, num_points, grid_num, a_inds, m_inds, t_num):
+def astro_post(delta_mu, delta_mu_err, m_star, a_list, m_list, per_list, 
+                e_list, i_list, om_list, T_anom_list, num_points, grid_num, 
+                a_inds, m_inds, t_num):
     
     # hip_times  = np.array([2447837.75, 2449065.15])
     # gaia_times = np.array([2456863.5, 2457531.5])
@@ -143,7 +149,7 @@ def astro_post(delta_mu, delta_mu_err, m_star, a_list, m_list, per_list, e_list,
     # T_anom_array = np.repeat(T_anom_array, 2, axis=1)
     # T_anom_array = np.repeat(T_anom_array, 100, axis=2)
 
-    x = hlpw.astro_post_dense_loop(delta_mu, delta_mu_err, m_star, a_list, m_list, per_list, e_list, i_list, om_list, T_anom_list, num_points, grid_num, a_inds, m_inds, t_num)
+    x = hlpw.astro_post_dense_loop_array(delta_mu, delta_mu_err, m_star, a_list, m_list, per_list, e_list, i_list, om_list, T_anom_list, num_points, grid_num, a_inds, m_inds, t_num)
     
     prob_list = []
     astro_bounds_array = np.zeros((grid_num, grid_num))
