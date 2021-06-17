@@ -3,6 +3,7 @@
 
 /trends/c_kepler/build
 /trends/__pycache__
+*/__pycache__
 
 
 *.c

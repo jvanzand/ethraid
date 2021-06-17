@@ -15,6 +15,14 @@ import radvel as rv
 from c_kepler import _kepler as ck
 import helper_functions as hlp
 
+##########################################
+#### Kepler solver for one M and one e 
+# Wrapping kepler(M,e) a simple function that takes two doubles as
+# arguments and returns a double
+cdef extern from "../c_kepler/kepler.c":
+    double kepler(double M, double e)
+    double rv_drive(double t, double per, double tp, double e, double cosom, double sinom, double k )
+##########################################
 ## Constants ##
 
 cdef float pi, G, M_sun, M_jup, au
@@ -48,6 +56,8 @@ def P(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mtotal):
     #double gamma(double a, double Mp, double per, double e, double i, double om, double E)
     
 
+@cython.cdivision(True)
+@cython.boundscheck(False)
 def gamma_array(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
           np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
           np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
@@ -57,6 +67,7 @@ def gamma_array(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp,
     Unfortunately, this is slower than gamma_direct_FAST below, which uses numpy and runs in ~0.5x the time.
     I think I need to import the functions from helper_functions.c, but this throws errors that I haven't figured out.
     """
+    print('Using gamma_array')
     cdef int size, j
     
     size = a.shape[0]
@@ -134,6 +145,7 @@ def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp,
     gamma_dot (m/s/d)
     gamma_ddot (m/s/d^2)
     """
+    print('Using gamma_direct')
     cdef int size, j, k
 
     size = a.shape[0]
@@ -188,8 +200,7 @@ def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp,
 
     return gamma_dot, gamma_ddot
     
-@cython.cdivision(True)
-@cython.boundscheck(False)
+#@profile
 def rv_post_dense_loop(double gammadot, double gammadot_err, 
                        double gammaddot, double gammaddot_err, 
                        double [:] gammadot_list, double [:] gammaddot_list, 
@@ -216,83 +227,122 @@ def rv_post_dense_loop(double gammadot, double gammadot_err,
     
     return rv_bounds_array
 
-
-def astro_post_dense_loop(double delta_mu, double delta_mu_err, double m_star, 
-                        np.ndarray[double, ndim=1] a, double [:] m, double [:] per,
-                         double [:] e, double [:] i, double [:] om, double [:] T_anom_0, 
+#@profile
+def astro_post_dense_loop_array(double delta_mu, double delta_mu_err, double m_star, 
+                        np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
+                         double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list, 
                          int num_points, int grid_num, long [:] a_inds, long [:] m_inds, int t_num):
     """
     M_anom_prog is not randomly-sampled. It is a deterministic list, based on elapsed time and per (which is sampled).
     It also has 2 dimensions: t_num and per_num (one array of mean anomalies through t_num for each per_num)
     The array of semi-major axes (a) has to be a np array to support scalar multiplication.
     """
-    cdef int size, j, k, l
+    cdef int j, k, l
     
-    size = a.shape[0]
     
     cdef double [:] hip_times  = np.ndarray(shape=(2,), dtype=np.float64),\
-                    gaia_times = np.ndarray(shape=(2,), dtype=np.float64),\
-                    E_prog = np.ndarray(shape=(num_points,), dtype=np.float64),\
-                    T_prog = np.ndarray(shape=(num_points,), dtype=np.float64),\
-                    r_star = np.ndarray(shape=(num_points,), dtype=np.float64)
+                    gaia_times = np.ndarray(shape=(2,), dtype=np.float64)
                     
     cdef double [:,:]   time_endpoints = np.ndarray(shape=(2,2), dtype=np.float64),\
-                        rot_mtrx = np.ndarray(shape=(3,3), dtype=np.float64)
+                        #rot_mtrx = np.ndarray(shape=(3,3), dtype=np.float64)
                                                          
-    cdef double start_time, end_time, elapsed_time, r_pl
+    cdef double start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0
     
     hip_times  = np.array([2447837.75, 2449065.15])
     gaia_times = np.array([2456863.5, 2457531.5])
     
     time_endpoints = np.array([[hip_times[0], gaia_times[0]], [hip_times[1], gaia_times[1]]])
     
-    for l in range(2):
+    for l in range(2): # Hipparcos or Gaia
         start_time, end_time = time_endpoints[l]
         
-        for k in range(t_num+1): # Start at 0, finish at t_num
+        for k in range(t_num+1): # Start at 0, finish at t_num. This is a loop over the time steps of each mission
             elapsed_time = (k+1)/t_num * (end_time - start_time)
+            print(k)
     
-            for j in range(size):
-        
-                M_anom_prog = (2*pi/per[j])*elapsed_time
-                #fdfd
-                # M_anom_prog is 2-D, so first arg is an array of length t_num. e should be constant along the t_num axis, so e is just a scalar. If this throws an error because e needs to be an array, either modify Kepler solver or repeat e into an array.
-                E_prog = ck.kepler_single(int(1), np.inf)
-        
-                T_prog = T_progression(T_anom_0[j], e[j], E_prog, t_num)
-    
-                rot_mtrx = rot_matrix(inc[j], om[j], 0) # Omega = 0 arbitrarily 
+            for j in range(num_points): # Loop over the desired number of random points
+            
+                a = a_list[j]
+                m = m_list[j]
+                per = per_list[j]
+                e = e_list[j]
+                i = i_list[j]
+                om = om_list[j]
+                T_anom_0 = T_anom_0_list[j]
 
-        
-                r_pl = r(T_prog, a*au, e)
-    
-                r_star[j] = r_pl*((m[j]*M_jup)/(m_star*M_sun))
+                fake = astro_post_dense_loop(delta_mu, delta_mu_err, m_star, 
+                        a, m, per, e, i, om, T_anom_0, num_points, grid_num, a_inds, m_inds, t_num, elapsed_time)
+                
     
     ########################################
     #r_unit_vec = -np.array([cos(T_prog), sin(T_prog), np.zeros((100,))])
     #r_unit_vec = np.moveaxis(r_unit_vec, 0, 2)[..., None]
     
-    return r_star
+    return fake
+
+
+def astro_post_dense_loop(double delta_mu, double delta_mu_err, double m_star, 
+                        double a, double m, double per, double e, double i, double om, 
+                        double T_anom_0, int num_points, int grid_num, long [:] a_inds, 
+                        long [:] m_inds, int t_num, double elapsed_time):
     
+    
+    cdef double [:,:] rot_mtrx = np.ndarray(shape=(3,3), dtype=np.float64)                
+        
+    cdef double M_anom, E_anom, T_anom, r_pl, r_star
+
+
+        
+    M_anom = (2*pi/per)*elapsed_time
+    
+    # M_anom is a float, so first arg is an array of length t_num. e should be constant along the t_num axis, so e is just a scalar. If this throws an error because e needs to be an array, either modify Kepler solver or repeat e into an array.
+    E_anom = kepler(M_anom, e)
     
 
-def rot_matrix(i, om, Om):
+    T_anom = T_anom_0 + 2*atan( ((1+e)/(1-e))**0.5 * tan(E_anom/2))
+    
+    rot_mtrx = rot_matrix(i, om, 0) # Omega = 0 arbitrarily 
+    
+
+    r_pl = r(T_anom, a*au, e)
+    
+    r_star = r_pl*((m*M_jup)/(m_star*M_sun))
+         
+    return r_star
+
+#@profile
+def rot_matrix(double i, double om, double Om):
     """
     This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. They multiply it immediately by r*[cos(f), sin(f), 0]
     because this gives the projection of position onto the sky. However, we also need the projection of velocity, so we need the matrix
     pre-multiplication by the position vector.
     """
-    row_1 = [np.cos(Om)*np.cos(om) - np.sin(Om)*np.cos(i)*np.sin(om),
-            -np.sin(om)*np.cos(Om) - np.sin(Om)*np.cos(i)*np.cos(om),
-            np.sin(Om)*np.sin(i)]
+    cdef double sin_Om, sin_om, sin_i, cos_Om, cos_om, cos_i
+    cdef list row_1, row_2, row_3
+    
+    cdef np.ndarray[double, ndim=2] rot_matrix = \
+        np.ndarray(shape=(3,3), dtype=np.float64)
+    
+    
+    sin_Om = sin(Om)
+    sin_om = sin(om)
+    sin_i = sin(i)
+    cos_Om = cos(Om)
+    cos_om = cos(om)
+    cos_i = cos(i)
+    
+    row_1 = [cos_Om*cos_om - sin_Om*cos_i*sin_om,
+            -sin_om*cos_Om - sin_Om*cos_i*cos_om,
+             sin_Om*sin_i]
 
-    row_2 = [np.sin(Om)*np.cos(om) + np.cos(Om)*np.cos(i)*np.sin(om),
-            -np.sin(om)*np.sin(Om) + np.cos(Om)*np.cos(i)*np.cos(om),
-            -np.cos(Om)*np.sin(i)]
+    row_2 = [sin_Om*cos_om + cos_Om*cos_i*sin_om,
+            -sin_om*sin_Om + cos_Om*cos_i*cos_om,
+            -cos_Om*sin_i]
 
-    row_3 = [np.sin(i)*np.sin(om), np.sin(i)*np.cos(om), np.cos(i)]
+    row_3 = [sin_i*sin_om, sin_i*cos_om, cos_i]
 
     rot_matrix = np.array([row_1, row_2, row_3])
+    
 
     return rot_matrix
 
@@ -313,6 +363,7 @@ def r(nu, a, e):
     returns:
         r (same as a): Distance of particle from barycenter along its orbit
     """
+
     num = a*(1-e**2)
     denom = 1 + e*np.cos(nu)
 
@@ -513,6 +564,8 @@ def index2value(index, index_space, value_space):
 
     return value
 
+##################################################################################################
+
 #@profile
 @cython.cdivision(True)
 @cython.boundscheck(False)
@@ -533,6 +586,7 @@ def gamma_direct_FAST(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] M
     gamma_dot (m/s/d)
     gamma_ddot (m/s/d^2)
     """
+    print('Using gamma_direct_FAST')
     cdef int size
 
     size = a.shape[0]

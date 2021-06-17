@@ -1,10 +1,13 @@
 from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 from Cython.Build import cythonize
+
+import Cython.Compiler.Options
+Cython.Compiler.Options.annotate = True
+
 import re
 import numpy as np
 import sys
-
 
 
 ####################
@@ -56,8 +59,6 @@ for i in path_list:
     extensions.append(eval('Extension("{}", ["{}"])'.format(i[0], i[1])))
 
 
-#extensions = [Extension("_kepler", ["_kepler.pyx"],)]
-
 reqs = []
 for line in open(sys.path[0]+'/requirements.txt', 'r').readlines():
 
@@ -66,7 +67,7 @@ for line in open(sys.path[0]+'/requirements.txt', 'r').readlines():
 setup(
     packages=find_packages(),
     setup_requires=['numpy', 'cython'],
-    ext_modules=cythonize(extensions, language_level=3, annotate=False),
+    ext_modules=cythonize(extensions, language_level=3, annotate=True),
     cmdclass={'build_ext': build_ext},
     install_requires=reqs,
     include_package_data=True
