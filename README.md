@@ -11,5 +11,4 @@
 ## Profiling rv_post
 
 - In root trends directory
-- *\$ cd no_classes*
-- *\$ kernprof -l -v runner.py*
+- *\$ kernprof -l -v no_classes/runner.py*
