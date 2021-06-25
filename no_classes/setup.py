@@ -7,6 +7,7 @@ import numpy as np
 # profile = line_profiler.LineProfiler()
 
 ####################
+print('## AT SOME POINT, need to speed up setup.py ##')
 
 # Extra stuff to profile code using kernprof -l -v file.py after it is compiled
 # Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line

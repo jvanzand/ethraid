@@ -2,6 +2,7 @@ from setuptools import setup, find_packages, Extension
 from setuptools.command.build_ext import build_ext as _build_ext
 from Cython.Build import cythonize
 
+
 import Cython.Compiler.Options
 Cython.Compiler.Options.annotate = True
 
@@ -21,12 +22,7 @@ directive_defaults = get_directive_defaults()
 directive_defaults['linetrace'] = True
 directive_defaults['binding'] = True
 
-extensions = [
-    Extension("helper_functions_wrapper", ['helper_functions_wrapper.pyx'], 
-                include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
-    Extension("helper_functions", ['helper_functions.pyx'], 
-                include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
-]
+
 ##############################
 
 
