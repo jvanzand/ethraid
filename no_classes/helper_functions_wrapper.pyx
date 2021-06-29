@@ -330,7 +330,7 @@ def astro_post_array(double delta_mu, double delta_mu_err, double m_star, double
 
                 elapsed_time = k*time_step + start_time
 
-                both = astro_post(delta_mu, delta_mu_err, m_star, cm_2_mas, cmd_2_masyr, a, m, per, e, i, om, T_anom_0, num_points, grid_num, a_inds, m_inds, t_num, elapsed_time)
+                both = astro_post(m_star, cm_2_mas, cmd_2_masyr, a, m, per, e, i, om, T_anom_0, num_points, grid_num, a_inds, m_inds, t_num, elapsed_time)
                 
                 ang_pos = both[0]
                 mu = both[1]
@@ -393,10 +393,9 @@ def astro_post_array(double delta_mu, double delta_mu_err, double m_star, double
     return astro_prob_array, astro_prob_list
 
 #@profile
-def astro_post(double delta_mu, double delta_mu_err, double m_star, double cm_2_mas,
-                        double cmd_2_masyr, double a, double m, double per, double e, double i, double om, 
-                        double T_anom_0, int num_points, int grid_num, long [:] a_inds, 
-                        long [:] m_inds, int t_num, double elapsed_time):
+def astro_post(double m_star, double cm_2_mas, double cmd_2_masyr, double a, double m, double per, 
+               double e, double i, double om, double T_anom_0, int num_points, int grid_num, 
+               long [:] a_inds, long [:] m_inds, int t_num, double elapsed_time):
 
     cdef double rot_mtrx[3][3]
     #cdef double [:,:] rot_mtrx = rot_mtrx_list # Can't use this line bc rot_mtrx needs to return a list
@@ -469,14 +468,6 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double cm_2_
     # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
     mu[0] = rotated_v_vec[0]*cmd_2_masyr
     mu[1] = rotated_v_vec[1]*cmd_2_masyr
-    
-    #print('Matrix')
-    #for p in range(3):
-    #    print(list(rot_mtrx_memview[p]))
-    #print('\n')
-    #print(list(v_vec_star))
-    #print(list(rot_vec))
-    #dfd
 
     return ang_pos, mu
 
