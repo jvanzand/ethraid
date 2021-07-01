@@ -237,34 +237,56 @@ def rv_post(double gammadot, double gammadot_err,
     cdef double chi_sq
     
     cdef double [:] rv_prob_list = np.zeros(shape=(num_points,), dtype=np.float64)
-    cdef double [:,:] rv_prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
+    #cdef double [:,:] rv_prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
+    cdef double model[2]
+    cdef double data[2]
+    cdef double err[2]
     
     
     gammadot_list, gammaddot_list = gamma_array(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
     
+    
+    data[0] = gammadot
+    data[1] = gammaddot
+    
+    err[0] = gammadot_err
+    err[1] = gammaddot_err
+    
     for i in range(num_points):
-    
-        a_i = a_inds[i]
-        m_i = m_inds[i]
-    
-        chi_sq = ((gammadot_list[i]-gammadot)/(gammadot_err))**2 + ((gammaddot_list[i]-gammaddot)/(gammaddot_err))**2
-        prob = math_e**(-chi_sq/2)
         
-        rv_prob_array[m_i, a_i] += prob
+        model[0] = gammadot_list[i]
+        model[1] = gammaddot_list[i]
+        
+        prob = likelihood_rv(model, data, err)
+
         rv_prob_list[i] = prob
     
-    return rv_prob_array, rv_prob_list
+    return rv_prob_list
 
-#@profile
-def astro_post_array(double delta_mu, double delta_mu_err, double m_star, double d_star, 
-                        np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
-                         double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list, 
-                         int num_points, int grid_num, long [:] a_inds, long [:] m_inds, int t_num):
-    """
-    M_anom_prog is not randomly-sampled. It is a deterministic list, based on elapsed time and per (which is sampled).
-    It also has 2 dimensions: t_num and per_num (one array of mean anomalies through t_num for each per_num)
-    The array of semi-major axes (a) has to be a np array to support scalar multiplication.
-    """
+
+@profile
+def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_star, 
+               np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
+               double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list, 
+               int num_points, int grid_num, int t_num):
+               
+              
+
+    #cdef double rot_mtrx_list[3][3]
+    cdef double [:,:] rot_mtrx #= rot_mtrx_list # This makes rot_mtrx a memview
+        
+    cdef double M_anom, E_anom, T_anom, r_pl, r_star, mass_ratio
+    
+    cdef double r_vec_list[3]
+    cdef double [:] r_vec = r_vec_list
+    
+    cdef double rot_vec_list[3]
+    #cdef double [:] rot_vec = rot_vec_list
+    
+    cdef double ang_pos_list[2]
+    cdef double [:] ang_pos = ang_pos_list
+    
+    ###############################################
     cdef int j, k, l, a_j, m_j
     
 
@@ -275,7 +297,8 @@ def astro_post_array(double delta_mu, double delta_mu_err, double m_star, double
     cdef double both[2][2]
 
                                                          
-    cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0, cm_2_mas, cms_2_masyr
+    cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0
+    cdef double mass_ratio_constant, cm_2_mas, cms_2_masyr
     cdef double ang_pos_x_sum, ang_pos_y_sum, mu_x_sum, mu_y_sum
     cdef double delta_mu_model, chi_sq, prob
     
@@ -295,7 +318,7 @@ def astro_post_array(double delta_mu, double delta_mu_err, double m_star, double
     # Time in days between epoch mid-points
     baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365
 
-    
+    mass_ratio_constant = M_jup/(m_star*M_sun)
     cm_2_mas = (206265*1e3)/d_star
     cmd_2_masyr = cm_2_mas * 365.25 # cm/day to milli-arcseconds/year
     
@@ -304,6 +327,19 @@ def astro_post_array(double delta_mu, double delta_mu_err, double m_star, double
     # Best to calculate these now so they aren't re-calculated many times in each loop
     time_steps[0] = (hip_times[1] - hip_times[0])/(t_num+1)
     time_steps[1] = (gaia_times[1] - gaia_times[0])/(t_num+1)
+    
+    
+    ############   #############
+    
+    cdef double v_vec_pl[3]
+    cdef double v_vec_star_list[3]
+    cdef double [:] v_vec_star = v_vec_star_list
+
+    cdef double rotated_v_vec_list[3]
+    #cdef double [:] rotated_v_vec = rotated_v_vec_list
+    
+    cdef double mu[2]
+    ###############################################
     
     for j in range(num_points): # Loop over the desired number of random points
     
@@ -329,153 +365,164 @@ def astro_post_array(double delta_mu, double delta_mu_err, double m_star, double
             for k in range(t_num+1): # Start at 0, finish at t_num. This is a loop over the time steps of each mission
 
                 elapsed_time = k*time_step + start_time
-
-                both = astro_post(m_star, cm_2_mas, cmd_2_masyr, a, m, per, e, i, om, T_anom_0, num_points, grid_num, a_inds, m_inds, t_num, elapsed_time)
                 
-                ang_pos = both[0]
-                mu = both[1]
+                ###############################################################
+                ###############################################################
+
+                mass_ratio = m*mass_ratio_constant
+    
+        
+                M_anom = (2*pi/per)*elapsed_time
+    
+                # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
+                E_anom = kepler(M_anom, e)
+    
+                # T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
+                T_anom = T_anom_0 + 2*atan( sqrt((1+e)/(1-e)) * tan(E_anom/2))
+
+                rot_mtrx = rot_matrix(i, om, 0) # Omega = 0 arbitrarily 
+                #print(rot_mtrx_memview)
+                #dfd
+                
+    
+                #cdef double [:,:] rot_mtrx_memview = rot_mtrx # Convert list to memview here because matrix is all zeros if rot_matrix() returns a memview instead of a list. This is a costly line, but performin mat_mul below with meviews is ~5x as fast as with lists.
+    
+
+                ################### Angular Positions ######################
+    
+                r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
+    
+                r_star = r_pl*mass_ratio
+    
+
+                # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
+                r_vec[0] = -cos(T_anom)*r_star
+                r_vec[1] = -sin(T_anom)*r_star
+                r_vec[2] = 0
+    
+                # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
+                rot_vec = mat_mul(rot_mtrx, r_vec)
+                
+
+                # ang_pos is the angular separation of the star from barycenter in milli-arcseconds.
+                ang_pos[0] = rot_vec[0]*cm_2_mas
+                ang_pos[1] = rot_vec[1]*cm_2_mas
                 
                 # Sum up each coordinate independently in anticipation of taking an average
                 ang_pos_x_sum += ang_pos[0]
                 ang_pos_y_sum += ang_pos[1]
+    
+                ################### Angular Velocities ########################
+                # I don't need angular velocities for Hip, only ang_pos.
+                if l == 0:
+                    continue
+    
+                v_vec_pl = v_vec(a, per, e, T_anom)
+                # Stellar velocity is related to planet through their masses. 
+                # Also they are in opposite directions, so add negative, but it shouldn't affect the final answer.
+                v_vec_star[0] = -v_vec_pl[0] * mass_ratio
+                v_vec_star[1] = -v_vec_pl[1] * mass_ratio
+                v_vec_star[2] = -v_vec_pl[2] * mass_ratio
+    
+    
+                rotated_v_vec = mat_mul(rot_mtrx, v_vec_star)
+    
+                # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
+                mu[0] = rotated_v_vec[0]*cmd_2_masyr
+                mu[1] = rotated_v_vec[1]*cmd_2_masyr
+                
+                ###############################################################
+                ###############################################################
             
                 mu_x_sum += mu[0]
                 mu_y_sum += mu[1]
-                
             
             # Once we have the sums over the whole epoch, divide by number of points to get the avg.
             ang_pos_avg[l][0] = ang_pos_x_sum/(t_num+1)
             ang_pos_avg[l][1] = ang_pos_y_sum/(t_num+1)            
-        
+    
             mu_avg[l][0] = mu_x_sum/(t_num+1)
             mu_avg[l][1] = mu_y_sum/(t_num+1)
             
-            #print('horses', ang_pos_avg)
-            #print(mu_avg)
-            #dfdf
-        
-        # The gaia mu is just the 1th component. mu_gaia has dimension (2) and units of mas/yr
+            
         mu_gaia = mu_avg[1]
 
         # To get the positional avg., subtract the epoch positions and divide by the time between in years.
         # Units of mas/yr
         mu_hg[0] = (ang_pos_avg[1][0] - ang_pos_avg[0][0])/baseline_yrs # x-comp. = gaia_x - hip_x
         mu_hg[1] = (ang_pos_avg[1][1] - ang_pos_avg[0][1])/baseline_yrs # y-comp. = gaia_y - hip_y
-        
+    
 
         delta_mu_model = sqrt((mu_hg[0] - mu_gaia[0])**2 + (mu_hg[1] - mu_gaia[1])**2)
-            
         
-        chi_sq = ((delta_mu-delta_mu_model)/delta_mu_err)**2
-        
-        
-        #if j < 10:
-        #    print('Yeeep')
-        #    #print(delta_mu_model)
-        #    print(chi_sq)
-        #    print(-chi_sq/2)
-        #    x = -chi_sq/2
-        #    print(math_e**x)
-        #    print(math_e**(-chi_sq/2))
-        #    print('\n')
-        #else:
-        #    asdfasdf
-        
-        a_j = a_inds[j]
-        m_j = m_inds[j]
-        
-        prob = math_e**(-chi_sq/2)
+        prob = likelihood_astro(delta_mu, delta_mu_err, delta_mu_model)
         
         astro_prob_list[j] = prob
-        astro_prob_array[m_j, a_j] += prob
+
+    return astro_prob_list
+    
+
+cdef double likelihood_astro(double data, double data_err, double model):
+    """
+    Simple calculation of likelihood given data and model
+    assuming gaussian uncertainties and uniform priors.
+    """
+
+    cdef double chi_sq, prob
+
+    
+    chi_sq = ((data-model)/data_err)**2
         
+    prob = math_e**(-chi_sq/2)
     
-    return astro_prob_array, astro_prob_list
+    return prob
 
-#@profile
-def astro_post(double m_star, double cm_2_mas, double cmd_2_masyr, double a, double m, double per, 
-               double e, double i, double om, double T_anom_0, int num_points, int grid_num, 
-               long [:] a_inds, long [:] m_inds, int t_num, double elapsed_time):
+cdef double likelihood_rv(double [:] model, double [:] data, double [:] data_err):
+    """
+    Simple calculation of likelihood given data and model
+    assuming gaussian uncertainties and uniform priors. Accepts lists of
+    data points because RV uses both gdot and gddot.
+    """
 
-    cdef double rot_mtrx[3][3]
-    #cdef double [:,:] rot_mtrx = rot_mtrx_list # Can't use this line bc rot_mtrx needs to return a list
+    cdef int i, size
+    cdef double chi_sq, prob
+
+    size = data.shape[0]
+    chi_sq = 0.0
+
+    for i in range(size):
+
+        chi_sq += ((data[i]-model[i])/data_err[i])**2
+    
+    prob = math_e**(-chi_sq/2)
+
+    return prob
+
+def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_num):
+    """
+    Form a list of probabilities into a 2D array
+    """
+    
+    cdef int i, size, a_i, m_i
+    cdef double [:,:] prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
+    
+    size = prob_list.shape[0]
+     
+    for i in range(size):
+    
+        a_i = a_inds[i]
+        m_i = m_inds[i]
         
-    cdef double M_anom, E_anom, T_anom, r_pl, r_star, mass_ratio
-    
-    cdef double r_vec_list[3]
-    cdef double [:] r_vec = r_vec_list
-    
-    cdef double ang_pos[2]
-    #cdef double [:] ang_pos = ang_pos_list
-    
-    #### POINT OF SPEED-UP: I could define C in an earlier function, where m*C = mass_ratio
-    mass_ratio = ((m*M_jup)/(m_star*M_sun))
-    
+        prob_array[m_i, a_i] += prob_list[i]
         
-    M_anom = (2*pi/per)*elapsed_time
+    return prob_array
     
-    # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
-    E_anom = kepler(M_anom, e)
-    
-    # T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
-    T_anom = T_anom_0 + 2*atan( sqrt((1+e)/(1-e)) * tan(E_anom/2))
-
-    rot_mtrx = rot_matrix(i, om, 0) # Omega = 0 arbitrarily 
-    
-    cdef double [:,:] rot_mtrx_memview = rot_mtrx # Convert list to memview here because matrix is all zeros if rot_matrix() returns a memview instead of a list. This is a costly line, but performin mat_mul below with meviews is ~5x as fast as with lists.
-    
-
-    ################### Angular Positions ######################
-    
-    r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
-    
-    r_star = r_pl*mass_ratio
-    
-
-    # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
-    r_vec[0] = -cos(T_anom)*r_star
-    r_vec[1] = -sin(T_anom)*r_star
-    r_vec[2] = 0
-    
-    # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
-    rot_vec = mat_mul(rot_mtrx_memview, r_vec)
-
-    # ang_pos is the angular separation of the star from barycenter in milli-arcseconds.
-    ang_pos[0] = rot_vec[0]*cm_2_mas
-    ang_pos[1] = rot_vec[1]*cm_2_mas
-    
-    ################### Angular Velocities ########################
-    
-    #### POINT OF SPEED-UP: I don't need angular velocities for Hip, only ang_pos. So I could add an if statement here to pass if we're calculating for Hip, saving all the calculations below. This could give a ~25% speed-up.
-    
-    cdef double v_vec_pl[3]
-    cdef double v_vec_star_list[3]
-    cdef double [:] v_vec_star = v_vec_star_list
-    
-    cdef double rotated_v_vec_list[3]
-    cdef double mu[2]
-    
-    v_vec_pl = v_vec(a, per, e, T_anom)
-    # Stellar velocity is related to planet through their masses. 
-    # Also they are in opposite directions, so add negative, but it shouldn't affect the final answer.
-    v_vec_star[0] = -v_vec_pl[0] * mass_ratio
-    v_vec_star[1] = -v_vec_pl[1] * mass_ratio
-    v_vec_star[2] = -v_vec_pl[2] * mass_ratio
-    
-    
-    rotated_v_vec = mat_mul(rot_mtrx_memview, v_vec_star)
-    
-    # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
-    mu[0] = rotated_v_vec[0]*cmd_2_masyr
-    mu[1] = rotated_v_vec[1]*cmd_2_masyr
-
-    return ang_pos, mu
 
 
 def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
             long [:] a_inds, long [:] m_inds):
     
-    cdef int size, i
+    cdef int size, i, a_i, m_i
     cdef double [:,:] tot_prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
     cdef double prob
     
@@ -500,38 +547,34 @@ cdef rot_matrix(double i, double om, double Om):
     pre-multiplication by the position vector.
     """
     cdef double sin_Om, sin_om, sin_i, cos_Om, cos_om, cos_i
-    
-    cdef double list_1[3]
-    cdef double list_2[3]
-    cdef double list_3[3]
 
-    cdef double rot_mtrx[3][3] # This is a list
-    #cdef double [:,:] rot_mtrx_mem = rot_mtrx # This line converts our list into a bytes-like object
+    cdef double rot_mtrx_list[3][3] # This is a list
+    cdef double [:,:] rot_mtrx = rot_mtrx_list # This line converts our list into a bytes-like object
     
     
     sin_Om = sin(Om)
     sin_om = sin(om)
-    sin_i = sin(i)
+    sin_i  = sin(i)
     cos_Om = cos(Om)
     cos_om = cos(om)
-    cos_i = cos(i)
+    cos_i  = cos(i)
     
-    list_1 = [cos_Om*cos_om - sin_Om*cos_i*sin_om,
-            -sin_om*cos_Om - sin_Om*cos_i*cos_om,
-             sin_Om*sin_i]
     
-    list_2 = [sin_Om*cos_om + cos_Om*cos_i*sin_om,
-            -sin_om*sin_Om + cos_Om*cos_i*cos_om,
-            -cos_Om*sin_i]
-    
-    list_3 = [sin_i*sin_om, sin_i*cos_om, cos_i]
+    rot_mtrx[0][0] = cos_Om*cos_om - sin_Om*cos_i*sin_om
+    rot_mtrx[0][1] = -sin_om*cos_Om - sin_Om*cos_i*cos_om
+    rot_mtrx[0][2] = sin_Om*sin_i
 
+    rot_mtrx[1][0] = sin_Om*cos_om + cos_Om*cos_i*sin_om
+    rot_mtrx[1][1] = -sin_om*sin_Om + cos_Om*cos_i*cos_om
+    rot_mtrx[1][2] = -cos_Om*sin_i
+
+    rot_mtrx[2][0] = sin_i*sin_om
+    rot_mtrx[2][1] = sin_i*cos_om
+    rot_mtrx[2][2] = cos_i
     
-    rot_mtrx[0][:] = list_1
-    rot_mtrx[1][:] = list_2
-    rot_mtrx[2][:] = list_3
     
-    return rot_mtrx # Return a list, not a memview
+    
+    return rot_mtrx
 
 
 cdef double r(double nu, double a, double e):
@@ -559,6 +602,7 @@ cdef double r(double nu, double a, double e):
 
     return num/denom
     
+#@profile
 cdef mat_mul(double [:,:] mat, double [:] vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with 
@@ -568,7 +612,8 @@ cdef mat_mul(double [:,:] mat, double [:] vec):
 
     cdef int i, k
     
-    cdef double result[3]     
+    cdef double result[3]
+    #cdef double [:] result = result_list
                 
     for i in range(3):
         result[i] = 0
@@ -576,6 +621,7 @@ cdef mat_mul(double [:,:] mat, double [:] vec):
             result[i] += mat[i][k]*vec[k]
 
     return result
+
 
 cdef v_vec(double a, double per, double e, double nu):
     """
@@ -596,10 +642,6 @@ cdef v_vec(double a, double per, double e, double nu):
 
     x_dot = -n_a / e_term * sin(nu)
     y_dot = +n_a / e_term * (e + cos(nu))
-
-    # To get the proper shape vector at the end, we need our 0 element to be an array with matching shape
-    # zero_shape = np.shape(y_dot)
-    # v_vec = np.array([x_dot, y_dot, np.zeros(zero_shape)])
     
     v_vec[0] = x_dot
     v_vec[1] = y_dot
@@ -607,16 +649,18 @@ cdef v_vec(double a, double per, double e, double nu):
 
     return v_vec
 
-def r_dot(nu, a, P, e):
-    """
-    Murray & Dermott equation 2.31. This function gives the time rate of change
-    of the distance between an orbiting body and the center of mass as a function of the body's true anomaly nu, period P, and
-    eccentricity e.
-    """
-    num = 2*np.pi*a*e*np.sin(nu)
-    denom = P*np.sqrt(1-e**2)
-
-    return num/denom
+#cdef double r_dot(double nu, double a, double P, double e):
+#    """
+#    Murray & Dermott equation 2.31. This function gives the time rate of change
+#    of the distance between an orbiting body and the center of mass as a function of the body's true anomaly nu, period P, and
+#    eccentricity e.
+#    """
+#    cdef double num, denom
+#    
+#    num = 2*pi*a*e*sin(nu)
+#    denom = P*sqrt(1-e**2)
+#
+#    return num/denom
 
 
 
@@ -784,169 +828,3 @@ def index2value(index, index_space, value_space):
     return value
 
 ##################################################################################################
-
-
-#@profile
-#@cython.cdivision(True)
-#@cython.boundscheck(False)
-def gamma_direct(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
-                 np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
-                 np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om,
-                 np.ndarray[double, ndim=1] E):
-    """
-    Function to analytically calculate the first and second derivatives of the RV curve at a given point in the orbit.
-    All arguments can be given as arrays (of compatible dimensions). M_anom and e in particular must be lists to work with the
-    C-based kepler solver.
-    Mp is expected in Jupiter masses.
-    a is expected in au
-    per is expected in days
-
-    Returns:
-    gamma_dot (m/s/d)
-    gamma_ddot (m/s/d^2)
-    """
-    print('Using gamma_direct')
-    cdef int size, j, k
-
-    size = a.shape[0]
-
-    cdef np.ndarray[double, ndim=1] gamma_dot = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64)
-                                    
-    cdef double cms2msday, cos_E, cos_nu, sin_nu_om, sin_E
-    
-    for k in range(size):
-        Mp[k] = Mp[k]*M_jup
-        a[k] = a[k]*au
-    
-    cms2msday = (1/100) * (24*3600)
-    
-    
-    cdef double nu, E_dot, nu_dot, prefac, gd_t1, gd_t2, gd_t1_dot, gd_t2_dot, gdd_t1, gdd_t2
-    
-    for j in range(size):
-        nu = 2*atan(((1+e[j])/(1-e[j]))**0.5*tan(E[j]/2))
-        
-        cos_E = cos(E[j])
-        cos_nu = cos(nu)
-        sin_nu_om = sin(nu+om[j])
-        sin_E = sin(E[j])
-
-        # Differentiate Kepler's equation in time to get E_dot
-        # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
-        E_dot = (2*pi/per[j])/(1-e[j]*cos_E)
-        nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e[j])/(1-e[j]))**0.5 * cos(E[j]/2)**-2 * E_dot
-
-        # Convert prefac units from cm/s^2 to m/s/day
-        # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-        prefac = -(Mp[j]*G*sin(i[j]))/(a[j]**2*(1-e[j])) * cms2msday
-
-
-        gd_t1 = (1+cos_nu)/(1+cos_E)
-        gd_t2 = sin_nu_om/(1-e[j]*cos_E)
-
-
-        gamma_dot[j] = prefac*gd_t1*gd_t2
-
-        gd_t1_dot = ((1+cos_nu)*sin_E * E_dot - (1+cos_E)*sin(nu)*nu_dot) / (1+cos_E)**2
-        gd_t2_dot = ((1-e[j]*cos_E)*cos(nu+om[j]) * nu_dot - sin_nu_om*e[j]*sin_E*E_dot) / (1-e[j]*cos_E)**2
-
-
-        gdd_t1 = gd_t2 * gd_t1_dot
-        gdd_t2 = gd_t1 * gd_t2_dot
-
-        gamma_ddot[j] = prefac*(gdd_t1+gdd_t2)
-    
-
-    return gamma_dot, gamma_ddot
-
-#@profile
-@cython.cdivision(True)
-@cython.boundscheck(False)
-def gamma_direct_FAST(np.ndarray[double, ndim=1] a, np.ndarray[double, ndim=1] Mp, 
-                      np.ndarray[double, ndim=1] per, np.ndarray[double, ndim=1] e, 
-                      np.ndarray[double, ndim=1] i, np.ndarray[double, ndim=1] om, 
-                      np.ndarray[double, ndim=1] E):
-    """
-    Function to analytically calculate the first and second derivatives of the RV 
-    curve at a given point in the orbit. All arguments can be given as arrays 
-    (of compatible dimensions). M_anom and e in particular must be lists to work with the
-    C-based kepler solver.
-    Mp is expected in Jupiter masses.
-    a is expected in au
-    per is expected in days
-
-    Returns:
-    gamma_dot (m/s/d)
-    gamma_ddot (m/s/d^2)
-    """
-    print('Using gamma_direct_FAST')
-    cdef int size
-
-    size = a.shape[0]
-
-
-    cdef np.ndarray[double, ndim=1] gamma_dot  = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #nu         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #nu_dot     = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #cos_E         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #cos_nu         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #sin_nu_om         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #sin_E         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #E_dot         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #prefac         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #gd_t1         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #gd_t2         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #gd_t1_dot         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #gd_t2_dot         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #gdd_t1         = np.ndarray(shape=(size,), dtype=np.float64),\
-                                    #gdd_t2         = np.ndarray(shape=(size,), dtype=np.float64)
-
-    Mp = Mp*M_jup
-    a = a*au
-
-
-    nu = 2*np.arctan(((1+e)/(1-e))**0.5*np.tan(E/2))
-
-    cos_E = np.cos(E)
-    cos_nu = np.cos(nu)
-    sin_nu_om = np.sin(nu+om)
-    sin_E = np.sin(E)
-
-    # Differentiate Kepler's equation in time to get E_dot
-    # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
-    E_dot = (2*pi/per)/(1-e*cos_E)
-    nu_dot = (1+np.tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * np.cos(E/2)**-2 * E_dot
-
-    # Convert prefac units from cm/s^2 to m/s/day
-    # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-    prefac = -(Mp*G*np.sin(i))/(a**2*(1-e)) * 864 # Save time on (24*3600)/100
-
-
-    gd_t1 = (1+cos_nu)/(1+cos_E)
-    gd_t2 = sin_nu_om/(1-e*cos_E)
-
-
-    gamma_dot = prefac*gd_t1*gd_t2
-
-    gd_t1_dot = ((1+cos_nu)*sin_E * E_dot - (1+cos_E)*np.sin(nu)*nu_dot) / (1+cos_E)**2
-    gd_t2_dot = ((1-e*cos_E)*np.cos(nu+om) * nu_dot - sin_nu_om*e*sin_E*E_dot) / (1-e*cos_E)**2
-
-
-    gdd_t1 = gd_t2 * gd_t1_dot
-    gdd_t2 = gd_t1 * gd_t2_dot
-
-    gamma_ddot = prefac*(gdd_t1+gdd_t2)
-
-
-    return gamma_dot, gamma_ddot
-
-
-
-
-
-
-
-
-
