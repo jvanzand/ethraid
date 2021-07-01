@@ -264,7 +264,7 @@ def rv_post(double gammadot, double gammadot_err,
     return rv_prob_list
 
 
-@profile
+#@profile
 def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_star, 
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
                double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list, 
@@ -544,7 +544,7 @@ cdef rot_matrix(double i, double om, double Om):
     """
     This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. They multiply it immediately by r*[cos(f), sin(f), 0]
     because this gives the projection of position onto the sky. However, we also need the projection of velocity, so we need the matrix
-    pre-multiplication by the position vector.
+    before multiplication by the position vector.
     """
     cdef double sin_Om, sin_om, sin_i, cos_Om, cos_om, cos_i
 
