@@ -39,30 +39,29 @@ t_num = 10
 tick_num = 6
 tick_size = 30
 
-
-#a_list, m_list, per_list, e_list, i_list, om_list, M_anom_list, E_anom_list, T_anom_list, a_inds, m_inds = pfp.make_arrays(m_star, a_lim, m_lim, grid_num, num_points)
+np.set_printoptions(threshold=np.inf)
 a_list, m_list, per_list, e_list, i_list, om_list, M_anom_list, E_anom_list, T_anom_list, a_inds, m_inds = \
                                             hlpw.make_arrays(m_star, a_lim, m_lim, grid_num, num_points)
-                                                
+                                             
 print('made arrays')
 
-rv_tuple = hlpw.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, 
+rv_list = hlpw.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, 
                         a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list, 
                         num_points, grid_num, a_inds, m_inds)
-post_rv = np.array(rv_tuple[0])
+                        
+post_rv = np.array(hlpw.prob_array(rv_list, a_inds, m_inds, grid_num))
 
 post_rv = post_rv/post_rv.sum()
 
-astro_tuple = hlpw.astro_post_array(delta_mu, delta_mu_err, m_star, d_star, a_list, 
-                                    m_list, per_list, e_list, i_list, om_list, 
-                                    T_anom_list, num_points, grid_num, a_inds, m_inds, t_num)
-post_astro = np.array(astro_tuple[0])
+astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
+                             m_list, per_list, e_list, i_list, om_list,
+                             T_anom_list, num_points, grid_num, t_num)
+
+post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
 
 post_astro = post_astro/post_astro.sum()
 
 
-rv_list = rv_tuple[1]
-astro_list = astro_tuple[1]
 post_tot = np.array(hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds))
 
 post_tot = post_tot/post_tot.sum()
@@ -70,8 +69,10 @@ post_tot = post_tot/post_tot.sum()
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 
-# plt.imshow(post_rv, origin='lower')
+# plt.imshow(post_astro, origin='lower')
 # plt.show()
+# dfddf
+
 # The priors for minimum period and planet mass. min_per is 4xbaseline because we see ~no curvature yet.
 rv_baseline = 430.2527364352718
 max_rv = 40.0581900021484
@@ -101,7 +102,7 @@ fig, ax = plt.subplots(figsize=(12,12))
 
 post_astro_cont = ax.contourf(post_astro, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
 post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
-post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.5)
+post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
 
 mass_rect = ptch.Rectangle((0, 0), grid_num-1, min_index_m, color='gray', alpha=1.0)
 a_rect = ptch.Rectangle((0, 0), min_index_a, grid_num-1, color='gray', alpha=1.0)

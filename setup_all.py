@@ -11,19 +11,19 @@ import numpy as np
 import sys
 
 
-####################
-
-# Extra stuff to profile code using kernprof -l -v file.py after it is compiled
-# Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
-
-from Cython.Compiler.Options import get_directive_defaults
-directive_defaults = get_directive_defaults()
-
-directive_defaults['linetrace'] = True
-directive_defaults['binding'] = True
-
-
-##############################
+# ####################
+#
+# # Extra stuff to profile code using kernprof -l -v file.py after it is compiled
+# # Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
+#
+# from Cython.Compiler.Options import get_directive_defaults
+# directive_defaults = get_directive_defaults()
+#
+# directive_defaults['linetrace'] = True
+# directive_defaults['binding'] = True
+#
+#
+# ##############################
 
 
 class build_ext(_build_ext):
