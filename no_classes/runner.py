@@ -40,7 +40,7 @@ a_lim = (1.9, 5e1)
 m_lim = (1.5, 2e2)
 
 grid_num = 100
-num_points = int(1e8) 
+num_points = int(1e4) 
 t_num = 2
 tick_num = 6
 tick_size = 30
@@ -70,8 +70,8 @@ post_tot = np.array(hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds)
 
 post_tot = post_tot/post_tot.sum()
 
-# import matplotlib.pyplot as plt
-# import matplotlib.patches as ptch
+import matplotlib.pyplot as plt
+import matplotlib.patches as ptch
 #
 # plt.imsave('post_rv.png', post_rv, origin='lower')
 # plt.imsave('post_astro.png', post_astro, origin='lower')
