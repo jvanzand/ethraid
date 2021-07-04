@@ -5,7 +5,11 @@ import astropy.units as u
 
 import radvel as rv
 
+<<<<<<< HEAD
 from trends.c_kepler import _kepler as ck
+=======
+from c_kepler import _kepler as ck
+>>>>>>> ccode
         
         
         

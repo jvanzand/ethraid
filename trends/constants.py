@@ -26,9 +26,10 @@ hip97166_gamma = [0.043, 0.033, -2e-4, 1.5e-4]
 
 gamma_dot, gamma_dot_err,  gamma_dotdot, gamma_dotdot_err = hd191939_gamma
 
-timeseries = pd.read_csv('data/191939_rv.csv', skiprows=14)
+timeseries = pd.read_csv('../data/191939_rv.csv', skiprows=14)
 rv_baseline = max(Time(list(timeseries.time.values), format='iso').jd) - min(Time(list(timeseries.time.values), format='iso').jd)
-max_rv = max(timeseries.mnvel)
+
+max_rv = max(timeseries.mnvel) # Need 1) good way to get RV residuals so I can add trend back in and 2) to take max(abs(timeseries.mnvel))
 
 # The priors for minimum period and planet mass. min_per is 4xbaseline because we see ~no curvature yet.
 min_per = 4*rv_baseline
@@ -69,7 +70,7 @@ baseline = gaia_mid - hip_mid
 # The proper motions and errors (mas/yr) in the order [Hipparcos, Gaia, HG]
 # hdul = ap.io.fits.open('../data/HGCA_vDR2.fits')
 
-hdul = ap.io.fits.open('data/HGCA_vEDR3.fits')
+hdul = ap.io.fits.open('../data/HGCA_vEDR3.fits')
 data_df = Table(hdul[1].data).to_pandas()
 
 

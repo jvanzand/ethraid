@@ -1,3 +1,4 @@
+# Get an import error for _kepler when I try to use these lines. Check out later
 # import pyximport
 # pyximport.install()
 
@@ -14,7 +15,7 @@ import trends.giant_class as gc
 
 # @profile
 def main(save_data=False): 
-    grid_num = 30
+    grid_num = 10
     plot_num = 30
     tick_num = 6
     
@@ -52,6 +53,7 @@ def main(save_data=False):
     post_rv = my_planet.rv_post()
     post_astro = my_planet.astro_post()
     post_tot = my_planet.rv_astro_post()
+
 
     
     post_rv_plot    = my_planet.rv_plot_array
@@ -124,7 +126,7 @@ def main(save_data=False):
     
     fig.tight_layout()
     fig.savefig('5thCompConstraints_RV_astr.png')
-    plt.show()
+    # plt.show()
     
     return
 

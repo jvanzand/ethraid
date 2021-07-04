@@ -8,6 +8,14 @@
 
 *.c
 !trends/c_kepler/kepler.c
+
+/trends/c_kepler/build
+/trends/__pycache__
+*/__pycache__
+
+
+*.c
+!c_kepler/kepler.c
 !no_classes/c_kepler/kepler.c
 *.pyc
 *.so
@@ -15,11 +23,18 @@
 
 # Output of kern profiler
 *.lprof
+<<<<<<< HEAD
 *.prof
 *.html
 
 *.o
 *.DS_Store
+=======
+*.html
+
+*.o
+.DS_Store
+*.ipynb
 
 ###########################################
 

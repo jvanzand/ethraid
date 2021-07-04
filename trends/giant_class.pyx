@@ -1,21 +1,26 @@
 import matplotlib.pyplot as plt
 import astropy.constants as c
 import numpy as np
-import trends.helper_functions as hlp
+cimport numpy as np
+import helper_functions as hlp
 
 import radvel as rv
-from trends.c_kepler import _kepler as ck
+
+from c_kepler import _kepler as ck
 
 from scipy.stats import loguniform, beta
 
-from trends.constants import *
+from constants import *
 
-"""
-This module is the official version of giant_class.py. 
-It includes the correct rotation of the velocity vector
-"""
-class Giant(object):
-    
+cdef class Giant:
+    cdef str star_name
+    cdef double m_star, gamma_dot, gamma_dot_err, gamma_dotdot, gamma_dotdot_err, parallax, pm_anom_data, pm_anom_data_err, d_star, tp
+    cdef int num_points, t_num, grid_num, plot_num
+    cdef np.ndarray a_list, m_list, per_list, e_list, cosi_list, i_list, sini_list, M_anom_list, E_anom_list, T_anom_list, om_list
+    cdef public Om_list, a_inds, m_inds, a_inds_plot, m_inds_plot, chi_sq_list_rv, prob_list_rv, rv_bounds_array, rv_plot_array
+    cdef np.ndarray E_prog, E_prog_list, T_prog
+    cdef public chi_sq_list_astro, prob_list_astro, astro_bounds_array, astro_plot_array, tot_plot_array
+
     def __init__(self, star_name, m_star, gamma_dot, gamma_dot_err, 
                 gamma_dotdot, gamma_dotdot_err, parallax, pm_anom_data, pm_anom_data_err):
         
@@ -26,12 +31,12 @@ class Giant(object):
         self.gamma_dotdot = gamma_dotdot
         self.gamma_dotdot_err = gamma_dotdot_err
         self.parallax = parallax # mas
-        self.d_star = (1/parallax)*c.pc.cgs.value*1000 # cm
+        self.d_star = (1/parallax)*(c.pc.cgs.value)*1000 # cm
         self.pm_anom_data = pm_anom_data
         self.pm_anom_data_err = pm_anom_data_err
         
 
-    
+
     def make_arrays(self, a_lim = (1.9, 1e2), m_lim = (1.5, 1e2), grid_num = 100, num_points = int(3e5), t_num = 100, plot_num = 30, e = 0, tp = 0, om = 0):
         
         
@@ -43,11 +48,12 @@ class Giant(object):
         m_min, m_max = m_lim
         
         self.num_points = num_points
+        self.t_num = t_num
         self.grid_num = grid_num
         self.plot_num = plot_num
         # These semimajor axes are distances between the planet and the barycenter of the system. The star is on its own orbit, which we will get later.
         self.a_list = loguniform.rvs(a_min, a_max, size=num_points)
-        self.m_list= loguniform.rvs(m_min, m_max, size=num_points)
+        self.m_list = loguniform.rvs(m_min, m_max, size=num_points)
         
         # Match up a_list and m_list and get the period for each pair.
         self.per_list = hlp.P(self.a_list, (self.m_star+self.m_list*(c.M_jup/c.M_sun).value))
@@ -91,16 +97,25 @@ class Giant(object):
         
         
         return
+<<<<<<< HEAD:trends/giant_class.py
+=======
+    
+>>>>>>> ccode:trends/giant_class.pyx
 
     def rv_post(self):
+
+        #cdef np.ndarray[double] dot_term_list    = np.zeros((self.num_points,))
+        #cdef np.ndarray[double] dotdot_term_list = np.zeros((self.num_points,))
         
-        m_tot_list = (self.m_star+self.m_list*(c.M_jup/c.M_sun).value)
+        m_tot_list = (self.m_star+self.m_list*(M_jup/M_sun))
         
         # Get the first and second derivatives of the RV curve
         gamma_dot, gamma_dotdot = hlp.gamma(self.a_list, self.m_list, self.per_list, self.e_list, self.i_list, self.om_list, self.M_anom_list)
         
+        # To get χ^2, we need the gdot and gddot (differences/errors)^2
         dot_term_list = ((gamma_dot-self.gamma_dot)/(self.gamma_dot_err))**2
         dotdot_term_list = ((gamma_dotdot-self.gamma_dotdot)/(self.gamma_dotdot_err))**2
+        
         
         # Why three arrays to store probabilities? self.prob_list_rv is a 1D list that will be multiplied with its astrometry counterpart to get a the total (rv+astro) marginalized posterior. rv_bounds_array is a 2D array of the rv probabilities, binned according to a and M. It will be used to find the 1-sigma bounds on a an M. rv_plot_array is similar, but it will be used for plotting the 2D probability surface instead of finding bounds. The only difference between the last two is the number of points used to create the 2D grid.
         
@@ -132,9 +147,11 @@ class Giant(object):
 
             if int(i%(int(self.num_points/100))) == 0:
                   print(int(i / (self.num_points/100)), '% ')#, self.prob_list_rv[i])
-
-        self.rv_bounds_array = rv_bounds_array/rv_bounds_array.sum()
+                  
+        self.rv_bounds_array = rv_bounds_array
+        #self.rv_bounds_array = rv_bounds_array/rv_bounds_array.sum()
         self.rv_plot_array   = rv_plot_array/rv_plot_array.sum()
+        
         return
         
         
@@ -152,7 +169,7 @@ class Giant(object):
         time_endpoints = np.array([[hip_times[0], gaia_times[0]], [hip_times[1], gaia_times[1]]])
 
         # Walk through mean anomaly over the HIP/Gaia missions. The mean anomaly array (final shape (per_num, 2, t_num)) contains a mean anomaly for n = (t_num) points along every one of the (per_num) periods, for both Hipparcos and Gaia.
-        M_anom_progression = (2*np.pi/per_array)*(np.linspace(time_endpoints[0], time_endpoints[1], 100) - hip_times[0])[None, :, :]
+        M_anom_progression = (2*np.pi/per_array)*(np.linspace(time_endpoints[0], time_endpoints[1], self.t_num) - hip_times[0])[None, :, :]
         M_anom_progression = np.swapaxes(M_anom_progression, 1,2)
         
         
@@ -170,6 +187,13 @@ class Giant(object):
         prob_list = []
         astro_bounds_array = np.zeros((self.grid_num, self.grid_num))
         astro_plot_array   = np.zeros((self.plot_num, self.plot_num))
+        
+        # Line to speed up E_prog loop below, but seems to slow it down
+        # cdef np.ndarray[double, ndim=1] E_prog = np.ndarray(shape=(100,))
+        cdef int i
+        cdef np.ndarray[double, ndim=2] E_prog_list = np.ndarray(shape=(2, self.t_num))
+        #cdef np.ndarray[double, ndim=2] T_prog = np.ndarray(shape=(self.t_num, 2))
+        
         for i in range(self.num_points):
 
             M_2d = M_anom_progression[i]
@@ -185,19 +209,18 @@ class Giant(object):
             om = self.om_list[i]
             inc = self.i_list[i]
             
-
-            E_prog_list = []
+            # E_prog_list is initialized above with cdef
             for j in range(2):
                 
                 M_1d = M_2d[j]
+                
+                # Much faster than hlp.kepler(M_1d, e_arr[0])
                 E_prog = rv._kepler.kepler_array(M_1d, e)
-                # E_prog = hlp.kepler(M_1d, e_arr[0])
 
                 
-                E_prog_list.append(E_prog)
+                E_prog_list[j] = E_prog
             
             # E_prog_list is a (2,100) array with an eccentric anomaly for each of 100 times in both the Hip and Gaia eras.
-            E_prog_list = np.array(E_prog_list)
             
 
             # Convert the eccentric anomalies into true anomalies and add on T_anom_array, the random starting true anomalies. Transpose so this has shape (t_num, 2). The length-2 axis holds Hipparcos vs. Gaia true anomalies.
@@ -209,6 +232,10 @@ class Giant(object):
             #                                                              (np.sin(om+T_prog)*np.sin(inc))])
             
             rot_matrix = hlp.rot_matrix(inc, om, Om)
+            
+            print(np.shape(rot_matrix))
+            print(type(rot_matrix))
+            dfdf
         
             ######################## Angular Positions ##########################
             # At each of these true anomalies, we need to know the angular separation from barycenter! So first use the r equation on these T_anoms to get r_planet
@@ -237,15 +264,6 @@ class Giant(object):
 
             ########################## Angular Velocities ###########################
             
-            ##################### Wrong way to get pm_anom ############################
-            ## I take the scalar r_dot and multiply by rot_vec. Since rot_vec is obtained using r_vec, this step implicitly assumed that v and r are in the same direction, which is WRONG.
-            # r_dot_pl = hlp.r_dot(T_prog, a*c.au.cgs.value, per*(24*3600), e)
-            #
-            # r_dot_star = r_dot_pl * ((m*c.M_jup.cgs.value)/(self.m_star*c.M_sun.cgs.value))
-            #
-            # # pm_anom_both has shape (2,2): (x&y components, Hip/Gaia)
-            # pm_anom_both = ((r_dot_star*rot_vec)[:-1] / self.d_star * (206265*1e3*3.15e7)).mean(axis= -2) # (cm/s / cm)*206265*1e3*3.15e7 = mas/yr
-            ############################################################################
             
             v_vec_pl = hlp.v_vec(a, per, e, T_prog)
             
