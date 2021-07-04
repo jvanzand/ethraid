@@ -34,6 +34,8 @@ cdef extern from "../c_kepler/kepler.c":
 ## Constants ##
 
 cdef float pi, G, M_sun, M_jup, au
+cdef float hip_times[2]
+cdef float gaia_times[2]
 
 pi = 3.141592653589793
 math_e  = 2.718281828459045
@@ -42,8 +44,11 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 
+hip_times  = [2447837.75, 2449065.15]
+gaia_times = [2456863.5, 2457531.5]
 
-def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_points):
+#@profile
+def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
 
     cdef double tp, a_min, a_max, m_min, m_max, two_pi
 
@@ -60,7 +65,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
                                     a_bins = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     m_bins = np.ndarray(shape=(num_points,), dtype=np.float64)
                                 
-    cdef long [:]                   a_inds, m_inds
+    cdef long [:] a_inds, m_inds
     
     np.random.seed(0)
     tp = 0
@@ -78,21 +83,25 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     # Match up a_list and m_list and get the period for each pair (in days).
     per_list = P(a_list, m_star+m_list*(M_jup/M_sun) )
     
-    # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014)
+    # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014).
     e_list = spst.beta(0.867, 3.03).rvs(num_points)
-    
+    e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
     #sini_list = np.sqrt(1-cosi_list**2)
     
     
-    # Mean anomaly, uniformly distributed. Use this to solve for True anomaly.
+    # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
     M_anom_list = np.random.uniform(0, two_pi, num_points)
+    
+    # Evolving M_anom forward to the epoch of RV calculations.
+    M_anom_evolved = M_anom_list + 2*pi*((rv_epoch - hip_times[0])/per_list)
+    E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
-    # Solving Kepler now to use in RV posterior
-    E_anom_list = ck.kepler_array(M_anom_list, e_list)
-    T_anom_list = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_list/2))
+    # Not evolving for use in astrometry calculations
+    E_anom_astro = ck.kepler_array(M_anom_list, e_list)
+    T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro
 
     # Arguments of peri, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
@@ -109,8 +118,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     m_inds = np.digitize(m_list, bins = m_bins)
     
     
-    
-    return a_list, m_list, per_list, e_list, i_list, om_list, M_anom_list, E_anom_list, T_anom_list, a_inds, m_inds
+    return a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, T_anom_astro, a_inds, m_inds
+    #return a_list, m_list, per_list, e_list, i_list, om_list, M_anom_list, E_anom_list, T_anom_list, a_inds, m_inds
 
 
 
@@ -126,7 +135,7 @@ cdef P(double [:] a, double [:] Mtotal):
     cdef double sec_2_days
     
     size = a.shape[0]
-    sec_2_days = 1./(24*3600) # Note the 1.; without it the result would be 0
+    sec_2_days = 1./(24*3600) # Note the 1.; with 1, the result would be 0
 
     cdef np.ndarray[double, ndim=1] P_days = np.ndarray(shape=(size,), dtype=np.float64)
     
@@ -265,15 +274,15 @@ def rv_post(double gammadot, double gammadot_err,
 
 
 #@profile
-def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_star, 
+def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star, 
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
                double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list, 
                int num_points, int grid_num, int t_num):
                
-              
-
+    
     #cdef double rot_mtrx_list[3][3]
-    cdef double [:,:] rot_mtrx #= rot_mtrx_list # This makes rot_mtrx a memview
+    cdef double [:,::1] rot_mtrx #= rot_mtrx_list # This makes rot_mtrx a memview
+    rot_mtrx = np.zeros((3,3),dtype=np.float64)
         
     cdef double M_anom, E_anom, T_anom, r_pl, r_star, mass_ratio
     
@@ -281,7 +290,7 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
     cdef double [:] r_vec = r_vec_list
     
     cdef double rot_vec_list[3]
-    #cdef double [:] rot_vec = rot_vec_list
+    cdef double [:] rot_vec = rot_vec_list
     
     cdef double ang_pos_list[2]
     cdef double [:] ang_pos = ang_pos_list
@@ -290,8 +299,8 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
     cdef int j, k, l, a_j, m_j
     
 
-    cdef double hip_times[2]
-    cdef double gaia_times[2]
+    #cdef double hip_times[2]
+    #cdef double gaia_times[2]
     #cdef double time_endpoints[2][2]
     cdef double time_steps[2]
     cdef double both[2][2]
@@ -312,8 +321,9 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
     cdef double [:] astro_prob_list = np.zeros(shape=(num_points), dtype=np.float64)
     cdef double [:,:] astro_prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
     
-    hip_times  = [2447837.75, 2449065.15]
-    gaia_times = [2456863.5, 2457531.5]
+    # Moved to global so they can be used in make_arrays()
+    #hip_times  = [2447837.75, 2449065.15]
+    #gaia_times = [2456863.5, 2457531.5]
     
     # Time in days between epoch mid-points
     baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365
@@ -331,12 +341,14 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
     
     ############   #############
     
-    cdef double v_vec_pl[3]
+    cdef double v_vec_pl_list[3]
+    cdef double [:] v_vec_pl = v_vec_pl_list
+    
     cdef double v_vec_star_list[3]
     cdef double [:] v_vec_star = v_vec_star_list
 
     cdef double rotated_v_vec_list[3]
-    #cdef double [:] rotated_v_vec = rotated_v_vec_list
+    cdef double [:] rotated_v_vec = rotated_v_vec_list
     
     cdef double mu[2]
     ###############################################
@@ -350,6 +362,7 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
         i = i_list[j]
         om = om_list[j]
         T_anom_0 = T_anom_0_list[j]
+
         
         for l in range(2): # Hipparcos or Gaia
             start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
@@ -373,14 +386,17 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
     
         
                 M_anom = (2*pi/per)*elapsed_time
+                
     
                 # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
                 E_anom = kepler(M_anom, e)
+                
     
                 # T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
                 T_anom = T_anom_0 + 2*atan( sqrt((1+e)/(1-e)) * tan(E_anom/2))
+            
 
-                rot_mtrx = rot_matrix(i, om, 0) # Omega = 0 arbitrarily 
+                rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily 
                 #print(rot_mtrx_memview)
                 #dfd
                 
@@ -401,7 +417,7 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
                 r_vec[2] = 0
     
                 # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
-                rot_vec = mat_mul(rot_mtrx, r_vec)
+                mat_mul(rot_mtrx, r_vec, rot_vec)
                 
 
                 # ang_pos is the angular separation of the star from barycenter in milli-arcseconds.
@@ -417,7 +433,7 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
                 if l == 0:
                     continue
     
-                v_vec_pl = v_vec(a, per, e, T_anom)
+                v_vec(a, per, e, T_anom, v_vec_pl)
                 # Stellar velocity is related to planet through their masses. 
                 # Also they are in opposite directions, so add negative, but it shouldn't affect the final answer.
                 v_vec_star[0] = -v_vec_pl[0] * mass_ratio
@@ -425,7 +441,7 @@ def astro_post(double delta_mu, double delta_mu_err, double d_star, double m_sta
                 v_vec_star[2] = -v_vec_pl[2] * mass_ratio
     
     
-                rotated_v_vec = mat_mul(rot_mtrx, v_vec_star)
+                mat_mul(rot_mtrx, v_vec_star, rotated_v_vec)
     
                 # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
                 mu[0] = rotated_v_vec[0]*cmd_2_masyr
@@ -540,17 +556,16 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
     return tot_prob_array
 
 #@profile
-cdef rot_matrix(double i, double om, double Om):
+cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
     """
     This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. They multiply it immediately by r*[cos(f), sin(f), 0]
     because this gives the projection of position onto the sky. However, we also need the projection of velocity, so we need the matrix
     before multiplication by the position vector.
+    
+    This function doesn't return anything. Instead, declare a matrix in your function and this will update it, saving
+    lots of time by not allocating memory to and returning a matrix.
     """
     cdef double sin_Om, sin_om, sin_i, cos_Om, cos_om, cos_i
-
-    cdef double rot_mtrx_list[3][3] # This is a list
-    cdef double [:,:] rot_mtrx = rot_mtrx_list # This line converts our list into a bytes-like object
-    
     
     sin_Om = sin(Om)
     sin_om = sin(om)
@@ -572,9 +587,7 @@ cdef rot_matrix(double i, double om, double Om):
     rot_mtrx[2][1] = sin_i*cos_om
     rot_mtrx[2][2] = cos_i
     
-    
-    
-    return rot_mtrx
+    #return rot_mtrx
 
 
 cdef double r(double nu, double a, double e):
@@ -603,7 +616,7 @@ cdef double r(double nu, double a, double e):
     return num/denom
     
 #@profile
-cdef mat_mul(double [:,:] mat, double [:] vec):
+cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with 
     r_unit_vec (3x1) and v_vec_star (3x1) in astro_post_dense_loop.
@@ -612,18 +625,18 @@ cdef mat_mul(double [:,:] mat, double [:] vec):
 
     cdef int i, k
     
-    cdef double result[3]
+    #cdef double result[3]
     #cdef double [:] result = result_list
                 
     for i in range(3):
-        result[i] = 0
+        out_vec[i] = 0
         for k in range(3):
-            result[i] += mat[i][k]*vec[k]
+            out_vec[i] += mat[i][k]*in_vec[k]
 
-    return result
+    #return result
 
-
-cdef v_vec(double a, double per, double e, double nu):
+#@profile
+cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
     """
     Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't capture the velocity perpendicular to the radial vector.
     Instead, v is the total velocity of the object. M&D doesn't actually give v vector explicitly, but I believe it's v_vec = [x_dot, y_dot, 0].
@@ -631,23 +644,21 @@ cdef v_vec(double a, double per, double e, double nu):
     Since periods created in units of days, v_vec has units of cm/day.
     v_vec is a list.
     """
-    cdef double n, n_a, e_term, x_dot, y_dot
+    cdef double n_a, e_term, x_dot, y_dot
     
-    cdef double v_vec[3]
-    
-    
-    n = 2*pi/per
-    n_a = n*a
+    #cdef double v_vec[3]
+     
+    n_a = (2*pi/per)*a
     e_term = sqrt(1-e**2)
 
     x_dot = -n_a / e_term * sin(nu)
     y_dot = +n_a / e_term * (e + cos(nu))
     
-    v_vec[0] = x_dot
-    v_vec[1] = y_dot
-    v_vec[2] = 0
+    out_vec[0] = x_dot
+    out_vec[1] = y_dot
+    out_vec[2] = 0
 
-    return v_vec
+    #return v_vec
 
 #cdef double r_dot(double nu, double a, double P, double e):
 #    """
