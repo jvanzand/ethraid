@@ -99,7 +99,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     M_anom_evolved = M_anom_list + 2*pi*((rv_epoch - hip_times[0])/per_list)
     E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
-    # Not evolving for use in astrometry calculations
+    # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991) astrometry,)
     E_anom_astro = ck.kepler_array(M_anom_list, e_list)
     T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro
 
@@ -184,7 +184,7 @@ cdef (double, double) gamma(double a, double Mp, double per, double e, double i,
     
     sqrt_eterm = sqrt((1+e)/(1-e))
     tan_E2 = tan(E/2)
-    #nu = 2*atan(sqrt((1+e)/(1-e))**0.5*tan(E/2))
+
     nu = 2*atan(sqrt_eterm*tan_E2)
     
     
