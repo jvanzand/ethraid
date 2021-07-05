@@ -45,7 +45,7 @@ path_to_setup_dots = sys.path[0].strip('/').replace('/', '.')
 
 path_list = [('c_kepler._kepler', path_to_setup+'/c_kepler/_kepler.pyx'),
              #('no_classes.helper_functions', path_to_setup+'/no_classes/helper_functions.pyx'),
-             ('no_classes.helper_functions_wrapper', path_to_setup+'/no_classes/helper_functions_wrapper.pyx')]
+             ('trends.helper_functions_wrapper', path_to_setup+'/trends/helper_functions_wrapper.pyx')]
 
 print(path_list[0])
 

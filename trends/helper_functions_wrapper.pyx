@@ -1,4 +1,12 @@
 # cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False
+import os
+import sys
+
+path = os.getcwd()
+sys.path.append(path+'/trends')
+
+print(sys.path)
+
 from kern_profiler_dummy import *
 
 import numpy as np
@@ -15,14 +23,11 @@ import scipy as sp
 #import astropy.constants as c
 #import astropy.units as u
 
-# Kind of sloppy. This is just so you can access c_kepler from no_classes/
-import sys
-
 
 import radvel as rv
 
 from c_kepler import _kepler as ck
-import helper_functions as hlp
+#import helper_functions as hlp
 
 ##########################################
 #### Kepler solver for one M and one e 

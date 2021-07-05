@@ -1,17 +1,12 @@
 import matplotlib.pyplot as plt
 import astropy.constants as c
 import numpy as np
-
-# replace with hlpw
-import helper_functions_wrapper as hlpw
-
+from scipy.stats import loguniform, beta
 
 import radvel as rv
 
-from scipy.stats import loguniform, beta
+from trends import helper_functions_wrapper as hlpw
 
-# import post_functions_python as  pfp
-# import post_functions as  pfp
 
 ## Constants ##
 
