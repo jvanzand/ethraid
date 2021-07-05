@@ -11,23 +11,15 @@ from kern_profiler_dummy import *
 
 import numpy as np
 cimport numpy as np
+import scipy as sp
 import scipy.stats as spst
 import cython
 from libc.math cimport sin, cos, tan, atan, sqrt
 from cpython cimport array
 
-
-#from scipy.stats import loguniform, beta
-
-import scipy as sp
-#import astropy.constants as c
-#import astropy.units as u
-
-
 import radvel as rv
 
 from c_kepler import _kepler as ck
-#import helper_functions as hlp
 
 ##########################################
 #### Kepler solver for one M and one e 
