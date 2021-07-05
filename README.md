@@ -4,7 +4,7 @@
 
 ## Installing dependencies
 - Create a new environment (python=3.9.4)
-- *\$ conda install -file requirements.txt*
+- *\$ conda install --file requirements.txt*
 - *\$ pip install radvel celerite*
 - *\$ python setup_all.py build_ext --inplace*
 
