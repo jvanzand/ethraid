@@ -17,9 +17,7 @@ import scipy as sp
 
 # Kind of sloppy. This is just so you can access c_kepler from no_classes/
 import sys
-#sys.path.append('../')
 
-print('HERE it is ######################', sys.path)
 
 import radvel as rv
 
