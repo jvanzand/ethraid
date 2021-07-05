@@ -5,8 +5,6 @@ import sys
 path = os.getcwd()
 sys.path.append(path+'/trends')
 
-print(sys.path)
-
 from kern_profiler_dummy import *
 
 import numpy as np
