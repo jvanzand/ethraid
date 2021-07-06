@@ -200,7 +200,7 @@ cdef (double, double) gamma(double a, double Mp, double per, double e, double i,
     # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
     E_dot = (2*pi/per)/(1-e*cos_E)
     #nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * cos(E/2)**-2 * E_dot
-    nu_dot = (1+tan_nu2**2)**-1 * sqrt_eterm * cos_E2_2 * E_dot
+    nu_dot = (1+sqrt_eterm*sqrt_eterm*tan_nu2**2)**-1 * sqrt_eterm * cos_E2_2 * E_dot
 
     # Convert prefac units from cm/s^2 to m/s/day
     # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.

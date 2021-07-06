@@ -35,7 +35,7 @@ a_lim = (1.9, 5e1)
 m_lim = (1.5, 2e2)
 
 grid_num = 100
-num_points = int(1e5)
+num_points = int(1e6)
 t_num = 2
 tick_num = 6
 tick_size = 30
@@ -108,7 +108,7 @@ bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
 print('a_lim, m_lim = ', bounds[0], bounds[1])
 
 
-fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
+fig, ax = plt.subplots(figsize=(12,12))#, dpi = 300)
 
 post_astro_cont = ax.contourf(post_astro, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
 post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
@@ -128,4 +128,4 @@ plt.yticks(tick_array, [np.round(m_list[i], 1) for i in tick_array ], size=tick_
 
 fig.tight_layout()
 fig.savefig('5thCompConstraints_RV_astr.png')
-# plt.show()
+plt.show()
