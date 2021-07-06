@@ -1,4 +1,4 @@
-name: test_trends
+name: trendsenv
 channels:
   - defaults
   - conda-forge
