@@ -7,8 +7,6 @@ import numpy as np
 # profile = line_profiler.LineProfiler()
 
 ####################
-print('## AT SOME POINT, need to speed up setup.py ##')
-
 # Extra stuff to profile code using kernprof -l -v file.py after it is compiled
 # Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
 
@@ -20,10 +18,18 @@ directive_defaults['binding'] = True
 
 ###########################################
 
+# extensions = [
+#     Extension("helper_functions_wrapper", ['helper_functions_wrapper.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+#     #Extension("helper_functions", ['helper_functions.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
+# ]
+
+
 extensions = [
-    Extension("helper_functions_wrapper", ['helper_functions_wrapper.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
-    #Extension("helper_functions", ['helper_functions.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
+    Extension("c_kepler._kepler", ['c_kepler/_kepler.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+    Extension("trends.helper_functions_wrapper", ['trends/helper_functions_wrapper.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
+    
 ]
+
 ##############################
 
 setup(
