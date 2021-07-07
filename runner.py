@@ -35,7 +35,7 @@ a_lim = (1.9, 5e1)
 m_lim = (1.5, 2e2)
 
 grid_num = 100
-num_points = int(1e6)
+num_points = int(1e5)
 t_num = 2
 tick_num = 6
 tick_size = 30
@@ -128,4 +128,4 @@ plt.yticks(tick_array, [np.round(m_list[i], 1) for i in tick_array ], size=tick_
 
 fig.tight_layout()
 fig.savefig('5thCompConstraints_RV_astr.png')
-plt.show()
+# plt.show()

@@ -53,6 +53,10 @@ extensions = []
 for i in path_list:
     extensions.append(eval('Extension("{}", ["{}"])'.format(i[0], i[1])))
 
+# reqs = []
+# for line in open(sys.path[0]+'/requirements.txt', 'r').readlines():
+#
+#     reqs.append(line)
 
 
 setup(
@@ -60,5 +64,6 @@ setup(
     setup_requires=['numpy', 'cython'],
     ext_modules=cythonize(extensions, language_level=3, annotate=True),
     cmdclass={'build_ext': build_ext},
+    # install_requires=reqs,
     include_package_data=True
 )

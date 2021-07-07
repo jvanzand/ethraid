@@ -141,7 +141,7 @@ cdef P(double [:] a, double [:] Mtotal):
     
     return P_days
     
-
+@profile
 def gamma_array(double [:] a, double [:] Mp, 
           double [:] per, double [:] e, 
           double [:] i, double [:] om, 
@@ -169,7 +169,7 @@ def gamma_array(double [:] a, double [:] Mp,
 
 cdef (double, double) gamma(double a, double Mp, double per, double e, double i, double om, double E):
 
-    cdef double Mp_units, a_units, sqrt_eterm, tan_E2, nu,\
+    cdef double Mp_units, a_units, e_term, sqrt_eterm, tan_E2, nu,\
                 cos_E, tan_nu2, cos_E2, sin_i, cos_nu,\
                 sin_nu, cos_nu_om, sin_nu_om, sin_E,\
                 E_dot, nu_dot, prefac, gd_t1, gd_t2,\
@@ -177,34 +177,38 @@ cdef (double, double) gamma(double a, double Mp, double per, double e, double i,
 
     Mp_units = Mp*M_jup
     a_units = a*au
+    a_units_sq = a_units*a_units
     
-    sqrt_eterm = sqrt((1+e)/(1-e))
-    tan_E2 = tan(E/2)
-
-    nu = 2*atan(sqrt_eterm*tan_E2)
+    e_term = (1+e)/(1-e)
+    sqrt_eterm = sqrt(e_term)
     
     
     cos_E = cos(E)
-    tan_nu2 = tan(nu/2)
-    cos_E2 = cos(E/2)
-    cos_E2_2 = 1/(cos_E2*cos_E2)
-    sin_i = sin(i)
+    cos_E_ovr2_sq = (1+cos_E)/2 # I don't define cos(E/2) here bc it has expensive and unneeded sqrt
+    sin_E = sqrt(1-cos_E*cos_E)
+    
+    tan_E_ovr2 = (1-cos_E)/sin_E
+    tan_E_ovr2_sq = tan_E_ovr2*tan_E_ovr2
+
+    nu = 2*atan(sqrt_eterm*tan_E_ovr2)
     
     cos_nu = cos(nu)
-    sin_nu = sin(nu)
+    sin_nu = sqrt(1-cos_nu*cos_nu)
+    
     cos_nu_om = cos(nu+om)
-    sin_nu_om = sin(nu+om)
-    sin_E = sin(E)
+    sin_nu_om = sqrt(1-cos_nu_om*cos_nu_om)
+    sin_i = sin(i)
+    
 
     # Differentiate Kepler's equation in time to get E_dot
     # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
     E_dot = (2*pi/per)/(1-e*cos_E)
     #nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * cos(E/2)**-2 * E_dot
-    nu_dot = (1+sqrt_eterm*sqrt_eterm*tan_nu2**2)**-1 * sqrt_eterm * cos_E2_2 * E_dot
+    nu_dot = 1/(1+e_term*tan_E_ovr2_sq) * sqrt_eterm * E_dot / cos_E_ovr2_sq
 
     # Convert prefac units from cm/s^2 to m/s/day
     # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-    prefac = -(Mp_units*G*sin_i)/(a_units**2*(1-e)) * 864 # Save calculation of 24*3600 / 100
+    prefac = -(Mp_units*G*sin_i)/(a_units_sq*(1-e)) * 864 # Save calculation of 24*3600 / 100
 
 
     gd_t1 = (1+cos_nu)/(1+cos_E)
