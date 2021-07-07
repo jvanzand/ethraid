@@ -1,4 +1,5 @@
 # cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False
+# cython: binding=True
 import os
 import sys
 
@@ -141,7 +142,7 @@ cdef P(double [:] a, double [:] Mtotal):
     
     return P_days
     
-@profile
+#@profile
 def gamma_array(double [:] a, double [:] Mp, 
           double [:] per, double [:] e, 
           double [:] i, double [:] om, 
@@ -169,9 +170,9 @@ def gamma_array(double [:] a, double [:] Mp,
 
 cdef (double, double) gamma(double a, double Mp, double per, double e, double i, double om, double E):
 
-    cdef double Mp_units, a_units, e_term, sqrt_eterm, tan_E2, nu,\
-                cos_E, tan_nu2, cos_E2, sin_i, cos_nu,\
-                sin_nu, cos_nu_om, sin_nu_om, sin_E,\
+    cdef double Mp_units, a_units, e_term, sqrt_eterm,\
+                cos_E, cos_E_ovr2_sq, sin_E, tan_E_ovr2, tan_E_ovr2_sq,\
+                nu, cos_nu, sin_nu, cos_nu_om, sin_nu_om, sin_i,\
                 E_dot, nu_dot, prefac, gd_t1, gd_t2,\
                 gamma_dot, gd_t1_dot, gd_t2_dot, gdd_t1, gdd_t2, gamma_ddot
 
@@ -229,7 +230,7 @@ cdef (double, double) gamma(double a, double Mp, double per, double e, double i,
     return gamma_dot, gamma_ddot
     
     
-#@profile
+@profile
 def rv_post(double gammadot, double gammadot_err, 
                        double gammaddot, double gammaddot_err,
                        double m_star, double [:] a_list, double [:] m_list,
