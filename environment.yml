@@ -1,4 +1,4 @@
-name: minimal_test
+name: trends_env
 channels:
   - defaults
   - conda-forge
