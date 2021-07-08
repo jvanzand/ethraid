@@ -45,7 +45,7 @@ au = 14959787070000.0
 hip_times  = [2447837.75, 2449065.15]
 gaia_times = [2456863.5, 2457531.5]
 
-@profile
+
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
 
     cdef double tp, a_min, a_max, m_min, m_max, two_pi
@@ -179,34 +179,41 @@ cdef (double, double) gamma(double a, double Mp, double per, double e, double i,
 
     Mp_units = Mp*M_jup
     a_units = a*au
-
-    sqrt_eterm = sqrt((1+e)/(1-e))
-    tan_E2 = tan(E/2)
-    #nu = 2*atan(sqrt((1+e)/(1-e))**0.5*tan(E/2))
-    nu = 2*atan(sqrt_eterm*tan_E2)
-
-
+    a_units_sq = a_units*a_units
+    
+    e_term = (1+e)/(1-e)
+    sqrt_eterm = sqrt(e_term)
+    
     cos_E = cos(E)
-    tan_nu2 = tan(nu/2)
-    cos_E2 = cos(E/2)
-    cos_E2_2 = 1/(cos_E2*cos_E2)
-    sin_i = sin(i)
+    sin_E = sin(E)
+    #sin_E = sqrt(1-cos_E*cos_E)
+    
+    cos_E_ovr2_sq = (1+cos_E)/2 # Don't need cos_E_ovr2 by itself
+    
+    tan_E_ovr2 = (1-cos_E)/sin_E
+    tan_E_ovr2_sq = tan_E_ovr2*tan_E_ovr2
+    
+    
+    nu = 2*atan(sqrt_eterm*tan_E_ovr2)
 
     cos_nu = cos(nu)
     sin_nu = sin(nu)
+    #sin_nu = sqrt(1-cos_nu*cos_nu)
     cos_nu_om = cos(nu+om)
     sin_nu_om = sin(nu+om)
-    sin_E = sin(E)
+    #sin_nu_om = sqrt(1-cos_nu_om*cos_nu_om)
+    sin_i = sin(i)
+    
 
     # Differentiate Kepler's equation in time to get E_dot
     # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
     E_dot = (2*pi/per)/(1-e*cos_E)
     #nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * cos(E/2)**-2 * E_dot
-    nu_dot = (1+tan_nu2**2)**-1 * sqrt_eterm * cos_E2_2 * E_dot
+    nu_dot = (1+e_term*tan_E_ovr2_sq)**-1 * sqrt_eterm * E_dot/cos_E_ovr2_sq
 
     # Convert prefac units from cm/s^2 to m/s/day
     # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-    prefac = -(Mp_units*G*sin_i)/(a_units**2*(1-e)) * 864 # Save calculation of 24*3600 / 100
+    prefac = -(Mp_units*G*sin_i)/(a_units_sq*(1-e)) * 864 # Save calculation of 24*3600 / 100
 
 
     gd_t1 = (1+cos_nu)/(1+cos_E)
