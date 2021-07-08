@@ -35,7 +35,7 @@ a_lim = (1.9, 5e1)
 m_lim = (1.5, 2e2)
 
 grid_num = 100
-num_points = int(1e7)
+num_points = int(1e8)
 t_num = 2
 tick_num = 6
 tick_size = 30
@@ -108,7 +108,7 @@ bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
 print('a_lim, m_lim = ', bounds[0], bounds[1])
 
 
-fig, ax = plt.subplots(figsize=(12,12))#, dpi = 300)
+fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
 
 post_astro_cont = ax.contourf(post_astro, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
 post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
@@ -119,6 +119,23 @@ a_rect = ptch.Rectangle((0, 0), min_index_a, grid_num-1, color='gray', alpha=1.0
 
 ax.add_patch(mass_rect)
 ax.add_patch(a_rect)
+
+###################################################
+label_size = 50
+region_label_size = 50
+restricted_region_label_size = 40
+
+plt.text((19/32)*grid_num, (7/8)*grid_num, 'RV', size=region_label_size, rotation=50)
+plt.text((9/16)*grid_num, (1/4)*grid_num, 'Astrometry', size=region_label_size)
+
+plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Masses disallowed by RVs', size=restricted_region_label_size)
+plt.text((1/3)*(min_index_a-1), (1/8)*grid_num, 'Ruled out by minimum period', size=restricted_region_label_size, rotation=90)
+
+
+ax.set_xlabel('Semi-major Axis (au)', size=label_size)
+ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
+# ax.set_title('Astrometry', size=title_size)
+###################################################
 
 tick_array = np.linspace(0, grid_num-1, tick_num).astype(int)
 
