@@ -168,8 +168,8 @@ def gamma_array(double [:] a, double [:] Mp,
 
     return gamma_dot, gamma_ddot
 
-
-cdef (double, double) gamma(double a, double Mp, double per, double e, double i, double om, double E):
+#@profile
+def gamma(double a, double Mp, double per, double e, double i, double om, double E):
 
     cdef double Mp_units, a_units, sqrt_eterm, tan_E2, nu,\
                     cos_E, tan_nu2, cos_E2, sin_i, cos_nu,\
