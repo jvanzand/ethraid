@@ -150,8 +150,6 @@ def gamma_array(double [:] a, double [:] Mp,
           double [:] E_anom):
     """
     Outsources intensive calculations to the pure-cython gamma function.
-    Unfortunately, this is slower than gamma_direct_FAST below, which uses numpy and runs in ~0.5x the time.
-    I think I need to import the functions from helper_functions.c, but this throws errors that I haven't figured out.
     """
     print('Using gamma_array')
     cdef int size, j
@@ -162,6 +160,8 @@ def gamma_array(double [:] a, double [:] Mp,
     cdef np.ndarray[double, ndim=1]  gamma_dot = np.ndarray(shape=(size,), dtype=np.float64),\
                                     gamma_ddot = np.ndarray(shape=(size,), dtype=np.float64)
 
+
+                                    
     for j in range(size):
        gamma_dot[j], gamma_ddot[j]  = gamma(a[j], Mp[j], per[j], e[j], i[j], om[j], E_anom[j])
 
