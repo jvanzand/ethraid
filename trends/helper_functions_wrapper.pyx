@@ -45,11 +45,7 @@ au = 14959787070000.0
 hip_times  = [2447837.75, 2449065.15]
 gaia_times = [2456863.5, 2457531.5]
 
-<<<<<<< HEAD
 
-=======
-#@profile
->>>>>>> main
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
 
     cdef double tp, a_min, a_max, m_min, m_max, two_pi
