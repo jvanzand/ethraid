@@ -177,7 +177,7 @@ cdef (double, double) gamma(double a, double Mp, double per, double e, double i,
                     sin_nu, cos_nu_om, sin_nu_om, sin_E,\
                     E_dot, nu_dot, prefac, gd_t1, gd_t2,\
                     gamma_dot, gd_t1_dot, gd_t2_dot, gdd_t1, gdd_t2, gamma_ddot
-
+                    
     Mp_units = Mp*M_jup
     a_units = a*au
     a_units_sq = a_units*a_units
