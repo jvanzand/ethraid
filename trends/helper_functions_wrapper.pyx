@@ -181,7 +181,6 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per, doub
 
     per_sec = per*24*3600
     a_star_cm = a*au * Mp*M_jup/(m_star*M_sun) # Overall, convert the planet's a in au into the star's a in cm
-    #a_units_sq = a_units*a_units
     
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
@@ -197,18 +196,18 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per, doub
     
     nu = 2*atan(sqrt_eterm*tan_E_ovr2)
     
-    nu_dot = two_pi*sqrt_e_sq_term/(per_sec*(1-e*cos_E)**2)
+    nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2)
     nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term
     
     cos_nu_om = cos(nu+om)
     sin_nu_om = sin(nu+om)
     sin_i = sin(i)
     
-    pre_fac = two_pi*a_star_cm*sin_i / (per_sec*sqrt_e_sq_term) * 864
+    pre_fac = two_pi*a_star_cm*sin_i / (per_sec*sqrt_e_sq_term) * 1/100 # cm/s ==> m/s
     
     
-    gamma_dot = -pre_fac*nu_dot*sin_nu_om
-    gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om)
+    gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/s ==> m/s/d
+    gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om) # m/s/s/d ==> m/s/d/d
     
     #print(gamma_dot, gamma_ddot)
     
