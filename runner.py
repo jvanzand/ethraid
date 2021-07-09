@@ -36,7 +36,7 @@ m_lim = (1.5, 2e2)
 
 grid_num = 100
 
-num_points = int(1e7)
+num_points = int(1e6)
 
 t_num = 2
 tick_num = 6
@@ -106,8 +106,8 @@ t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
 t_contours_astro = hlpw.contour_levels(post_astro, [1,2])
 t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
-bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
-print('a_lim, m_lim = ', bounds[0], bounds[1])
+# bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+# print('a_lim, m_lim = ', bounds[0], bounds[1])
 
 
 fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
