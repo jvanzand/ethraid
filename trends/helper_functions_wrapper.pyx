@@ -206,37 +206,8 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per, doub
     pre_fac = two_pi*a_star_cm*sin_i / (per_sec*sqrt_e_sq_term) * 1/100 # cm/s ==> m/s
     
     
-    gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/s ==> m/s/d
-    gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om) # m/s/s/d ==> m/s/d/d
-    
-    #print(gamma_dot, gamma_ddot)
-    
-
-    ## Differentiate Kepler's equation in time to get E_dot
-    ## Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
-    #E_dot = (2*pi/per)/(1-e*cos_E)
-    ##nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * cos(E/2)**-2 * E_dot
-    #nu_dot = (1+e_term*tan_E_ovr2_sq)**-1 * sqrt_eterm * E_dot/cos_E_ovr2_sq
-    #
-    ## Convert prefac units from cm/s^2 to m/s/day
-    ## Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-    #prefac = -(Mp_units*G*sin_i)/(a_units_sq*(1-e)) * 864 # Save calculation of 24*3600 / 100
-    #
-    #
-    #gd_t1 = (1+cos_nu)/(1+cos_E)
-    #gd_t2 = sin_nu_om/(1-e*cos_E)
-    #
-    #
-    #gamma_dot = prefac*gd_t1*gd_t2
-    #
-    #gd_t1_dot = ((1+cos_nu)*sin_E * E_dot - (1+cos_E)*sin_nu*nu_dot) / (1+cos_E)**2
-    #gd_t2_dot = ((1-e*cos_E)*cos_nu_om * nu_dot - sin_nu_om*e*sin_E*E_dot) / (1-e*cos_E)**2
-    #
-    #
-    #gdd_t1 = gd_t2 * gd_t1_dot
-    #gdd_t2 = gd_t1 * gd_t2_dot
-    #
-    #gamma_ddot = prefac*(gdd_t1+gdd_t2)
+    gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/d
+    gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om) # m/s/d/d
 
     return gamma_dot, gamma_ddot
 
