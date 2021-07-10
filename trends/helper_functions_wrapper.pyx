@@ -31,11 +31,12 @@ cdef extern from "../c_kepler/kepler.c":
 ##########################################
 ## Constants ##
 
-cdef float pi, math_e, G, M_sun, M_jup, au
+cdef float pi, two_pi, math_e, G, M_sun, M_jup, au
 cdef float hip_times[2]
 cdef float gaia_times[2]
 
 pi = 3.141592653589793
+two_pi = 6.283185307179586
 math_e  = 2.718281828459045
 G =  6.674299999999999e-08
 M_sun = 1.988409870698051e+33
@@ -143,7 +144,7 @@ cdef P(double [:] a, double [:] Mtotal):
     return P_days
 
 #@profile
-def gamma_array(double [:] a, double [:] Mp,
+def gamma_array(double m_star, double [:] a, double [:] Mp,
           double [:] per, double [:] e,
           double [:] i, double [:] om,
           double [:] E_anom):
@@ -162,74 +163,51 @@ def gamma_array(double [:] a, double [:] Mp,
 
                                     
     for j in range(size):
-       gamma_dot[j], gamma_ddot[j]  = gamma(a[j], Mp[j], per[j], e[j], i[j], om[j], E_anom[j])
+       gamma_dot[j], gamma_ddot[j]  = gamma(m_star, a[j], Mp[j], per[j], e[j], i[j], om[j], E_anom[j])
 
 
     return gamma_dot, gamma_ddot
 
 # gamma() needs to be a cdef function, otherwise it seems to return nans
 #@profile
-cdef (double, double) gamma(double a, double Mp, double per, double e, double i, double om, double E):
+cdef (double, double) gamma(double m_star, double a, double Mp, double per, double e, double i, double om, double E):
 
-    cdef double Mp_units, a_units, sqrt_eterm, tan_E2, nu,\
+    cdef double     a_units, sqrt_eterm, tan_E2, nu,\
                     cos_E, tan_nu2, cos_E2, sin_i, cos_nu,\
                     sin_nu, cos_nu_om, sin_nu_om, sin_E,\
                     E_dot, nu_dot, prefac, gd_t1, gd_t2,\
-                    gamma_dot, gd_t1_dot, gd_t2_dot, gdd_t1, gdd_t2, gamma_ddot
-                    
-    Mp_units = Mp*M_jup
-    a_units = a*au
-    a_units_sq = a_units*a_units
+                    gamma_dot, gamma_ddot
+
+    per_sec = per*86400 # 24*3600 to convert days ==> seconds
+    a_star_cm = a*au * Mp*M_jup/(m_star*M_sun) # Convert the planet's a in au into the star's a in cm
+>>>>>>> math_cleanup
     
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
     
+    sqrt_e_sq_term = sqrt(1-e*e)
+    
     cos_E = cos(E)
     sin_E = sin(E)
-    #sin_E = sqrt(1-cos_E*cos_E)
-    
-    cos_E_ovr2_sq = (1+cos_E)/2 # Don't need cos_E_ovr2 by itself
+
     
     tan_E_ovr2 = (1-cos_E)/sin_E
-    tan_E_ovr2_sq = tan_E_ovr2*tan_E_ovr2
     
     
     nu = 2*atan(sqrt_eterm*tan_E_ovr2)
-
-    cos_nu = cos(nu)
-    sin_nu = sin(nu)
-    #sin_nu = sqrt(1-cos_nu*cos_nu)
+    
+    nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2)
+    nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term
+    
     cos_nu_om = cos(nu+om)
     sin_nu_om = sin(nu+om)
-    #sin_nu_om = sqrt(1-cos_nu_om*cos_nu_om)
     sin_i = sin(i)
     
-
-    # Differentiate Kepler's equation in time to get E_dot
-    # Note that E_dot has units of (1/per), where [per] is days. Therefore [gamma_ddot] = m/s/d^2
-    E_dot = (2*pi/per)/(1-e*cos_E)
-    #nu_dot = (1+tan(nu/2)**2)**-1 * ((1+e)/(1-e))**0.5 * cos(E/2)**-2 * E_dot
-    nu_dot = (1+e_term*tan_E_ovr2_sq)**-1 * sqrt_eterm * E_dot/cos_E_ovr2_sq
-
-    # Convert prefac units from cm/s^2 to m/s/day
-    # Negative just depends on choice of reference direction. I am being consistent with radvel rv_drive function.
-    prefac = -(Mp_units*G*sin_i)/(a_units_sq*(1-e)) * 864 # Save calculation of 24*3600 / 100
-
-
-    gd_t1 = (1+cos_nu)/(1+cos_E)
-    gd_t2 = sin_nu_om/(1-e*cos_E)
-
-
-    gamma_dot = prefac*gd_t1*gd_t2
-
-    gd_t1_dot = ((1+cos_nu)*sin_E * E_dot - (1+cos_E)*sin_nu*nu_dot) / (1+cos_E)**2
-    gd_t2_dot = ((1-e*cos_E)*cos_nu_om * nu_dot - sin_nu_om*e*sin_E*E_dot) / (1-e*cos_E)**2
-
-
-    gdd_t1 = gd_t2 * gd_t1_dot
-    gdd_t2 = gd_t1 * gd_t2_dot
-
-    gamma_ddot = prefac*(gdd_t1+gdd_t2)
+    pre_fac = two_pi*a_star_cm*sin_i / (per_sec*sqrt_e_sq_term) * 1/100 # cm/s ==> m/s
+    
+    
+    gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/d
+    gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om) # m/s/d/d
 
     return gamma_dot, gamma_ddot
 
@@ -257,7 +235,7 @@ def rv_post(double gammadot, double gammadot_err,
     cdef double err[2]
 
 
-    gammadot_list, gammaddot_list = gamma_array(a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
+    gammadot_list, gammaddot_list = gamma_array(m_star, a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
 
 
     data[0] = gammadot
