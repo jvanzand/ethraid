@@ -180,7 +180,6 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per, doub
 
     per_sec = per*86400 # 24*3600 to convert days ==> seconds
     a_star_cm = a*au * Mp*M_jup/(m_star*M_sun) # Convert the planet's a in au into the star's a in cm
->>>>>>> math_cleanup
     
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
