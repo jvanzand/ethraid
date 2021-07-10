@@ -179,8 +179,8 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per, doub
                     E_dot, nu_dot, prefac, gd_t1, gd_t2,\
                     gamma_dot, gamma_ddot
 
-    per_sec = per*24*3600
-    a_star_cm = a*au * Mp*M_jup/(m_star*M_sun) # Overall, convert the planet's a in au into the star's a in cm
+    per_sec = per*86400 # 24*3600 to convert days ==> seconds
+    a_star_cm = a*au * Mp*M_jup/(m_star*M_sun) # Convert the planet's a in au into the star's a in cm
     
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
