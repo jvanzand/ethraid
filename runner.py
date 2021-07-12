@@ -9,8 +9,6 @@ from trends import helper_functions_wrapper as hlpw
 
 
 ## Constants ##
-
-pi = 3.141592653589793
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 
@@ -29,14 +27,12 @@ delta_mu_err = 0.034199052901953214
 m_star = 0.807
 d_star = 1.7989500299953727e+20
 
-# a_lim = (.5, 5e1)
-# m_lim = (1e-3, 2e2)
 a_lim = (1.9, 5e1)
 m_lim = (1.5, 2e2)
 
 grid_num = 100
 
-num_points = int(1e7)
+num_points = int(1e5)
 
 t_num = 2
 tick_num = 6
@@ -56,13 +52,13 @@ astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
                              m_list, per_list, e_list, i_list, om_list,
                              T_anom_astro, num_points, grid_num, t_num)
 
-np.save('erik_samples/rv_probs.npy', rv_list)
-np.save('erik_samples/astro_probs.npy', astro_list)
-np.save('erik_samples/a_indices.npy', a_inds)
-np.save('erik_samples/m_indices.npy', m_inds)
-
-rv_list = np.load('erik_samples/rv_probs.npy')
-astro_list = np.load('erik_samples/astro_probs.npy')
+# np.save('erik_samples/rv_probs.npy', rv_list)
+# np.save('erik_samples/astro_probs.npy', astro_list)
+# np.save('erik_samples/a_indices.npy', a_inds)
+# np.save('erik_samples/m_indices.npy', m_inds)
+#
+# rv_list = np.load('erik_samples/rv_probs.npy')
+# astro_list = np.load('erik_samples/astro_probs.npy')
                                                                
 post_rv = np.array(hlpw.prob_array(rv_list, a_inds, m_inds, grid_num))
 post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
