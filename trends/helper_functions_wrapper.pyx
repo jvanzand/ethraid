@@ -43,7 +43,7 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 
-hip_times  = [Time(1989.85, format='byear').jd, Time(1993.21, format='byear').jd] #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
+hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
 
 gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
 
