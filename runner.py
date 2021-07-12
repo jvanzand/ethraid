@@ -51,21 +51,29 @@ print('made arrays')
 
 rv_list = hlpw.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, 
                         a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, 
-                        num_points, grid_num, a_inds, m_inds)                  
-post_rv = np.array(hlpw.prob_array(rv_list, a_inds, m_inds, grid_num))
-post_rv = post_rv/post_rv.sum()
-
-
+                        num_points, grid_num)
 astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
                              m_list, per_list, e_list, i_list, om_list,
                              T_anom_astro, num_points, grid_num, t_num)
+
+np.save('erik_samples/rv_probs.npy', rv_list)
+np.save('erik_samples/astro_probs.npy', astro_list)
+np.save('erik_samples/a_indices.npy', a_inds)
+np.save('erik_samples/m_indices.npy', m_inds)
+
+rv_list = np.load('erik_samples/rv_probs.npy')
+astro_list = np.load('erik_samples/astro_probs.npy')
+                                                               
+post_rv = np.array(hlpw.prob_array(rv_list, a_inds, m_inds, grid_num))
 post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
-post_astro = post_astro/post_astro.sum()
-
-
 post_tot = np.array(hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds))
 
+
+post_rv = post_rv/post_rv.sum()
+post_astro = post_astro/post_astro.sum()
 post_tot = post_tot/post_tot.sum()
+
+
 
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch

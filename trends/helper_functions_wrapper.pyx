@@ -43,8 +43,9 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 
-hip_times  = [2447837.75, 2449065.15]
-gaia_times = [2456863.5, 2457531.5]
+hip_times  = [Time(1989.85, format='byear').jd, Time(1993.21, format='byear').jd] #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
+
+gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
 
 
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
@@ -217,14 +218,14 @@ def rv_post(double gammadot, double gammadot_err,
                        double m_star, double [:] a_list, double [:] m_list,
                        double [:] per_list, double [:] e_list, double [:] i_list,
                        double [:] om_list, double [:] E_anom_list, int num_points,
-                       int grid_num, long [:] a_inds, long [:] m_inds):
+                       int grid_num):
 
     cdef double [:] m_tot_list = np.zeros(shape=(num_points), dtype=np.float64)
     cdef double [:] gammadot_list = np.zeros(shape=(num_points), dtype=np.float64)
     cdef double [:] gammaddot_list = np.zeros(shape=(num_points), dtype=np.float64)
 
 
-    cdef int i, size, a_i, m_i  #Typing a_i and m_i slows it down? Double check.
+    cdef int i, size
     cdef double chi_sq
 
     cdef double [:] rv_prob_list = np.zeros(shape=(num_points,), dtype=np.float64)
