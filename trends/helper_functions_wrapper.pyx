@@ -282,13 +282,8 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     ###############################################
     cdef int j, k, l, a_j, m_j
 
-
-    #cdef double hip_times[2]
-    #cdef double gaia_times[2]
-    #cdef double time_endpoints[2][2]
     cdef double time_steps[2]
     cdef double both[2][2]
-
 
     cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0
     cdef double mass_ratio_constant, cm_2_mas, cms_2_masyr
