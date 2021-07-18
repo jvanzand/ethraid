@@ -257,7 +257,7 @@ def rv_post(double gammadot, double gammadot_err,
     return rv_prob_list
 
 
-#@profile
+@profile
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
                double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list,
