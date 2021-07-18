@@ -48,7 +48,7 @@ hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='deci
 
 gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
 
-
+#@profile
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
 
     cdef double tp, a_min, a_max, m_min, m_max, two_pi
@@ -170,7 +170,7 @@ def gamma_array(double m_star, double [:] a, double [:] Mp,
 
     return gamma_dot, gamma_ddot
 
-# gamma() needs to be a cdef function, otherwise it seems to return nans
+# It seems gamma() needs to be a cdef function, otherwise it returns nans
 #@profile
 cdef (double, double) gamma(double m_star, double a, double Mp, double per, double e, double i, double om, double E):
 
@@ -257,7 +257,7 @@ def rv_post(double gammadot, double gammadot_err,
     return rv_prob_list
 
 
-@profile
+#@profile
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
                double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list,
@@ -292,6 +292,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
     cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0
     cdef double mass_ratio_constant, cm_2_mas, cms_2_masyr
+    cdef double two_pi_ovr_per, sqrt_eterm, a_units, e_sq, r_star_num_fac
     cdef double ang_pos_x_sum, ang_pos_y_sum, mu_x_sum, mu_y_sum
     cdef double delta_mu_model, chi_sq, prob
 
@@ -346,6 +347,14 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         i = i_list[j]
         om = om_list[j]
         T_anom_0 = T_anom_0_list[j]
+        
+        # Terms to use in deeper loops
+        two_pi_ovr_per = two_pi/per
+        sqrt_eterm = sqrt((1+e)/(1-e))
+        a_units = a*au
+        e_sq = e**2
+        rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
+        r_star_num_fac = a_units*(1-e_sq)
 
 
         for l in range(2): # Hipparcos or Gaia
@@ -369,31 +378,21 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
                 mass_ratio = m*mass_ratio_constant
 
 
-                M_anom = (2*pi/per)*elapsed_time
-
+                M_anom = (two_pi_ovr_per)*elapsed_time
 
                 # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
                 E_anom = kepler(M_anom, e)
 
 
                 # T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
-                T_anom = T_anom_0 + 2*atan( sqrt((1+e)/(1-e)) * tan(E_anom/2))
-
-
-                rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
-                #print(rot_mtrx_memview)
-                #dfd
-
-
-                #cdef double [:,:] rot_mtrx_memview = rot_mtrx # Convert list to memview here because matrix is all zeros if rot_matrix() returns a memview instead of a list. This is a costly line, but performin mat_mul below with meviews is ~5x as fast as with lists.
-
+                T_anom = T_anom_0 + 2*atan( sqrt_eterm * tan(E_anom/2))
 
                 ################### Angular Positions ######################
 
-                r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
+                #r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
+                #r_pl = a*au*(1-e**2) / (1+e*cos(T_anom))
 
-                r_star = r_pl*mass_ratio
-
+                r_star = (a_units*(1-e_sq) / (1+e*cos(T_anom))) * mass_ratio
 
                 # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
                 r_vec[0] = -cos(T_anom)*r_star
@@ -557,14 +556,15 @@ cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
     cos_Om = cos(Om)
     cos_om = cos(om)
     cos_i  = cos(i)
+    sin_Om_cos_i = sin_Om*cos_i
+    cos_Om_cos_i = cos_Om*cos_i
 
-
-    rot_mtrx[0][0] = cos_Om*cos_om - sin_Om*cos_i*sin_om
-    rot_mtrx[0][1] = -sin_om*cos_Om - sin_Om*cos_i*cos_om
+    rot_mtrx[0][0] = cos_Om*cos_om - sin_Om_cos_i*sin_om
+    rot_mtrx[0][1] = -sin_om*cos_Om - sin_Om_cos_i*cos_om
     rot_mtrx[0][2] = sin_Om*sin_i
 
-    rot_mtrx[1][0] = sin_Om*cos_om + cos_Om*cos_i*sin_om
-    rot_mtrx[1][1] = -sin_om*sin_Om + cos_Om*cos_i*cos_om
+    rot_mtrx[1][0] = sin_Om*cos_om + cos_Om_cos_i*sin_om
+    rot_mtrx[1][1] = -sin_om*sin_Om + cos_Om_cos_i*cos_om
     rot_mtrx[1][2] = -cos_Om*sin_i
 
     rot_mtrx[2][0] = sin_i*sin_om
@@ -574,50 +574,44 @@ cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
     #return rot_mtrx
 
 
-cdef double r(double nu, double a, double e):
-    """
-
-    Equation of an ellipse (Murray & Dermott equation 2.20).
-    Arguments:
-
-        nu (radians): True anomaly
-        a (distance): Semi-major axis of ellipse. Choice of a determines what output r represents.
-                        For example, if a is the semi-major axis of one planet's orbit, then r represents
-                        that planet's distance from barycenter as a function of nu. On the other hand,
-                        if a is the SA of the test mass μ's orbit, then r is r1+r2 as a function of nu,
-                        where r1 (r2) is the distance of m1 (m2) from the system barycenter in the
-                        2-body (m1 & m2) frame.
-        e (unitless): Eccentricity
-
-    returns:
-        r (same as a): Distance of particle from barycenter along its orbit
-    """
-    cdef double num, denom
-
-    num = a*(1-e**2)
-    denom = 1 + e*cos(nu)
-
-    return num/denom
+#cdef double r(double nu, double a, double e):
+#    """
+#
+#    Equation of an ellipse (Murray & Dermott equation 2.20).
+#    Arguments:
+#
+#        nu (radians): True anomaly
+#        a (distance): Semi-major axis of ellipse. Choice of a determines what output r represents.
+#                        For example, if a is the semi-major axis of one planet's orbit, then r represents
+#                        that planet's distance from barycenter as a function of nu. On the other hand,
+#                        if a is the SA of the test mass μ's orbit, then r is r1+r2 as a function of nu,
+#                        where r1 (r2) is the distance of m1 (m2) from the system barycenter in the
+#                        2-body (m1 & m2) frame.
+#        e (unitless): Eccentricity
+#
+#    returns:
+#        r (same as a): Distance of particle from barycenter along its orbit
+#    """
+#    cdef double num, denom
+#
+#    num = a*(1-e**2)
+#    denom = 1 + e*cos(nu)
+#
+#    return num/denom
 
 #@profile
 cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with
     r_unit_vec (3x1) and v_vec_star (3x1) in astro_post_dense_loop.
-    This function returns a list.
     """
 
     cdef int i, k
-
-    #cdef double result[3]
-    #cdef double [:] result = result_list
 
     for i in range(3):
         out_vec[i] = 0
         for k in range(3):
             out_vec[i] += mat[i][k]*in_vec[k]
-
-    #return result
 
 #@profile
 cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
