@@ -13,12 +13,13 @@ import numpy as np
 cimport numpy as np
 import scipy as sp
 import scipy.stats as spst
+from astropy.time import Time
+
 import cython
 from libc.math cimport sin, cos, tan, atan, sqrt
 from cpython cimport array
 
 import radvel as rv
-
 from c_kepler import _kepler as ck
 
 ##########################################
@@ -37,8 +38,8 @@ cdef float gaia_times[2]
 
 pi = 3.141592653589793
 two_pi = 6.283185307179586
-math_e  = 2.718281828459045
-G =  6.674299999999999e-08
+math_e = 2.718281828459045
+G = 6.674299999999999e-08
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0

@@ -32,7 +32,7 @@ m_lim = (1.5, 2e2)
 
 grid_num = 100
 
-num_points = int(1e5)
+num_points = int(1e7)
 
 t_num = 2
 tick_num = 6
