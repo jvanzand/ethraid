@@ -32,7 +32,7 @@ m_lim = (1.5, 2e2)
 
 grid_num = 100
 
-num_points = int(1e7)
+num_points = int(1e4)
 
 t_num = 2
 tick_num = 6
@@ -95,12 +95,8 @@ min_per = 4*rv_baseline
 a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
 m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
 
-# min_m = 3e-3
-# min_a = 0.5
 min_m = rv.utils.Msini(max_rv, min_per, m_star, e=0, Msini_units='jupiter')
 min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(M_jup/M_sun)))
-
-
 
 min_index_m = hlpw.value2index(min_m, (0, grid_num-1), m_lim)
 min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)
