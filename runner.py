@@ -11,24 +11,28 @@ from trends import helper_functions_wrapper as hlpw
 ## Constants ##
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
+pc_in_cm = 3.086e18
 
+params_191939 = (0.807, 1.7989500299953727e+20, 0.114, 0.006, -6e-5, 1.9e-5, 
+                430.2527364352718, 40.0581900021484, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
-gammadot      = 0.114
-gammadot_err  = 0.006
-gammaddot     = -6e-5
-gammaddot_err = 1.9e-5
+# HIP97166 params. rv_baseline and max_rv are estimated for ease.
+params_HIP97166 = (0.91, 68*pc_in_cm, 0.013, 0.03, -3e-6, 3.2e-5,
+                    440, 1, 2458683.353840575, 0.036354497, 0.037699807)
 
-rv_epoch = 2458847.780463 # Epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
+# 12572 params. rv_baseline and max_rv are estimated for ease.
+params_12572 = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
+                550, 30, 2458991.236308, 0.0748781, 0.045100458)
 
-delta_mu     = 0.12767382507786398
-delta_mu_err = 0.034199052901953214
+# rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
+m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_HIP97166
 
-
-m_star = 0.807
-d_star = 1.7989500299953727e+20
-
-a_lim = (1.9, 5e1)
-m_lim = (1.5, 2e2)
+# Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
+# a_lim = (1.9, 5e1)
+# m_lim = (1.5, 2e2)
+a_lim = (1.9, 2e2)
+m_lim = (0.03, 2e2)
 
 grid_num = 100
 
@@ -37,8 +41,9 @@ num_points = int(1e4)
 t_num = 2
 tick_num = 6
 tick_size = 30
-
 np.set_printoptions(threshold=np.inf)
+
+
 a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, T_anom_astro, a_inds, m_inds = \
                                             hlpw.make_arrays(m_star, a_lim, m_lim, rv_epoch, grid_num, num_points)
 
@@ -86,9 +91,7 @@ import matplotlib.patches as ptch
 # plt.show()
 
 
-# The priors for minimum period and planet mass. min_per is 4xbaseline because we see ~no curvature yet.
-rv_baseline = 430.2527364352718
-max_rv = 40.0581900021484
+# min_per is 4xbaseline because we see ~no curvature yet.
 min_per = 4*rv_baseline
 
 # While the above a_list and m_list are the random samples, these are log-uniform lists for plotting.
@@ -98,6 +101,7 @@ m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
 min_m = rv.utils.Msini(max_rv, min_per, m_star, e=0, Msini_units='jupiter')
 min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(M_jup/M_sun)))
 
+
 min_index_m = hlpw.value2index(min_m, (0, grid_num-1), m_lim)
 min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)
 
@@ -106,8 +110,8 @@ t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
 t_contours_astro = hlpw.contour_levels(post_astro, [1,2])
 t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
-bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
-print('a_lim, m_lim = ', bounds[0], bounds[1])
+# bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+# print('a_lim, m_lim = ', bounds[0], bounds[1])
 
 
 fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
