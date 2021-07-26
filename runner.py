@@ -26,17 +26,17 @@ params_12572 = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_HIP97166
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_191939
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-# a_lim = (1.9, 5e1)
-# m_lim = (1.5, 2e2)
-a_lim = (1.9, 2e2)
-m_lim = (0.03, 2e2)
+a_lim = (1.9, 5e1)
+m_lim = (1.5, 2e2)
+# a_lim = (1.9, 2e2)
+# m_lim = (0.03, 2e2)
 
 grid_num = 100
 
-num_points = int(1e4)
+num_points = int(1e7)
 
 t_num = 2
 tick_num = 6
@@ -110,8 +110,8 @@ t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
 t_contours_astro = hlpw.contour_levels(post_astro, [1,2])
 t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
-# bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
-# print('a_lim, m_lim = ', bounds[0], bounds[1])
+bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+print('a_lim, m_lim = ', bounds[0], bounds[1])
 
 
 fig, ax = plt.subplots(figsize=(12,12), dpi = 300)

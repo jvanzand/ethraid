@@ -621,7 +621,7 @@ cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
 
     #cdef double v_vec[3]
 
-    n_a = (2*pi/per)*a
+    n_a = (two_pi/per)*a
     e_term = sqrt(1-e**2)
 
     x_dot = -n_a / e_term * sin(nu)
