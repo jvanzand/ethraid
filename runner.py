@@ -13,6 +13,8 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 pc_in_cm = 3.086e18
 
+# params_star = (m_star, distance(pc), gdot, gdot_err, gddot, gddot_err, rv_baseline(days), max_rv of residuals, rv_epoch, delta_mu, delta_mu_err)
+
 params_191939 = (0.807, 1.7989500299953727e+20, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 40.0581900021484, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
@@ -20,9 +22,12 @@ params_191939 = (0.807, 1.7989500299953727e+20, 0.114, 0.006, -6e-5, 1.9e-5,
 params_HIP97166 = (0.91, 68*pc_in_cm, 0.013, 0.03, -3e-6, 3.2e-5,
                     440, 1, 2458683.353840575, 0.036354497, 0.037699807)
 
-# 12572 params. rv_baseline and max_rv are estimated for ease.
+# 12572 params. rv_baseline and max_rv are estimated for ease. gddot := 0, so borrow its error from gdot
 params_12572 = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
                 550, 30, 2458991.236308, 0.0748781, 0.045100458)
+                
+# T001194 params. rv_baseline and max_rv are estimated for ease.
+# params_T001194 = (0.98, 150.3*pc_in_cm, )
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
@@ -36,7 +41,7 @@ m_lim = (1.5, 2e2)
 
 grid_num = 100
 
-num_points = int(1e8)
+num_points = int(1e7)
 
 t_num = 2
 tick_num = 6
