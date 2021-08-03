@@ -82,7 +82,7 @@ print('made arrays')
 fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
 
 
-# Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior.
+# Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
 if delta_mu == None or delta_mu_err == None:
     astro_list = np.ones(num_points)
     post_astro = np.ones((grid_num, grid_num))
