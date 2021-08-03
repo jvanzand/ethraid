@@ -29,26 +29,43 @@ params_HIP97166 = (0.91, 68*pc_in_cm, 0.013, 0.03, -3e-6, 3.2e-5,
 params_12572 = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
                 550, 30, 2458991.236308, 0.0748781, 0.045100458)
                 
-                
-params_test = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
-                550, 30, 2458991.236308, None, None)
+# HD6106, the highest-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
+params_hd6101 = (0.79, 21.5*pc_in_cm, 94.764633, 8.200012, 0, 8.200012,
+                1626, 1100, 2457654.089, 19.411242, 0.240018) 
                 
 # T001194 params. rv_baseline and max_rv are estimated for ease.
-# params_T001194 = (0.98, 150.3*pc_in_cm, )
+params_T001194 = (0.98, 150.3*pc_in_cm, 0.019, 0.023, -6.2e-5, 5.8e-5,
+                    567, 1, 2458917.385183, None, None)
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_191939
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_hd6101
+
+
+# min_per is 4xbaseline because we see ~no curvature yet.
+# min_per = 4*rv_baseline
+min_per = 1*rv_baseline
+
+min_m = rv.utils.Msini(max_rv, min_per, m_star, e=0, Msini_units='jupiter')
+min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(M_jup/M_sun)))
+
+print('Min m is: ', min_m)
+print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-a_lim = (1.9, 5e1)
-m_lim = (1.5, 2e2)
-# a_lim = (1.9, 2e2)
-# m_lim = (0.03, 2e2)
+# 191939
+# a_lim = (1.9, 5e1)
+# m_lim = (1.5, 2e2)
+# 97166
+# a_lim = (1.9, 2e3)
+# m_lim = (0.03, 2e3)
+# 6106
+a_lim = (0.9*min_a, 6e1)
+m_lim = (0.9*min_m, 1e5)
 
 grid_num = 100
 
-num_points = int(1e6)
+num_points = int(1e7)
 
 t_num = 2
 tick_num = 6
@@ -117,15 +134,10 @@ post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max',
 # plt.show()
 
 
-# min_per is 4xbaseline because we see ~no curvature yet.
-min_per = 4*rv_baseline
-
 # While the above a_list and m_list are the random samples, these are log-uniform lists for plotting.
 a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
 m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
 
-min_m = rv.utils.Msini(max_rv, min_per, m_star, e=0, Msini_units='jupiter')
-min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(M_jup/M_sun)))
 
 min_index_m = hlpw.value2index(min_m, (0, grid_num-1), m_lim)
 min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)

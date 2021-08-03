@@ -306,7 +306,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     #gaia_times = [2456863.5, 2457531.5]
 
     # Time in days between epoch mid-points
-    baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365
+    baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
 
     mass_ratio_constant = M_jup/(m_star*M_sun)
     cm_2_mas = (206265*1e3)/d_star
