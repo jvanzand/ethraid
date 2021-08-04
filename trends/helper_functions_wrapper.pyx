@@ -755,23 +755,29 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
 
 def value2index(value, index_space, value_space):
     """
-    The inverse of index2value: take a value on a
+    The inverse of index2value: take a value or on a
     log scale and convert it to an index. index_space
     and value_space are expected as tuples of the form
     (min_value, max_value).
     """
-
-    value = np.array(value)
 
     min_index, max_index = index_space[0],  index_space[1]
     min_value, max_value = value_space[0], value_space[1]
 
     index_range = max_index - min_index
     log_value_range = np.log10(max_value) - np.log10(min_value)
+    
+    value_arr = np.array(value)
 
-    index = (np.log10(value)-np.log10(min_value))*(index_range/log_value_range) + min_index
+    index = (np.log10(value_arr)-np.log10(min_value))*(index_range/log_value_range) + min_index
+    
+    # Looking back at this, I don't see any reason to round these values to integers. I am converting them into "index space," but they don't need to be integers for me to plot them.
+    #if isinstance(value, (int, float)):
+    #    ind = int(np.around(index))
+    #else:
+    #    ind = [int(np.around(i)) for i in index]
 
-    return int(np.around(index))
+    return index
 
 def index2value(index, index_space, value_space):
     """
@@ -797,4 +803,42 @@ def index2value(index, index_space, value_space):
 
     return value
 
-##################################################################################################
+def period_lines(m, per, m_star):
+    """
+    Function to draw lines of constant period on the final plot.
+    Rearranges Kepler's 3rd law to find how semi-major axis a 
+    varies with period, companion mass, and stellar mass.
+    
+    Intended usage: Calculate an array of a values for a fixed per
+                and m_star and an array of companion masses.
+                
+    Arguments:
+            m (list of floats): companion masses (M_J)
+            per (float): companion orbital period (days)
+            m_star (float): stellar mass (M_sun)
+    
+    Returns:
+            a (list of floats): Semi-major axis values (au)
+    """
+    m_grams = m*M_jup
+    per_sec = per*24*3600
+    m_star_grams = m_star*M_sun
+    
+    a_cm = ((per_sec/two_pi)**2*G*(m_grams+m_star_grams))**(0.3333333333)
+    
+    
+    
+    return a_cm / au
+    
+    
+
+
+
+
+
+
+
+
+
+
+

@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import astropy.constants as c
 import numpy as np
+from astropy.time import Time
 from scipy.stats import loguniform, beta
 
 import radvel as rv
@@ -30,7 +31,7 @@ params_12572 = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
                 550, 30, 2458991.236308, 0.0748781, 0.045100458)
                 
 # HD6106, the highest-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
-params_hd6101 = (0.79, 21.5*pc_in_cm, 94.764633, 8.200012, 0, 8.200012,
+params_hd6101 = (0.79, 21.5*pc_in_cm, 94.764633, 8.200012, 0, 0.1,
                 1626, 1100, 2457654.089, 19.411242, 0.240018) 
                 
 # T001194 params. rv_baseline and max_rv are estimated for ease.
@@ -53,13 +54,13 @@ print('Min m is: ', min_m)
 print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-# 191939
+# # 191939
 # a_lim = (1.9, 5e1)
 # m_lim = (1.5, 2e2)
-# 97166
+# # 97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
-# 6106
+# 6101
 a_lim = (0.9*min_a, 6e1)
 m_lim = (0.9*min_m, 1e5)
 
@@ -153,8 +154,9 @@ a_rect = ptch.Rectangle((0, 0), min_index_a, grid_num-1, color='gray', alpha=1.0
 
 ax.add_patch(mass_rect)
 ax.add_patch(a_rect)
-
 ###################################################
+
+############### Adding labels #####################
 label_size = 50
 region_label_size = 50
 restricted_region_label_size = 40
@@ -168,6 +170,26 @@ plt.text((1/3)*(min_index_a-1), (1/8)*grid_num, 'Ruled out by minimum period', s
 
 ax.set_xlabel('Semi-major Axis (au)', size=label_size)
 ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
+###################################################
+
+######## Adding lines of constant period ##########
+hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
+
+gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
+
+# Time between the midpoints of the two missions
+baseline_days = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)
+
+# Log-spaced masses in Jupiter masses
+const_per_m_list = np.logspace(np.log10(min_m), np.log10(m_lim[1]))
+const_per_m_inds = hlpw.value2index(const_per_m_list, (0, grid_num-1), m_lim)
+
+for f in range(5):
+    
+    const_per_a_list = hlpw.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
+    const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+
+    plt.plot(const_per_a_inds, const_per_m_inds, '--k', alpha=0.5)
 ###################################################
 
 tick_array = np.linspace(0, grid_num-1, tick_num).astype(int)
