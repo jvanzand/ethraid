@@ -33,6 +33,14 @@ def kepler_array(double [:,] M, double [:,] e):
 
     return E
 
+def kepler_single(double M, double e):
+    
+    cdef double E
+
+    E = kepler(M, e)
+
+    return E
+
 
 # create the wrapper code, with numpy type annotations
 @cython.boundscheck(False)
