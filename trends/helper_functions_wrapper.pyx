@@ -170,7 +170,8 @@ def gamma_array(double m_star, double [:] a, double [:] Mp,
 
 # It seems gamma() needs to be a cdef function, otherwise it returns nans
 #@profile
-cdef (double, double) gamma(double m_star, double a, double Mp, double per, double e, double i, double om, double E):
+cdef (double, double) gamma(double m_star, double a, double Mp, double per, 
+      double e, double i, double om, double E):
 
     cdef double     a_units, sqrt_eterm, tan_E2, nu,\
                     cos_E, tan_nu2, cos_E2, sin_i, cos_nu,\
@@ -370,7 +371,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
                 mass_ratio = m*mass_ratio_constant
 
 
-                M_anom = (two_pi_ovr_per)*elapsed_time
+                M_anom = (two_pi_ovr_per)*elapsed_time # Period and elapsed_time in units of days
 
                 # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
                 E_anom = kepler(M_anom, e)
@@ -570,7 +571,7 @@ cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
 cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with
-    r_unit_vec (3x1) and v_vec_star (3x1) in astro_post_dense_loop.
+    r_unit_vec (3x1) and later v_vec_star (3x1) in astro_post_dense_loop.
     """
 
     cdef int i, k
