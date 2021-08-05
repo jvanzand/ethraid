@@ -32,7 +32,11 @@ params_12572 = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
                 
 # HD6106, the highest-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
 params_hd6101 = (0.79, 21.5*pc_in_cm, 94.764633, 8.200012, 0, 0.1,
-                1626, 1100, 2457654.089, 19.411242, 0.240018) 
+                1626, 300, 2457654.089, 19.411242, 0.240018)
+                
+# HD91204, a high-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
+params_hd91204 = (1.15, 51.8*pc_in_cm, -144.69, 0.914247, 0, 0.1,
+                6485.728, 2000, 2455232.024, 3.136, 0.0464) 
                 
 # T001194 params. rv_baseline and max_rv are estimated for ease.
 params_T001194 = (0.98, 150.3*pc_in_cm, 0.019, 0.023, -6.2e-5, 5.8e-5,
@@ -45,10 +49,17 @@ m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
 
 # min_per is 4xbaseline because we see ~no curvature yet.
 min_per = 4*rv_baseline
-# min_per = 1*rv_baseline
+# min_per = rv_baseline
+min_K = max_rv
 
-min_m = rv.utils.Msini(max_rv, min_per, m_star, e=0, Msini_units='jupiter')
+min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
 min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(M_jup/M_sun)))
+
+# print('!!!', min_m)
+# # Experimental: revised min_m using gdot. The idea is to find the smallest mass that could produce the observed gdot at the known minimum period. This is not completely right because it uses min_K to get min_m, min_m to get min_a, and then min_a to get a new value for min_m.
+#
+# min_m = (gammadot*100/(24*3600))*((min_per*24*3600)/6.283185)**2*(m_star*M_sun)/(min_a*14959787070000.0) / M_jup
+# print('!!!', min_m)
 
 print('Min m is: ', min_m)
 print('Min a is: ', min_a)
@@ -57,16 +68,20 @@ print('Min a is: ', min_a)
 # 191939
 a_lim = (1.9, 5e1)
 m_lim = (1.5, 2e2)
-# # 97166
+# # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
-# # 6101
+# # HD6101
 # a_lim = (0.9*min_a, 6e1)
 # m_lim = (0.9*min_m, 1e5)
+# # HD91204
+# a_lim = (0.8*min_a, 8e1)
+# m_lim = (0.8*min_m, 1e5)
+print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e5)
+num_points = int(1e6)
 
 t_num = 2
 tick_num = 6
@@ -110,10 +125,10 @@ post_rv = post_rv/post_rv.sum()
 post_tot = post_tot/post_tot.sum()
 
 t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
-t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
+# t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
 post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
-post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
+# post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
 
 # np.save('erik_samples/rv_probs.npy', rv_list)
 # np.save('erik_samples/astro_probs.npy', astro_list)
@@ -144,9 +159,9 @@ min_index_m = hlpw.value2index(min_m, (0, grid_num-1), m_lim)
 min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)
 
 
-# Print out the 2-sigma boundaries for the total posterior
-bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
-print('a_lim, m_lim = ', bounds[0], bounds[1])
+# # Print out the 2-sigma boundaries for the total posterior
+# bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+# print('a_lim, m_lim = ', bounds[0], bounds[1])
 
 
 mass_rect = ptch.Rectangle((0, 0), grid_num-1, min_index_m, color='gray', alpha=1.0)
@@ -188,14 +203,17 @@ for f in range(5):
     
     const_per_a_list = hlpw.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
     const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+    
+    values_in_bounds = np.where(const_per_a_list >= min_a)
 
-    plt.plot(const_per_a_inds, const_per_m_inds, '--k', alpha=0.5)
+    plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--k', alpha=0.5)
 ###################################################
 
 tick_array = np.linspace(0, grid_num-1, tick_num).astype(int)
 
-plt.xticks(tick_array, [np.round(a_list[i], 1) for i in tick_array], size=tick_size)
-plt.yticks(tick_array, [np.round(m_list[i], 1) for i in tick_array ], size=tick_size)
+# Need the .item() method for larger companions because once m_pl > 0.1*M_star, rvutils.Msini() returns [value] instead of value.
+plt.xticks(tick_array, [np.round(a_list[i], 1).item() for i in tick_array], size=tick_size)
+plt.yticks(tick_array, [np.round(m_list[i], 1).item() for i in tick_array ], size=tick_size)
 
 
 fig.tight_layout()

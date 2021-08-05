@@ -90,7 +90,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
-    #sini_list = np.sqrt(1-cosi_list**2)
 
 
     # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
@@ -100,7 +99,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     M_anom_evolved = M_anom_list + 2*pi*((rv_epoch - hip_times[0])/per_list)
     E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
-    # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991) astrometry,)
+    # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991)
     E_anom_astro = ck.kepler_array(M_anom_list, e_list)
     T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro
 
@@ -108,8 +107,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     om_list = np.random.uniform(0, two_pi, num_points)
 
     # Longitudes of ascending node, uniformly distributed
-    #Om_list = np.random.uniform(0, 2*pi, num_points)
-
+    # Om_list = np.random.uniform(0, 2*pi, num_points)
 
     # Breaking up the (a, M) parameter space into grid_num x grid_num
     a_bins = np.logspace(np.log10(a_min), np.log10(a_max), grid_num)
@@ -192,11 +190,12 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per, doub
     sin_E = sin(E)
 
     
-    tan_E_ovr2 = (1-cos_E)/sin_E
+    tan_Eovr2 = (1-cos_E)/sin_E
     
     
-    nu = 2*atan(sqrt_eterm*tan_E_ovr2)
+    nu = 2*atan(sqrt_eterm*tan_Eovr2)
     
+    # nu derivatives use days (not seconds) to give gdot/gddot correct units 
     nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2)
     nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term
     
@@ -314,7 +313,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
     time_endpoints = [[hip_times[0], gaia_times[0]], [hip_times[1], gaia_times[1]]]
 
-    # Best to calculate these now so they aren't re-calculated many times in each loop
+    # Calculate these now so they aren't re-calculated many times in each loop
     time_steps[0] = (hip_times[1] - hip_times[0])/(t_num+1)
     time_steps[1] = (gaia_times[1] - gaia_times[0])/(t_num+1)
 
@@ -367,8 +366,6 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
                 elapsed_time = k*time_step + start_time
 
-                ###############################################################
-                ###############################################################
 
                 mass_ratio = m*mass_ratio_constant
 
@@ -569,31 +566,6 @@ cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
     #return rot_mtrx
 
 
-#cdef double r(double nu, double a, double e):
-#    """
-#
-#    Equation of an ellipse (Murray & Dermott equation 2.20).
-#    Arguments:
-#
-#        nu (radians): True anomaly
-#        a (distance): Semi-major axis of ellipse. Choice of a determines what output r represents.
-#                        For example, if a is the semi-major axis of one planet's orbit, then r represents
-#                        that planet's distance from barycenter as a function of nu. On the other hand,
-#                        if a is the SA of the test mass μ's orbit, then r is r1+r2 as a function of nu,
-#                        where r1 (r2) is the distance of m1 (m2) from the system barycenter in the
-#                        2-body (m1 & m2) frame.
-#        e (unitless): Eccentricity
-#
-#    returns:
-#        r (same as a): Distance of particle from barycenter along its orbit
-#    """
-#    cdef double num, denom
-#
-#    num = a*(1-e**2)
-#    denom = 1 + e*cos(nu)
-#
-#    return num/denom
-
 #@profile
 cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
@@ -755,7 +727,7 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
 
 def value2index(value, index_space, value_space):
     """
-    The inverse of index2value: take a value or on a
+    The inverse of index2value: take a value on a
     log scale and convert it to an index. index_space
     and value_space are expected as tuples of the form
     (min_value, max_value).
