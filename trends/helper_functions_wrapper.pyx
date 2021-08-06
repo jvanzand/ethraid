@@ -96,12 +96,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     M_anom_list = np.random.uniform(0, two_pi, num_points)
 
     # Evolving M_anom forward to the epoch of RV calculations.
-    M_anom_evolved = M_anom_list + 2*pi*((rv_epoch - hip_times[0])/per_list)
+    M_anom_evolved = M_anom_list + two_pi*((rv_epoch - hip_times[0])/per_list)
     E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
     # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991)
     E_anom_astro = ck.kepler_array(M_anom_list, e_list)
-    T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro
+    T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro as T_anom_0.
 
     # Arguments of peri, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
@@ -133,7 +133,7 @@ cdef P(double [:] a, double [:] Mtotal):
     cdef double sec_2_days
 
     size = a.shape[0]
-    sec_2_days = 1./(24*3600) # Note the 1.; with 1, the result would be 0
+    sec_2_days = 1./(24*3600) # Note the 1.; with 1, the result would be 0 for some reason
 
     cdef np.ndarray[double, ndim=1] P_days = np.ndarray(shape=(size,), dtype=np.float64)
 
@@ -151,7 +151,6 @@ def gamma_array(double m_star, double [:] a, double [:] Mp,
     """
     Outsources intensive calculations to the pure-cython gamma function.
     """
-    print('Using gamma_array')
     cdef int size, j
 
     size = a.shape[0]
@@ -197,8 +196,8 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per,
     nu = 2*atan(sqrt_eterm*tan_Eovr2)
     
     # nu derivatives use days (not seconds) to give gdot/gddot correct units 
-    nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2)
-    nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term
+    nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2) # Units of day^-1
+    nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term # # Units of day^-2
     
     cos_nu_om = cos(nu+om)
     sin_nu_om = sin(nu+om)
@@ -371,7 +370,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
                 mass_ratio = m*mass_ratio_constant
 
 
-                M_anom = (two_pi_ovr_per)*elapsed_time # Period and elapsed_time in units of days
+                M_anom = two_pi_ovr_per*elapsed_time # Period and elapsed_time are in units of days
 
                 # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
                 E_anom = kepler(M_anom, e)

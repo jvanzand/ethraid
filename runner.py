@@ -16,10 +16,10 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 pc_in_cm = 3.086e18
 
-# params_star = (m_star, distance(pc), gdot, gdot_err, gddot, gddot_err, 
+# params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), max_rv of residuals, rv_epoch, delta_mu, delta_mu_err)
 
-params_191939 = (0.807, 1.7989500299953727e+20, 0.114, 0.006, -6e-5, 1.9e-5, 
+params_191939 = (0.807, 58.3*pc_in_cm, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 40.0581900021484, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
 # HIP97166 params. rv_baseline and max_rv are estimated for ease.
@@ -42,14 +42,18 @@ params_hd91204 = (1.15, 51.8*pc_in_cm, -144.69, 0.914247, 0, 0.1,
 params_T001194 = (0.98, 150.3*pc_in_cm, 0.019, 0.023, -6.2e-5, 5.8e-5,
                     567, 1, 2458917.385183, None, None)
 
+# Synthetic planet params to test trend code
+params_synthetic = (0.807, 58.3*pc_in_cm, 0.38993633, 0.038993633, 0.0003175118997, 0.00003175118997, 
+                1500, 3000, 2458847.780463, 19.335557659, 1.9335557659)
+
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_191939
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_synthetic
 
 
 # min_per is 4xbaseline because we see ~no curvature yet.
-min_per = 4*rv_baseline
-# min_per = rv_baseline
+# min_per = 4*rv_baseline
+min_per = rv_baseline
 min_K = max_rv
 
 min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -65,9 +69,9 @@ print('Min m is: ', min_m)
 print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-# 191939
-a_lim = (1.9, 5e1)
-m_lim = (1.5, 2e2)
+# # 191939
+# a_lim = (1.9, 5e1)
+# m_lim = (1.5, 2e2)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
@@ -77,11 +81,14 @@ m_lim = (1.5, 2e2)
 # # HD91204
 # a_lim = (0.8*min_a, 8e1)
 # m_lim = (0.8*min_m, 1e5)
+# synthetic
+a_lim = (0.8*min_a, 5e1)
+m_lim = (0.8*min_m, 1e5)
 print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e6)
+num_points = int(1e7)
 
 t_num = 2
 tick_num = 6
@@ -125,10 +132,10 @@ post_rv = post_rv/post_rv.sum()
 post_tot = post_tot/post_tot.sum()
 
 t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
-# t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
+t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
 post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
-# post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
+post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
 
 # np.save('erik_samples/rv_probs.npy', rv_list)
 # np.save('erik_samples/astro_probs.npy', astro_list)
@@ -159,9 +166,9 @@ min_index_m = hlpw.value2index(min_m, (0, grid_num-1), m_lim)
 min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)
 
 
-# # Print out the 2-sigma boundaries for the total posterior
-# bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
-# print('a_lim, m_lim = ', bounds[0], bounds[1])
+# Print out the 2-sigma boundaries for the total posterior
+bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+print('a_lim, m_lim = ', bounds[0], bounds[1])
 
 
 mass_rect = ptch.Rectangle((0, 0), grid_num-1, min_index_m, color='gray', alpha=1.0)
