@@ -30,8 +30,8 @@ params_HIP97166 = (0.91, 68*pc_in_cm, 0.013, 0.03, -3e-6, 3.2e-5,
 params_12572 = (0.91, 65.9*pc_in_cm, -0.0595, 0.0032, 0, 0.0032,
                 550, 30, 2458991.236308, 0.0748781, 0.045100458)
                 
-# HD6106, the highest-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
-params_hd6101 = (0.79, 21.5*pc_in_cm, 94.764633, 8.200012, 0, 0.1,
+# HD6106, the highest-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated. Trend/curv taken from manual radvel run.          
+params_hd6101 = (0.79, 21.5*pc_in_cm, 0.25858, 0.022, -4.64671e-05, 4.8e-05,
                 1626, 300, 2457654.089, 19.411242, 0.240018)
                 
 # HD91204, a high-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
@@ -43,17 +43,17 @@ params_T001194 = (0.98, 150.3*pc_in_cm, 0.019, 0.023, -6.2e-5, 5.8e-5,
                     567, 1, 2458917.385183, None, None)
 
 # Synthetic planet params to test trend code
-params_synthetic = (0.807, 58.3*pc_in_cm, 0.38993633, 0.038993633, 0.0003175118997, 0.00003175118997, 
-                1500, 3000, 2458847.780463, 19.335557659, 1.9335557659)
+params_synthetic = (0.79, 21.5*pc_in_cm, 0.069409808, 0.0069409808*3, -0.00055156352, -0.000055156352*3,
+                1626, 300, 2457654.089, 8.1687693, 0.81687693)
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_synthetic
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_191939
 
 
 # min_per is 4xbaseline because we see ~no curvature yet.
-# min_per = 4*rv_baseline
-min_per = rv_baseline
+min_per = 4*rv_baseline
+# min_per = rv_baseline
 min_K = max_rv
 
 min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -69,9 +69,9 @@ print('Min m is: ', min_m)
 print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-# # 191939
-# a_lim = (1.9, 5e1)
-# m_lim = (1.5, 2e2)
+# 191939
+a_lim = (1.9, 5e1)
+m_lim = (1.5, 2e2)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
@@ -81,14 +81,14 @@ print('Min a is: ', min_a)
 # # HD91204
 # a_lim = (0.8*min_a, 8e1)
 # m_lim = (0.8*min_m, 1e5)
-# synthetic
-a_lim = (0.8*min_a, 5e1)
-m_lim = (0.8*min_m, 1e5)
+# # synthetic
+# a_lim = (0.8*min_a, 5e1)
+# m_lim = (0.8*min_m, 1e5)
 print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e7)
+num_points = int(1e6)
 
 t_num = 2
 tick_num = 6
@@ -136,14 +136,6 @@ t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
 post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
 post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
-
-# np.save('erik_samples/rv_probs.npy', rv_list)
-# np.save('erik_samples/astro_probs.npy', astro_list)
-# np.save('erik_samples/a_indices.npy', a_inds)
-# np.save('erik_samples/m_indices.npy', m_inds)
-#
-# rv_list = np.load('erik_samples/rv_probs.npy')
-# astro_list = np.load('erik_samples/astro_probs.npy')
 
 # plt.imsave('post_rv.png', post_rv, origin='lower')
 # plt.imsave('post_astro.png', post_astro, origin='lower')
@@ -224,5 +216,22 @@ plt.yticks(tick_array, [np.round(m_list[i], 1).item() for i in tick_array ], siz
 
 
 fig.tight_layout()
-fig.savefig('5thCompConstraints_RV_astr.png')
-# plt.show()
+fig.savefig('plots/5thCompConstraints_RV_astr.png')
+
+##########################################
+plt.close()
+fig, ax = plt.subplots(1,2, figsize=(12,12))
+sma_1d = post_tot.sum(axis=0)
+mass_1d = post_tot.sum(axis=1)
+
+ax[0].plot(range(grid_num), sma_1d)
+plt.sca(ax[0])
+plt.xticks(tick_array, [np.round(a_list[i], 1).item() for i in tick_array], size=10)
+
+ax[1].plot(range(grid_num), mass_1d)
+plt.sca(ax[1])
+plt.xticks(tick_array, [np.round(m_list[i], 1).item() for i in tick_array], size=10)
+
+fig.savefig('plots/1_d_posts.png')
+
+############################################

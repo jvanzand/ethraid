@@ -51,7 +51,7 @@ gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='i
 #@profile
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
 
-    cdef double tp, a_min, a_max, m_min, m_max, two_pi
+    cdef double tp, a_min, a_max, m_min, m_max
 
 
     cdef np.ndarray[double, ndim=1] a_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
@@ -74,7 +74,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     a_max = a_lim[1]
     m_min = m_lim[0]
     m_max = m_lim[1]
-    two_pi = 2*pi
 
 
     # These semimajor axes are distances between the planet and the barycenter of the system. The star is on its own orbit, which we will get later.
@@ -179,7 +178,15 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per,
                     gamma_dot, gamma_ddot
 
     per_sec = per*86400 # 24*3600 to convert days ==> seconds
-    a_star_cm = a*au * Mp*M_jup/(m_star*M_sun) # Convert the planet's a in au into the star's a in cm
+    Mp_g = Mp*M_jup
+    m_star_g = m_star*M_sun
+    
+    a_star = a * Mp_g/m_star_g
+    a_tot = a + a_star
+    
+    a_cm = a*au
+    a_star_cm = a_star*au # Convert the planet's a in au into the star's a in cm
+    a_tot_cm = a_tot*au
     
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
@@ -203,8 +210,13 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per,
     sin_nu_om = sin(nu+om)
     sin_i = sin(i)
     
-    pre_fac = two_pi*a_star_cm*sin_i / (per_sec*sqrt_e_sq_term) * 1/100 # cm/s ==> m/s
-    
+    # Fischer (analytic)
+    pre_fac = sqrt(G)/sqrt_e_sq_term * Mp_g*sin_i/sqrt((Mp_g+m_star_g)*(a_tot_cm)) * 1/100 # cm/s ==> m/s
+    # Fischer (calculated, a)
+    #pre_fac = 28.4329/sqrt_e_sq_term * Mp*sin_i/sqrt(m_star+Mp_g/M_sun)*1/sqrt(a_tot)
+    # Fischer (calculated, per)
+    #pre_fac = 28.4329/sqrt_e_sq_term * Mp*sin_i/(pow(m_star+Mp_g/M_sun, 0.6666666666)*pow(per/365.25, 0.3333333333))
+    #print(pow(per/365.25, 0.333333333))
     
     gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/d
     gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om) # m/s/d/d
