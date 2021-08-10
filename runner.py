@@ -43,17 +43,17 @@ params_T001194 = (0.98, 150.3*pc_in_cm, 0.019, 0.023, -6.2e-5, 5.8e-5,
                     567, 1, 2458917.385183, None, None)
 
 # Synthetic planet params to test trend code
-params_synthetic = (0.79, 21.5*pc_in_cm, 0.069409808, 0.0069409808*3, -0.00055156352, -0.000055156352*3,
-                1626, 300, 2457654.089, 8.1687693, 0.81687693)
+params_synthetic = (0.79, 21.5*pc_in_cm, 0.059206530869421, 0.00592065308694, -2.0423039552e-4, -2.0423039552e-5,
+                1626, 300, 2457654.089, 9.762827453051148, 0.9762827453051148)
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_191939
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_synthetic
 
 
 # min_per is 4xbaseline because we see ~no curvature yet.
-min_per = 4*rv_baseline
-# min_per = rv_baseline
+# min_per = 4*rv_baseline
+min_per = rv_baseline
 min_K = max_rv
 
 min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -69,9 +69,9 @@ print('Min m is: ', min_m)
 print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-# 191939
-a_lim = (1.9, 5e1)
-m_lim = (1.5, 2e2)
+# # 191939
+# a_lim = (1.9, 5e1)
+# m_lim = (1.5, 2e2)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
@@ -81,14 +81,14 @@ m_lim = (1.5, 2e2)
 # # HD91204
 # a_lim = (0.8*min_a, 8e1)
 # m_lim = (0.8*min_m, 1e5)
-# # synthetic
-# a_lim = (0.8*min_a, 5e1)
-# m_lim = (0.8*min_m, 1e5)
+# synthetic
+a_lim = (0.8*min_a, 5e1)
+m_lim = (0.8*min_m, 1e5)
 print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e6)
+num_points = int(1e8)
 
 t_num = 2
 tick_num = 6

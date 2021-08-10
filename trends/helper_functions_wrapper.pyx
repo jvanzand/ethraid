@@ -395,7 +395,8 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
                 #r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
                 #r_pl = a*au*(1-e**2) / (1+e*cos(T_anom))
-
+                
+                # Distance of star from barycenter in cm
                 r_star = (a_units*(1-e_sq) / (1+e*cos(T_anom))) * mass_ratio
 
                 # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
@@ -407,7 +408,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
                 mat_mul(rot_mtrx, r_vec, rot_vec)
 
 
-                # ang_pos is the angular separation of the star from barycenter in milli-arcseconds.
+                # ang_pos is the angular position of the star relative to barycenter in milli-arcseconds.
                 ang_pos[0] = rot_vec[0]*cm_2_mas
                 ang_pos[1] = rot_vec[1]*cm_2_mas
 
