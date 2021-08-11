@@ -88,7 +88,7 @@ print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e8)
+num_points = int(1e6)
 
 t_num = 2
 tick_num = 6
@@ -216,7 +216,9 @@ plt.yticks(tick_array, [np.round(m_list[i], 1).item() for i in tick_array ], siz
 
 
 fig.tight_layout()
-fig.savefig('plots/5thCompConstraints_RV_astr.png')
+fig.savefig('5thCompConstraints_RV_astr.png')
+# fig.savefig('plots/5thCompConstraints_RV_astr.png')
+
 
 ##########################################
 plt.close()
@@ -232,6 +234,7 @@ ax[1].plot(range(grid_num), mass_1d)
 plt.sca(ax[1])
 plt.xticks(tick_array, [np.round(m_list[i], 1).item() for i in tick_array], size=10)
 
-fig.savefig('plots/1_d_posts.png')
+fig.savefig('1_d_posts.png')
+# fig.savefig('plots/1_d_posts.png')
 
 ############################################
