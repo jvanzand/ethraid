@@ -138,7 +138,7 @@ cdef P(double [:] a, double [:] Mtotal):
 
     for i in range(size):
 
-        P_days[i] = sqrt((2*pi)**2*(a[i]*au)**3/(G*(Mtotal[i]*M_sun))) * sec_2_days
+        P_days[i] = sqrt((two_pi)**2*(a[i]*au)**3/(G*(Mtotal[i]*M_sun))) * sec_2_days
 
     return P_days
 
