@@ -354,7 +354,9 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         om = om_list[j]
         T_anom_0 = T_anom_0_list[j]
         
+        
         # Terms to use in deeper loops
+        mass_ratio = m*mass_ratio_constant
         two_pi_ovr_per = two_pi/per
         sqrt_eterm = sqrt((1+e)/(1-e))
         a_units = a*au
@@ -377,9 +379,6 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             for k in range(t_num+1): # Start at 0, finish at t_num. This is a loop over the time steps of each mission
 
                 elapsed_time = k*time_step + start_time
-
-
-                mass_ratio = m*mass_ratio_constant
 
 
                 M_anom = two_pi_ovr_per*elapsed_time # Period and elapsed_time are in units of days

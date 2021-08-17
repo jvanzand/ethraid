@@ -88,7 +88,7 @@ print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e7)
+num_points = int(1e6)
 
 t_num = 2
 tick_num = 6
