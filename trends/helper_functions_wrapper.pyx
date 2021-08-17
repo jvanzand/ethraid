@@ -420,7 +420,8 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
                 if l == 0:
                     continue
 
-                v_vec(a, per, e, T_anom, v_vec_pl)
+                v_vec(a_units, per, e, T_anom, v_vec_pl)
+
                 # Stellar velocity is related to planet through their masses.
                 # Also they are in opposite directions, so add negative, but it shouldn't affect the final answer.
                 v_vec_star[0] = -v_vec_pl[0] * mass_ratio
@@ -545,12 +546,14 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
 #@profile
 cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
     """
-    This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. They multiply it immediately by r*[cos(f), sin(f), 0]
-    because this gives the projection of position onto the sky. However, we also need the projection of velocity, so we need the matrix
-    before multiplication by the position vector.
+    This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. 
+    They multiply it immediately by r*[cos(f), sin(f), 0] because this gives the 
+    projection of position onto the sky. However, we also need the projection of 
+    velocity, so we need the matrix before multiplication by the position vector.
 
-    This function doesn't return anything. Instead, declare a matrix in your function and this will update it, saving
-    lots of time by not allocating memory to and returning a matrix.
+    This function doesn't return anything. Instead, declare a matrix in your 
+    function and this will update it, saving lots of time by not allocating memory 
+    to and returning a matrix.
     """
     cdef double sin_Om, sin_om, sin_i, cos_Om, cos_om, cos_i
 
@@ -595,15 +598,15 @@ cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
 #@profile
 cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
     """
-    Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't capture the velocity perpendicular to the radial vector.
-    Instead, v is the total velocity of the object. M&D doesn't actually give v vector explicitly, but I believe it's v_vec = [x_dot, y_dot, 0].
+    Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't 
+    capture the velocity perpendicular to the radial vector. Instead, v is the total 
+    velocity of the object. M&D doesn't actually give v vector explicitly, but I believe 
+    it's v_vec = [x_dot, y_dot, 0].
 
-    Since periods created in units of days, v_vec has units of cm/day.
+    Since period is created in units of days, v_vec has units of cm/day.
     v_vec is a list.
     """
     cdef double n_a, e_term, x_dot, y_dot
-
-    #cdef double v_vec[3]
 
     n_a = (two_pi/per)*a
     e_term = sqrt(1-e**2)
@@ -809,7 +812,6 @@ def period_lines(m, per, m_star):
     m_star_grams = m_star*M_sun
     
     a_cm = ((per_sec/two_pi)**2*G*(m_grams+m_star_grams))**(0.3333333333)
-    
     
     
     return a_cm / au
