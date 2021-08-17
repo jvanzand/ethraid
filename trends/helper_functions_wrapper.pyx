@@ -298,7 +298,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
     cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0
     cdef double mass_ratio_constant, cm_2_mas, cms_2_masyr
-    cdef double two_pi_ovr_per, sqrt_eterm, a_units, e_sq, r_star_num_fac
+    cdef double mean_motion, sqrt_eterm, a_units, e_sq, r_star_num_fac
     cdef double ang_pos_x_sum, ang_pos_y_sum, mu_x_sum, mu_y_sum
     cdef double delta_mu_model, chi_sq, prob
 
@@ -356,10 +356,13 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         
         
         # Terms to use in deeper loops
-        mass_ratio = m*mass_ratio_constant
-        two_pi_ovr_per = two_pi/per
-        sqrt_eterm = sqrt((1+e)/(1-e))
+        mass_ratio = m*mass_ratio_constant # M_pl/M_sun in proper units
+        
         a_units = a*au
+        a_star_units = a_units*mass_ratio # Calculate the sma (cm) of the star's orbit around barycenter. 
+        
+        mean_motion = two_pi/per
+        sqrt_eterm = sqrt((1+e)/(1-e))
         e_sq = e**2
         rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
         r_star_num_fac = a_units*(1-e_sq)
@@ -367,86 +370,92 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
         for l in range(2): # Hipparcos or Gaia
             start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
+            end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
+            
+            
+            ## NOTE that I haven't put in randomly sampled starting times yet, so for now it's set to 0. I just need to use E_anom_astro from make_arrays(), but I don't want to change that yet.
+            M1 = mean_motion*start_time
+            M2 = mean_motion*end_time
+            t_mission = end_time - start_time
+            #time_step = time_steps[l]
+            #
+            #ang_pos_x_sum = 0
+            #ang_pos_y_sum = 0
+            #
+            #mu_x_sum = 0
+            #mu_y_sum = 0
 
-            time_step = time_steps[l]
+            #for k in range(t_num+1): # Start at 0, finish at t_num. This is a loop over the time steps of each mission
 
-            ang_pos_x_sum = 0
-            ang_pos_y_sum = 0
+                #elapsed_time = k*time_step + start_time
+                #
+                #
+                #M_anom = mean_motion*elapsed_time # Period and elapsed_time are in units of days
+                #
+                ## This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
+                #E_anom = kepler(M_anom, e)
+                #
+                #
+                ## T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
+                #T_anom = T_anom_0 + 2*atan( sqrt_eterm * tan(E_anom/2))
+                #
+                #################### Angular Positions ######################
+                #
+                ##r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
+                ##r_pl = a*au*(1-e**2) / (1+e*cos(T_anom))
+                #
+                ## Distance of star from barycenter in cm
+                #r_star = (a_units*(1-e_sq) / (1+e*cos(T_anom))) * mass_ratio
 
-            mu_x_sum = 0
-            mu_y_sum = 0
+            # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
+            r_vec[0] = -cos(T_anom)*r_star
+            r_vec[1] = -sin(T_anom)*r_star
+            r_vec[2] = 0
 
-            for k in range(t_num+1): # Start at 0, finish at t_num. This is a loop over the time steps of each mission
-
-                elapsed_time = k*time_step + start_time
-
-
-                M_anom = two_pi_ovr_per*elapsed_time # Period and elapsed_time are in units of days
-
-                # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
-                E_anom = kepler(M_anom, e)
-
-
-                # T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
-                T_anom = T_anom_0 + 2*atan( sqrt_eterm * tan(E_anom/2))
-
-                ################### Angular Positions ######################
-
-                #r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
-                #r_pl = a*au*(1-e**2) / (1+e*cos(T_anom))
-                
-                # Distance of star from barycenter in cm
-                r_star = (a_units*(1-e_sq) / (1+e*cos(T_anom))) * mass_ratio
-
-                # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
-                r_vec[0] = -cos(T_anom)*r_star
-                r_vec[1] = -sin(T_anom)*r_star
-                r_vec[2] = 0
-
-                # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
-                mat_mul(rot_mtrx, r_vec, rot_vec)
-
-
-                # ang_pos is the angular position of the star relative to barycenter in milli-arcseconds.
-                ang_pos[0] = rot_vec[0]*cm_2_mas
-                ang_pos[1] = rot_vec[1]*cm_2_mas
-
-                # Sum up each coordinate independently in anticipation of taking an average
-                ang_pos_x_sum += ang_pos[0]
-                ang_pos_y_sum += ang_pos[1]
-
-                ################### Angular Velocities ########################
-                # I don't need angular velocities for Hip, only ang_pos.
-                if l == 0:
-                    continue
-
-                v_vec(a, per, e, T_anom, v_vec_pl)
-                # Stellar velocity is related to planet through their masses.
-                # Also they are in opposite directions, so add negative, but it shouldn't affect the final answer.
-                v_vec_star[0] = -v_vec_pl[0] * mass_ratio
-                v_vec_star[1] = -v_vec_pl[1] * mass_ratio
-                v_vec_star[2] = -v_vec_pl[2] * mass_ratio
+            # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
+            mat_mul(rot_mtrx, r_vec, rot_vec)
 
 
-                mat_mul(rot_mtrx, v_vec_star, rotated_v_vec)
+            # ang_pos is the angular position of the star relative to barycenter in milli-arcseconds.
+            ang_pos[0] = rot_vec[0]*cm_2_mas
+            ang_pos[1] = rot_vec[1]*cm_2_mas
 
-                # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
-                mu[0] = rotated_v_vec[0]*cmd_2_masyr
-                mu[1] = rotated_v_vec[1]*cmd_2_masyr
+            ## Sum up each coordinate independently in anticipation of taking an average
+            #ang_pos_x_sum += ang_pos[0]
+            #ang_pos_y_sum += ang_pos[1]
 
-                ###############################################################
-                ###############################################################
+            ################### Angular Velocities ########################
+            # I don't need angular velocities for Hip, only ang_pos.
+            if l == 0:
+                continue
 
-                mu_x_sum += mu[0]
-                mu_y_sum += mu[1]
+            v_vec(a, per, e, T_anom, v_vec_pl)
+            # Stellar velocity is related to planet through their masses.
+            # Also they are in opposite directions, so add negative, but it shouldn't affect the final answer.
+            v_vec_star[0] = -v_vec_pl[0] * mass_ratio
+            v_vec_star[1] = -v_vec_pl[1] * mass_ratio
+            v_vec_star[2] = -v_vec_pl[2] * mass_ratio
 
-            # Once we have the sums over the whole epoch, divide by number of points to get the avg.
-            ang_pos_avg[l][0] = ang_pos_x_sum/(t_num+1)
-            ang_pos_avg[l][1] = ang_pos_y_sum/(t_num+1)
 
-            mu_avg[l][0] = mu_x_sum/(t_num+1)
-            mu_avg[l][1] = mu_y_sum/(t_num+1)
+            mat_mul(rot_mtrx, v_vec_star, rotated_v_vec)
 
+            # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
+            mu[0] = rotated_v_vec[0]*cmd_2_masyr
+            mu[1] = rotated_v_vec[1]*cmd_2_masyr
+
+            ###############################################################
+            ###############################################################
+
+            mu_x_sum += mu[0]
+            mu_y_sum += mu[1]
+
+        # Once we have the sums over the whole epoch, divide by number of points to get the avg.
+        ang_pos_avg[l][0] = ang_pos_x_sum/(t_num+1)
+        ang_pos_avg[l][1] = ang_pos_y_sum/(t_num+1)
+
+        mu_avg[l][0] = mu_x_sum/(t_num+1)
+        mu_avg[l][1] = mu_y_sum/(t_num+1)
+        ### HHEEEEYYYY  OOOOOHHHH #####
 
         mu_gaia = mu_avg[1]
 
