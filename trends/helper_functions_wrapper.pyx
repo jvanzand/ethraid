@@ -427,8 +427,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
 
         mu_gaia = mu_avg[1]
-        if j==0:
-            print(a, m, per, e, i, om)
+
         # To get the positional avg., subtract the epoch positions and divide by the time between in years.
         # Units of mas/yr
         mu_hg[0] = (ang_pos_avg[1][0] - ang_pos_avg[0][0])/baseline_yrs # x-comp. = gaia_x - hip_x
