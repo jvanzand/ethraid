@@ -373,43 +373,21 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
             
             
-            ## NOTE that I haven't put in randomly sampled starting times yet, so for now it's set to 0. I just need to use E_anom_astro from make_arrays(), but I don't want to change that yet.
+            ## NOTE that I haven't put in randomly sampled starting times yet, so for now it's set to 0. I just need to add on M_anom from make_arrays(), but I don't want to change that yet.
             M1 = mean_motion*start_time
             M2 = mean_motion*end_time
-            t_mission = end_time - start_time
-            #time_step = time_steps[l]
-            #
-            #ang_pos_x_sum = 0
-            #ang_pos_y_sum = 0
-            #
-            #mu_x_sum = 0
-            #mu_y_sum = 0
-
-            #for k in range(t_num+1): # Start at 0, finish at t_num. This is a loop over the time steps of each mission
-
-                #elapsed_time = k*time_step + start_time
-                #
-                #
-                #M_anom = mean_motion*elapsed_time # Period and elapsed_time are in units of days
-                #
-                ## This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
-                #E_anom = kepler(M_anom, e)
-                #
-                #
-                ## T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
-                #T_anom = T_anom_0 + 2*atan( sqrt_eterm * tan(E_anom/2))
-                #
-                #################### Angular Positions ######################
-                #
-                ##r_pl = r(T_anom, a*au, e) # a is planet semi-major axis, so use it to find pl separation from bary with T_anom
-                ##r_pl = a*au*(1-e**2) / (1+e*cos(T_anom))
-                #
-                ## Distance of star from barycenter in cm
-                #r_star = (a_units*(1-e_sq) / (1+e*cos(T_anom))) * mass_ratio
+            
+            
+            E1 = kepler(M1, e)
+            E2 = kepler(M2, e)
+            
+            # Get positions and velocities of the STAR.
+            x_pos_avg, y_pos_avg = pos_avg(a_star_units, mean_motion, e, E1, E2, start_time, end_time)
+            
 
             # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
-            r_vec[0] = -cos(T_anom)*r_star
-            r_vec[1] = -sin(T_anom)*r_star
+            r_vec[0] = -x_pos_avg
+            r_vec[1] = -y_pos_avg
             r_vec[2] = 0
 
             # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
@@ -419,43 +397,38 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             # ang_pos is the angular position of the star relative to barycenter in milli-arcseconds.
             ang_pos[0] = rot_vec[0]*cm_2_mas
             ang_pos[1] = rot_vec[1]*cm_2_mas
-
-            ## Sum up each coordinate independently in anticipation of taking an average
-            #ang_pos_x_sum += ang_pos[0]
-            #ang_pos_y_sum += ang_pos[1]
-
+            
+            
+            ang_pos_avg[l][0] = ang_pos[0]
+            ang_pos_avg[l][1] = ang_pos[1]
+            
             ################### Angular Velocities ########################
+            
             # I don't need angular velocities for Hip, only ang_pos.
             if l == 0:
                 continue
+            
+            x_vel_avg, y_vel_avg = vel_avg(a_star_units, mean_motion, e, E1, E2, start_time, end_time)
 
-            v_vec(a, per, e, T_anom, v_vec_pl)
-            # Stellar velocity is related to planet through their masses.
-            # Also they are in opposite directions, so add negative, but it shouldn't affect the final answer.
-            v_vec_star[0] = -v_vec_pl[0] * mass_ratio
-            v_vec_star[1] = -v_vec_pl[1] * mass_ratio
-            v_vec_star[2] = -v_vec_pl[2] * mass_ratio
+            v_vec_star[0] = -x_vel_avg
+            v_vec_star[1] = -y_vel_avg
+            v_vec_star[2] = 0
 
 
             mat_mul(rot_mtrx, v_vec_star, rotated_v_vec)
 
             # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
+            # Since period is in days and a_star_units in cm, velocities are in cm/day.
             mu[0] = rotated_v_vec[0]*cmd_2_masyr
             mu[1] = rotated_v_vec[1]*cmd_2_masyr
+            
+            
+            mu_avg[l][0] = mu[0]
+            mu_avg[l][1] = mu[1]
 
             ###############################################################
             ###############################################################
 
-            mu_x_sum += mu[0]
-            mu_y_sum += mu[1]
-
-        # Once we have the sums over the whole epoch, divide by number of points to get the avg.
-        ang_pos_avg[l][0] = ang_pos_x_sum/(t_num+1)
-        ang_pos_avg[l][1] = ang_pos_y_sum/(t_num+1)
-
-        mu_avg[l][0] = mu_x_sum/(t_num+1)
-        mu_avg[l][1] = mu_y_sum/(t_num+1)
-        ### HHEEEEYYYY  OOOOOHHHH #####
 
         mu_gaia = mu_avg[1]
 
@@ -472,6 +445,68 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         astro_prob_list[j] = prob
 
     return astro_prob_list
+
+def pos_avg(a, n, e, E1, E2, t1, t2):
+    """
+    Calculate the average x/y positions of an object on an elliptical orbit, 
+    where (0,0) is the focus.
+    
+    a (cm): semi-major axis
+    n (1/days): 2pi/per
+    t1, t2 (days): beginning and ending time to calculate average
+    
+    returns: Average x and y positions (cm)
+    """
+    
+    x_term_1 = a/n * (sin(E1) - e/2 * (E1+0.5*sin(2*E1)) -e*E1 + e**2 * sin(E1))
+    x_term_2 = a/n * (sin(E2) - e/2 * (E2+0.5*sin(2*E2)) -e*E2 + e**2 * sin(E2))
+    
+    x_integral = x_term_2 - x_term_1
+    
+    x_avg = 1/(t2-t1) * x_integral
+    
+    y_term_1 = -a*sqrt(1-e**2)/n * (cos(E1) - e/2 * sin(E1)**2 )
+    y_term_2 = -a*sqrt(1-e**2)/n * (cos(E2) - e/2 * sin(E2)**2 )
+     
+    y_integral = y_term_2 - y_term_1
+     
+    y_avg = 1/(t2-t1) * y_integral
+    
+    
+    return x_avg, y_avg
+
+def vel_avg(a, n, e, E1, E2, t1, t2):
+    """
+    Calculate the average x/y positions of an object on an elliptical orbit, 
+    where (0,0) is the focus.
+
+    a (cm): semi-major axis
+    n (1/days): 2pi/per
+    t1, t2 (days): beginning and ending time to calculate average
+    
+    returns: Average x and y velocities (cm/day)
+    """
+    
+    r1 = a*(1-e*cos(E1))
+    r2 = a*(1-e*cos(E2))
+
+    x_term_1 = a**2/r1 * (cos(E1) + e/2 * sin(E1)**2)
+    x_term_2 = a**2/r2 * (cos(E2) + e/2 * sin(E2)**2)
+
+    x_integral = x_term_2 - x_term_1
+
+    x_avg = 1/(t2-t1) * x_integral
+
+
+    y_term_1 = a**2*sqrt(1-e**2)/r1 * (sin(E1) - e/2 * (E1 + 0.5*sin(2*E1)) )
+    y_term_2 = a**2*sqrt(1-e**2)/r2 * (sin(E2) - e/2 * (E2 + 0.5*sin(2*E2)) )
+ 
+    y_integral = y_term_2 - y_term_1
+ 
+    y_avg = 1/(t2-t1) * y_integral
+
+
+    return x_avg, y_avg
 
 
 cdef double likelihood_astro(double data, double data_err, double model):
@@ -601,30 +636,30 @@ cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
         for k in range(3):
             out_vec[i] += mat[i][k]*in_vec[k]
 
-#@profile
-cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
-    """
-    Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't capture the velocity perpendicular to the radial vector.
-    Instead, v is the total velocity of the object. M&D doesn't actually give v vector explicitly, but I believe it's v_vec = [x_dot, y_dot, 0].
-
-    Since periods created in units of days, v_vec has units of cm/day.
-    v_vec is a list.
-    """
-    cdef double n_a, e_term, x_dot, y_dot
-
-    #cdef double v_vec[3]
-
-    n_a = (two_pi/per)*a
-    e_term = sqrt(1-e**2)
-
-    x_dot = -n_a / e_term * sin(nu)
-    y_dot = +n_a / e_term * (e + cos(nu))
-
-    out_vec[0] = x_dot
-    out_vec[1] = y_dot
-    out_vec[2] = 0
-
-    #return v_vec
+##@profile
+#cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
+#    """
+#    Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't capture the velocity perpendicular to the radial vector.
+#    Instead, v is the total velocity of the object. M&D doesn't actually give v vector explicitly, but I believe it's v_vec = [x_dot, y_dot, 0].
+#
+#    Since periods created in units of days, v_vec has units of cm/day.
+#    v_vec is a list.
+#    """
+#    cdef double n_a, e_term, x_dot, y_dot
+#
+#    #cdef double v_vec[3]
+#
+#    n_a = (two_pi/per)*a
+#    e_term = sqrt(1-e**2)
+#
+#    x_dot = -n_a / e_term * sin(nu)
+#    y_dot = +n_a / e_term * (e + cos(nu))
+#
+#    out_vec[0] = x_dot
+#    out_vec[1] = y_dot
+#    out_vec[2] = 0
+#
+#    #return v_vec
 
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
