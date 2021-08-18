@@ -99,8 +99,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
     # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991)
-    E_anom_astro = ck.kepler_array(M_anom_list, e_list)
-    T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro as T_anom_0.
+    #E_anom_astro = ck.kepler_array(M_anom_list, e_list)
+    #T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro as T_anom_0.
 
     # Arguments of peri, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
@@ -116,7 +116,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     m_inds = np.digitize(m_list, bins = m_bins)
 
 
-    return a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, T_anom_astro, a_inds, m_inds
+    return a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, M_anom_list, a_inds, m_inds
 
 
 
@@ -247,7 +247,8 @@ def rv_post(double gammadot, double gammadot_err,
     cdef double err[2]
 
 
-    gammadot_list, gammaddot_list = gamma_array(m_star, a_list, m_list, per_list, e_list, i_list, om_list, E_anom_list)
+    gammadot_list, gammaddot_list = gamma_array(m_star, a_list, m_list, 
+                                                per_list, e_list, i_list, om_list, E_anom_list)
 
 
     data[0] = gammadot
@@ -271,8 +272,8 @@ def rv_post(double gammadot, double gammadot_err,
 #@profile
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
-               double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list,
-               int num_points, int grid_num, int t_num):
+               double [:] e_list, double [:] i_list, double [:] om_list, double [:] M_anom_list,
+               int num_points, int grid_num):
 
 
     #cdef double rot_mtrx_list[3][3]
@@ -296,10 +297,10 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     cdef double time_steps[2]
     cdef double both[2][2]
 
-    cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0
+    cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, M_anom_0
     cdef double mass_ratio_constant, cm_2_mas, cms_2_masyr
     cdef double mean_motion, sqrt_eterm, a_units, e_sq, r_star_num_fac
-    cdef double ang_pos_x_sum, ang_pos_y_sum, mu_x_sum, mu_y_sum
+    cdef double M1, M2, E1, E2, x_pos_avg, y_pos_avg, x_vel_avg, y_vel_avg
     cdef double delta_mu_model, chi_sq, prob
 
     cdef double time_endpoints[2][2]
@@ -312,10 +313,6 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     cdef double [:] astro_prob_list = np.zeros(shape=(num_points), dtype=np.float64)
     cdef double [:,:] astro_prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
 
-    # Moved to global so they can be used in make_arrays()
-    #hip_times  = [2447837.75, 2449065.15]
-    #gaia_times = [2456863.5, 2457531.5]
-
     # Time in days between epoch mid-points
     baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
 
@@ -326,8 +323,8 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     time_endpoints = [[hip_times[0], gaia_times[0]], [hip_times[1], gaia_times[1]]]
 
     # Calculate these now so they aren't re-calculated many times in each loop
-    time_steps[0] = (hip_times[1] - hip_times[0])/(t_num+1)
-    time_steps[1] = (gaia_times[1] - gaia_times[0])/(t_num+1)
+    #time_steps[0] = (hip_times[1] - hip_times[0])/(t_num+1)
+    #time_steps[1] = (gaia_times[1] - gaia_times[0])/(t_num+1)
 
 
     ############   #############
@@ -352,16 +349,16 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         e = e_list[j]
         i = i_list[j]
         om = om_list[j]
-        T_anom_0 = T_anom_0_list[j]
+        M_anom_0 = M_anom_list[j]
         
         
         # Terms to use in deeper loops
-        mass_ratio = m*mass_ratio_constant # M_pl/M_sun in proper units
+        mass_ratio = m*mass_ratio_constant # M_pl/M_star in grams/grams
         
         a_units = a*au
         a_star_units = a_units*mass_ratio # Calculate the sma (cm) of the star's orbit around barycenter. 
         
-        mean_motion = two_pi/per
+        mean_motion = two_pi/per # Units of 1/day because per is in days
         sqrt_eterm = sqrt((1+e)/(1-e))
         e_sq = e**2
         rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
@@ -373,10 +370,9 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
             
             
-            ## NOTE that I haven't put in randomly sampled starting times yet, so for now it's set to 0. I just need to add on M_anom from make_arrays(), but I don't want to change that yet.
-            M1 = mean_motion*start_time
-            M2 = mean_motion*end_time
-            
+            ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
+            M1 = mean_motion*start_time + M_anom_0
+            M2 = mean_motion*end_time + M_anom_0
             
             E1 = kepler(M1, e)
             E2 = kepler(M2, e)
@@ -431,7 +427,8 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
 
         mu_gaia = mu_avg[1]
-
+        if j==0:
+            print(a, m, per, e, i, om)
         # To get the positional avg., subtract the epoch positions and divide by the time between in years.
         # Units of mas/yr
         mu_hg[0] = (ang_pos_avg[1][0] - ang_pos_avg[0][0])/baseline_yrs # x-comp. = gaia_x - hip_x
@@ -446,7 +443,8 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
     return astro_prob_list
 
-def pos_avg(a, n, e, E1, E2, t1, t2):
+cdef pos_avg(double a, double n, double e, double E1, double E2, 
+                  double t1, double t2):
     """
     Calculate the average x/y positions of an object on an elliptical orbit, 
     where (0,0) is the focus.
@@ -458,15 +456,18 @@ def pos_avg(a, n, e, E1, E2, t1, t2):
     returns: Average x and y positions (cm)
     """
     
-    x_term_1 = a/n * (sin(E1) - e/2 * (E1+0.5*sin(2*E1)) -e*E1 + e**2 * sin(E1))
-    x_term_2 = a/n * (sin(E2) - e/2 * (E2+0.5*sin(2*E2)) -e*E2 + e**2 * sin(E2))
+    cdef double x_term_1, x_term_2, x_integral, x_avg,\
+                y_term_1, y_term_2, y_integral, y_avg
+    
+    x_term_1 = a/n * ((1+e**2)*sin(E1) - e/4 * (6*E1+sin(2*E1)))
+    x_term_2 = a/n * ((1+e**2)*sin(E2) - e/4 * (6*E2+sin(2*E2)))
     
     x_integral = x_term_2 - x_term_1
     
     x_avg = 1/(t2-t1) * x_integral
     
-    y_term_1 = -a*sqrt(1-e**2)/n * (cos(E1) - e/2 * sin(E1)**2 )
-    y_term_2 = -a*sqrt(1-e**2)/n * (cos(E2) - e/2 * sin(E2)**2 )
+    y_term_1 = -a*sqrt(1-e**2)/n * (cos(E1) - e/2 * cos(E1)**2 )
+    y_term_2 = -a*sqrt(1-e**2)/n * (cos(E2) - e/2 * cos(E2)**2 )
      
     y_integral = y_term_2 - y_term_1
      
@@ -475,7 +476,8 @@ def pos_avg(a, n, e, E1, E2, t1, t2):
     
     return x_avg, y_avg
 
-def vel_avg(a, n, e, E1, E2, t1, t2):
+cdef vel_avg(double a, double n, double e, double E1, double E2, 
+                  double t1, double t2):
     """
     Calculate the average x/y positions of an object on an elliptical orbit, 
     where (0,0) is the focus.
@@ -486,6 +488,10 @@ def vel_avg(a, n, e, E1, E2, t1, t2):
     
     returns: Average x and y velocities (cm/day)
     """
+    
+    cdef double x_term_1, x_term_2, x_integral, x_avg,\
+                y_term_1, y_term_2, y_integral, y_avg,\
+                r1, r2
     
     r1 = a*(1-e*cos(E1))
     r2 = a*(1-e*cos(E2))
@@ -636,30 +642,6 @@ cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
         for k in range(3):
             out_vec[i] += mat[i][k]*in_vec[k]
 
-##@profile
-#cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
-#    """
-#    Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't capture the velocity perpendicular to the radial vector.
-#    Instead, v is the total velocity of the object. M&D doesn't actually give v vector explicitly, but I believe it's v_vec = [x_dot, y_dot, 0].
-#
-#    Since periods created in units of days, v_vec has units of cm/day.
-#    v_vec is a list.
-#    """
-#    cdef double n_a, e_term, x_dot, y_dot
-#
-#    #cdef double v_vec[3]
-#
-#    n_a = (two_pi/per)*a
-#    e_term = sqrt(1-e**2)
-#
-#    x_dot = -n_a / e_term * sin(nu)
-#    y_dot = +n_a / e_term * (e + cos(nu))
-#
-#    out_vec[0] = x_dot
-#    out_vec[1] = y_dot
-#    out_vec[2] = 0
-#
-#    #return v_vec
 
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
