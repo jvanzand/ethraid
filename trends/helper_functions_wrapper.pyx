@@ -92,10 +92,10 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
 
     # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
-    M_anom_list = np.random.uniform(0, two_pi, num_points)
+    M_anom_0 = np.random.uniform(0, two_pi, num_points)
 
     # Evolving M_anom forward to the epoch of RV calculations.
-    M_anom_evolved = M_anom_list + two_pi*((rv_epoch - hip_times[0])/per_list)
+    M_anom_evolved = M_anom_0 + two_pi*((rv_epoch - hip_times[0])/per_list)
     E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
     # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991)
@@ -115,8 +115,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     a_inds = np.digitize(a_list, bins = a_bins)
     m_inds = np.digitize(m_list, bins = m_bins)
 
-
-    return a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, M_anom_list, a_inds, m_inds
+    return a_list, m_list, per_list, e_list, i_list, om_list, M_anom_0, E_anom_rv, a_inds, m_inds
 
 
 
@@ -272,8 +271,8 @@ def rv_post(double gammadot, double gammadot_err,
 #@profile
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
-               double [:] e_list, double [:] i_list, double [:] om_list, double [:] M_anom_list,
-               int num_points, int grid_num):
+               double [:] e_list, double [:] i_list, double [:] om_list, double [:] M_anom_0_list,
+               int num_points, int grid_num, int t_num):
 
 
     #cdef double rot_mtrx_list[3][3]
@@ -349,8 +348,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         e = e_list[j]
         i = i_list[j]
         om = om_list[j]
-        M_anom_0 = M_anom_list[j]
-        
+        M_anom_0 = M_anom_0_list[j]
         
         # Terms to use in deeper loops
         mass_ratio = m*mass_ratio_constant # M_pl/M_star in grams/grams
@@ -595,12 +593,14 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
 #@profile
 cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
     """
-    This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. They multiply it immediately by r*[cos(f), sin(f), 0]
-    because this gives the projection of position onto the sky. However, we also need the projection of velocity, so we need the matrix
-    before multiplication by the position vector.
+    This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. 
+    They multiply it immediately by r*[cos(f), sin(f), 0] because this gives the 
+    projection of position onto the sky. However, we also need the projection of 
+    velocity, so we need the matrix before multiplication by the position vector.
 
-    This function doesn't return anything. Instead, declare a matrix in your function and this will update it, saving
-    lots of time by not allocating memory to and returning a matrix.
+    This function doesn't return anything. Instead, declare a matrix in your 
+    function and this will update it, saving lots of time by not allocating memory 
+    to and returning a matrix.
     """
     cdef double sin_Om, sin_om, sin_i, cos_Om, cos_om, cos_i
 
@@ -642,6 +642,33 @@ cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
         for k in range(3):
             out_vec[i] += mat[i][k]*in_vec[k]
 
+<<<<<<< HEAD
+=======
+#@profile
+cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
+    """
+    Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't 
+    capture the velocity perpendicular to the radial vector. Instead, v is the total 
+    velocity of the object. M&D doesn't actually give v vector explicitly, but I believe 
+    it's v_vec = [x_dot, y_dot, 0].
+
+    Since period is created in units of days, v_vec has units of cm/day.
+    v_vec is a list.
+    """
+    cdef double n_a, e_term, x_dot, y_dot
+
+    n_a = (two_pi/per)*a
+    e_term = sqrt(1-e**2)
+
+    x_dot = -n_a / e_term * sin(nu)
+    y_dot = +n_a / e_term * (e + cos(nu))
+
+    out_vec[0] = x_dot
+    out_vec[1] = y_dot
+    out_vec[2] = 0
+
+    #return v_vec
+>>>>>>> main
 
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
@@ -835,7 +862,6 @@ def period_lines(m, per, m_star):
     m_star_grams = m_star*M_sun
     
     a_cm = ((per_sec/two_pi)**2*G*(m_grams+m_star_grams))**(0.3333333333)
-    
     
     
     return a_cm / au

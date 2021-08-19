@@ -95,7 +95,8 @@ tick_size = 30
 np.set_printoptions(threshold=np.inf)
 
 
-a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, M_anom_list, a_inds, m_inds = \
+
+a_list, m_list, per_list, e_list, i_list, om_list, M_anom_0, E_anom_rv, a_inds, m_inds = \
                                             hlpw.make_arrays(m_star, a_lim, m_lim, rv_epoch, grid_num, num_points)
 
 
@@ -113,7 +114,8 @@ if delta_mu == None or delta_mu_err == None:
 else:
     astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
                                  m_list, per_list, e_list, i_list, om_list,
-                                 M_anom_list, num_points, grid_num)                      
+                                 M_anom_0, num_points, grid_num, t_num)                      
+                                 
     post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
     post_astro = post_astro/post_astro.sum()
     
