@@ -92,15 +92,15 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
 
     # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
-    M_anom_list = np.random.uniform(0, two_pi, num_points)
+    M_anom_0 = np.random.uniform(0, two_pi, num_points)
 
     # Evolving M_anom forward to the epoch of RV calculations.
-    M_anom_evolved = M_anom_list + two_pi*((rv_epoch - hip_times[0])/per_list)
+    M_anom_evolved = M_anom_0 + two_pi*((rv_epoch - hip_times[0])/per_list)
     E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
     # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991)
-    E_anom_astro = ck.kepler_array(M_anom_list, e_list)
-    T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro as T_anom_0.
+    #E_anom_astro = ck.kepler_array(M_anom_list, e_list)
+    #T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro as T_anom_0.
 
     # Arguments of peri, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
@@ -116,7 +116,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     m_inds = np.digitize(m_list, bins = m_bins)
 
 
-    return a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, T_anom_astro, a_inds, m_inds
+    return a_list, m_list, per_list, e_list, i_list, om_list, M_anom_0, E_anom_rv, a_inds, m_inds
 
 
 
@@ -271,7 +271,7 @@ def rv_post(double gammadot, double gammadot_err,
 #@profile
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
-               double [:] e_list, double [:] i_list, double [:] om_list, double [:] T_anom_0_list,
+               double [:] e_list, double [:] i_list, double [:] om_list, double [:] M_anom_0_list,
                int num_points, int grid_num, int t_num):
 
 
@@ -296,7 +296,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     cdef double time_steps[2]
     cdef double both[2][2]
 
-    cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, T_anom_0
+    cdef double baseline_yrs, start_time, end_time, elapsed_time, a, m, per, e, i, om, M_anom_0
     cdef double mass_ratio_constant, cm_2_mas, cms_2_masyr
     cdef double two_pi_ovr_per, sqrt_eterm, a_units, e_sq, r_star_num_fac
     cdef double ang_pos_x_sum, ang_pos_y_sum, mu_x_sum, mu_y_sum
@@ -352,7 +352,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         e = e_list[j]
         i = i_list[j]
         om = om_list[j]
-        T_anom_0 = T_anom_0_list[j]
+        M_anom_0 = M_anom_0_list[j]
         
         
         # Terms to use in deeper loops
@@ -381,14 +381,14 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
                 elapsed_time = k*time_step + start_time
 
 
-                M_anom = two_pi_ovr_per*elapsed_time # Period and elapsed_time are in units of days
+                M_anom = M_anom_0 + two_pi_ovr_per*elapsed_time # Period and elapsed_time are in units of days
 
                 # This is the eccentric anomaly at a given point in the epoch. It is different from the starting E_anomalies in E_anom_list in the make_arrays function.
                 E_anom = kepler(M_anom, e)
 
 
                 # T_anom replaces T_prog from the outdated code. It is the true anomaly after adding the randomly-sampled starting T_anom_0.
-                T_anom = T_anom_0 + 2*atan( sqrt_eterm * tan(E_anom/2))
+                T_anom = 2*atan( sqrt_eterm * tan(E_anom/2))
 
                 ################### Angular Positions ######################
 
