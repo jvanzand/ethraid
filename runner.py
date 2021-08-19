@@ -88,7 +88,7 @@ print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e5)
+num_points = int(1e6)
 
 tick_num = 6
 tick_size = 30
@@ -114,7 +114,7 @@ if delta_mu == None or delta_mu_err == None:
 else:
     astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
                                  m_list, per_list, e_list, i_list, om_list,
-                                 M_anom_0, num_points, grid_num, t_num)                      
+                                 M_anom_0, num_points, grid_num)                      
                                  
     post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
     post_astro = post_astro/post_astro.sum()

@@ -272,11 +272,11 @@ def rv_post(double gammadot, double gammadot_err,
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
                double [:] e_list, double [:] i_list, double [:] om_list, double [:] M_anom_0_list,
-               int num_points, int grid_num, int t_num):
+               int num_points, int grid_num):
 
 
     #cdef double rot_mtrx_list[3][3]
-    cdef double [:,::1] rot_mtrx #= rot_mtrx_list # This makes rot_mtrx a memview
+    cdef double [:,::1] rot_mtrx # This makes rot_mtrx a memview
     rot_mtrx = np.zeros((3,3),dtype=np.float64)
 
     cdef double M_anom, E_anom, T_anom, r_pl, r_star, mass_ratio
@@ -641,34 +641,6 @@ cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
         out_vec[i] = 0
         for k in range(3):
             out_vec[i] += mat[i][k]*in_vec[k]
-
-<<<<<<< HEAD
-=======
-#@profile
-cdef void v_vec(double a, double per, double e, double nu, double [:] out_vec):
-    """
-    Uses Murray & Dermott equation 2.36. r_dot is not what we want because it doesn't 
-    capture the velocity perpendicular to the radial vector. Instead, v is the total 
-    velocity of the object. M&D doesn't actually give v vector explicitly, but I believe 
-    it's v_vec = [x_dot, y_dot, 0].
-
-    Since period is created in units of days, v_vec has units of cm/day.
-    v_vec is a list.
-    """
-    cdef double n_a, e_term, x_dot, y_dot
-
-    n_a = (two_pi/per)*a
-    e_term = sqrt(1-e**2)
-
-    x_dot = -n_a / e_term * sin(nu)
-    y_dot = +n_a / e_term * (e + cos(nu))
-
-    out_vec[0] = x_dot
-    out_vec[1] = y_dot
-    out_vec[2] = 0
-
-    #return v_vec
->>>>>>> main
 
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
