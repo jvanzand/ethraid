@@ -385,6 +385,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             r_vec[0] = -x_pos_avg
             r_vec[1] = -y_pos_avg
             r_vec[2] = 0
+            
 
             # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
             mat_mul(rot_mtrx, r_vec, rot_vec)
