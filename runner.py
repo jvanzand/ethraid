@@ -72,8 +72,8 @@ print('Min a is: ', min_a)
 # 191939
 min_a = 0.5
 min_m = 0.5
-a_lim = (0.8*min_a, 5e1)
-m_lim = (0.8*min_m, 2e2)
+a_lim = (0.8*min_a, 5e3)
+m_lim = (0.8*min_m, 2e4)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
@@ -90,7 +90,7 @@ print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e6)
+num_points = int(1e7)
 
 tick_num = 6
 tick_size = 30
