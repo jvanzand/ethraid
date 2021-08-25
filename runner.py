@@ -70,8 +70,10 @@ print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
 # 191939
-a_lim = (1.9, 5e1)
-m_lim = (1.5, 2e2)
+min_a = 0.5
+min_m = 0.5
+a_lim = (0.8*min_a, 5e1)
+m_lim = (0.8*min_m, 2e2)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)

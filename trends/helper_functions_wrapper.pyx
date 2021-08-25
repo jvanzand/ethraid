@@ -375,11 +375,12 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             E1 = kepler(M1, e)
             E2 = kepler(M2, e)
             
-            # Get positions and velocities of the STAR.
+            # Get position of the STAR.
             x_pos_avg, y_pos_avg = pos_avg(a_star_units, mean_motion, e, E1, E2, start_time, end_time)
             
 
             # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
+            # Since we're using the E_anom for the planet, the star is located in the opposite direction
             r_vec[0] = -x_pos_avg
             r_vec[1] = -y_pos_avg
             r_vec[2] = 0
@@ -399,12 +400,14 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             
             ################### Angular Velocities ########################
             
-            # I don't need angular velocities for Hip, only ang_pos.
+            # I only need Gaia velocities, not Hip velocities
             if l == 0:
                 continue
             
+            # Get velocity of the star
             x_vel_avg, y_vel_avg = vel_avg(a_star_units, mean_motion, e, E1, E2, start_time, end_time)
 
+            # Since we're using the E_anom for the planet, the star is moving in the opposite direction
             v_vec_star[0] = -x_vel_avg
             v_vec_star[1] = -y_vel_avg
             v_vec_star[2] = 0
@@ -417,7 +420,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             mu[0] = rotated_v_vec[0]*cmd_2_masyr
             mu[1] = rotated_v_vec[1]*cmd_2_masyr
             
-            
+            # mu_avg is a 2x2 array. The top row stays empty because we skip Hip. The bottom row is Gaia prop. motion
             mu_avg[l][0] = mu[0]
             mu_avg[l][1] = mu[1]
 
@@ -428,6 +431,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         mu_gaia = mu_avg[1]
 
         # To get the positional avg., subtract the epoch positions and divide by the time between in years.
+        # First index tells Hip ([0]) or Gaia ([1]), second index tells x ([0]) or y ([1])
         # Units of mas/yr
         mu_hg[0] = (ang_pos_avg[1][0] - ang_pos_avg[0][0])/baseline_yrs # x-comp. = gaia_x - hip_x
         mu_hg[1] = (ang_pos_avg[1][1] - ang_pos_avg[0][1])/baseline_yrs # y-comp. = gaia_y - hip_y
@@ -718,11 +722,14 @@ def contour_levels_1D(prob_list, sig_list, t_num = 1e3):
 
 def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
     """
-    Given a 2D probability array, this function collapses the array along each axis to find the 68% confidence interval.
+    Given a 2D probability array, this function collapses the array along each 
+    axis to find the 68% confidence interval.
 
     value_spaces represents the parameter intervals covered by the array along each axis.
-    It is expected in the form [(min_value1, max_value1), (min_value2, max_value2)], where 1 and 2 refer to the 0th and 1st axes.
-    Note that the limits MUST be in this order: if the array has shape (x_num, y_num), then value_spaces must be [x_lims, y_lims].
+    It is expected in the form [(min_value1, max_value1), (min_value2, max_value2)], 
+    where 1 and 2 refer to the 0th and 1st axes.
+    Note that the limits MUST be in this order: if the array has shape (x_num, y_num), 
+    then value_spaces must be [x_lims, y_lims].
     """
     bounds_list = []
     for i in range(2):
