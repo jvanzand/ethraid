@@ -10,7 +10,7 @@ from libc.math cimport cos
 # (not strictly necessary for this example, but good practice)
 np.import_array()
 
-# Wrapping kepler(M,e) a simple function that takes two doubles as
+# Wrapping kepler(M,e), a simple function that takes two doubles as
 # arguments and returns a double
 cdef extern from "kepler.c":
     double kepler(double M, double e)
@@ -36,7 +36,6 @@ def kepler_array(double [:,] M, double [:,] e):
 def kepler_single(double M, double e):
     
     cdef double E
-
     E = kepler(M, e)
 
     return E

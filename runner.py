@@ -43,17 +43,21 @@ params_T001194 = (0.98, 150.3*pc_in_cm, 0.019, 0.023, -6.2e-5, 5.8e-5,
                     567, 1, 2458917.385183, None, None)
 
 # Synthetic planet params to test trend code
-params_synthetic = (0.79, 21.5*pc_in_cm, 0.059206530869421, 0.00592065308694, -2.0423039552e-4, -2.0423039552e-5,
-                1626, 300, 2457654.089, 9.762827453051148, 0.9762827453051148)
+params_synthetic = (0.79, 21.5*pc_in_cm, 0.088372596, 0.0088372596, -0.0001712052, -0.00001712052,
+                1626, 300, 2457654.089, 47.176, 4.7176)
+                
+# GL758, an example star in Tim Brandt's Orvara code. Using this to compare results.
+params_gl758 = (0.95, 15.5*pc_in_cm, -0.00633, 0.00025, -8.19e-7, 0.67e-7,
+                8413.010, 60, 2454995.123, 1.0397, 0.0261)
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_191939
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_gl758
 
 
 # min_per is 4xbaseline because we see ~no curvature yet.
-min_per = 4*rv_baseline
-# min_per = rv_baseline
+# min_per = 4*rv_baseline
+min_per = rv_baseline
 min_K = max_rv
 
 min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -69,11 +73,11 @@ print('Min m is: ', min_m)
 print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-# 191939
-min_a = 0.5
-min_m = 0.5
-a_lim = (0.8*min_a, 5e3)
-m_lim = (0.8*min_m, 2e4)
+# # 191939
+# min_a = 0.5
+# min_m = 0.5
+# a_lim = (0.8*min_a, 5e1)
+# m_lim = (0.8*min_m, 2e2)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
@@ -86,11 +90,14 @@ m_lim = (0.8*min_m, 2e4)
 # # synthetic
 # a_lim = (0.8*min_a, 5e1)
 # m_lim = (0.8*min_m, 1e5)
+# GL758
+a_lim = (0.5*min_a, 2e2)
+m_lim = (0.5*min_m, 4e2)
 print(a_lim[0], min_a)
 
 grid_num = 100
 
-num_points = int(1e7)
+num_points = int(1e8)
 
 tick_num = 6
 tick_size = 30
@@ -163,7 +170,8 @@ min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)
 
 # Print out the 2-sigma boundaries for the total posterior
 bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
-print('a_lim, m_lim = ', bounds[0], bounds[1])
+print('a_lim = ', bounds[0], ' AU')
+print('m_lim = ', bounds[1], ' M_J')
 
 
 mass_rect = ptch.Rectangle((0, 0), grid_num-1, min_index_m, color='gray', alpha=1.0)
@@ -196,19 +204,31 @@ gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='i
 
 # Time between the midpoints of the two missions
 baseline_days = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)
+gaia_baseline_days = gaia_times[1] - gaia_times[0]
 
 # Log-spaced masses in Jupiter masses
 const_per_m_list = np.logspace(np.log10(min_m), np.log10(m_lim[1]))
 const_per_m_inds = hlpw.value2index(const_per_m_list, (0, grid_num-1), m_lim)
 
-for f in range(5):
-    
-    const_per_a_list = hlpw.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
-    const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
-    
-    values_in_bounds = np.where(const_per_a_list >= min_a)
+# # Lines of constant period for p = baseline_days/n
+# for f in range(5):
+#
+#     const_per_a_list = hlpw.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
+#     const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+#
+#     values_in_bounds = np.where(const_per_a_list >= min_a)
+#
+#     plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--k', alpha=0.5)
 
-    plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--k', alpha=0.5)
+# # Lines of constant period for p = gaia_baseline_days/n
+# for f in range(5):
+#
+#     const_per_a_list = hlpw.period_lines(const_per_m_list, gaia_baseline_days/(f+1), m_star)
+#     const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+#
+#     values_in_bounds = np.where(const_per_a_list >= min_a)
+#
+#     plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--r', alpha=0.5)
 ###################################################
 
 tick_array = np.linspace(0, grid_num-1, tick_num).astype(int)

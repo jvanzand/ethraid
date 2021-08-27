@@ -362,7 +362,6 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
         r_star_num_fac = a_units*(1-e_sq)
 
-
         for l in range(2): # Hipparcos or Gaia
             start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
             end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
