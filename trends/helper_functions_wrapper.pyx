@@ -196,7 +196,7 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per,
     sin_E = sin(E)
 
     
-    tan_Eovr2 = (1-cos_E)/sin_E
+    tan_Eovr2 = sin_E/(1+cos_E)
     
     
     nu = 2*atan(sqrt_eterm*tan_Eovr2)
