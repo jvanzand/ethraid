@@ -3,6 +3,7 @@ import astropy.constants as c
 import numpy as np
 from astropy.time import Time
 from scipy.stats import loguniform, beta
+import time
 
 import radvel as rv
 import matplotlib.pyplot as plt
@@ -52,12 +53,12 @@ params_gl758 = (0.95, 15.5*pc_in_cm, -0.00633, 0.00025, -8.19e-7, 0.67e-7,
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_gl758
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params_191939
 
 
 # min_per is 4xbaseline because we see ~no curvature yet.
-# min_per = 4*rv_baseline
-min_per = rv_baseline
+min_per = 4*rv_baseline
+# min_per = rv_baseline
 min_K = max_rv
 
 min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -73,11 +74,11 @@ print('Min m is: ', min_m)
 print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-# # 191939
+# 191939
 # min_a = 0.5
 # min_m = 0.5
-# a_lim = (0.8*min_a, 5e1)
-# m_lim = (0.8*min_m, 2e2)
+a_lim = (0.8*min_a, 5e1)
+m_lim = (0.8*min_m, 2e2)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
@@ -90,9 +91,9 @@ print('Min a is: ', min_a)
 # # synthetic
 # a_lim = (0.8*min_a, 5e1)
 # m_lim = (0.8*min_m, 1e5)
-# GL758
-a_lim = (0.5*min_a, 2e2)
-m_lim = (0.5*min_m, 4e2)
+# # GL758
+# a_lim = (0.5*min_a, 2e2)
+# m_lim = (0.5*min_m, 4e2)
 print(a_lim[0], min_a)
 
 grid_num = 100
@@ -113,6 +114,9 @@ print('made arrays')
 
 fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
 
+##
+start_time = time.time()
+##
 
 # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
 if delta_mu == None or delta_mu_err == None:
@@ -141,12 +145,17 @@ post_tot = np.array(hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds)
 post_rv = post_rv/post_rv.sum()
 post_tot = post_tot/post_tot.sum()
 
+##
+end_time = time.time()
+##
+
 t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
 t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
 post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
 post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
 
+print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
 # plt.imsave('post_rv.png', post_rv, origin='lower')
 # plt.imsave('post_astro.png', post_astro, origin='lower')
 # plt.imsave('post_tot.png', post_tot, origin='lower')
