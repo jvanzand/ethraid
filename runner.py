@@ -1,15 +1,16 @@
 import matplotlib.pyplot as plt
 import astropy.constants as c
 import numpy as np
-from astropy.time import Time
+# from astropy.time import Time
 from scipy.stats import loguniform, beta
 import time
 
 import radvel as rv
-import matplotlib.pyplot as plt
-import matplotlib.patches as ptch
+# import matplotlib.pyplot as plt
+# import matplotlib.patches as ptch
 
 from trends import helper_functions_wrapper as hlpw
+import plotter
 
 
 ## Constants ##
@@ -64,7 +65,6 @@ min_K = max_rv
 min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
 min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(M_jup/M_sun)))
 
-# print('!!!', min_m)
 # # Experimental: revised min_m using gdot. The idea is to find the smallest mass that could produce the observed gdot at the known minimum period. This is not completely right because it uses min_K to get min_m, min_m to get min_a, and then min_a to get a new value for min_m.
 #
 # min_m = (gammadot*100/(24*3600))*((min_per*24*3600)/6.283185)**2*(m_star*M_sun)/(min_a*14959787070000.0) / M_jup
@@ -97,11 +97,7 @@ m_lim = (0.8*min_m, 2e2)
 print(a_lim[0], min_a)
 
 grid_num = 100
-
 num_points = int(1e6)
-
-tick_num = 6
-tick_size = 30
 np.set_printoptions(threshold=np.inf)
 
 
@@ -112,8 +108,6 @@ a_list, m_list, per_list, e_list, i_list, om_list, M_anom_0, E_anom_rv, a_inds, 
 
 print('made arrays')
 
-fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
-
 ##
 start_time = time.time()
 ##
@@ -122,7 +116,7 @@ start_time = time.time()
 if delta_mu == None or delta_mu_err == None:
     astro_list = np.ones(num_points)
     post_astro = np.ones((grid_num, grid_num))
-    print('all_ones')
+    print('No astrometry data provided. Bounds will be based on RVs only.')
     
 else:
     astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
@@ -131,9 +125,6 @@ else:
                                  
     post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
     post_astro = post_astro/post_astro.sum()
-    
-    t_contours_astro = hlpw.contour_levels(post_astro, [1,2])
-    post_astro_cont = ax.contourf(post_astro, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
     
 
 rv_list = hlpw.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, 
@@ -149,11 +140,6 @@ post_tot = post_tot/post_tot.sum()
 end_time = time.time()
 ##
 
-t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
-t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
-
-post_rv_cont = ax.contourf(post_rv, t_contours_rv, cmap='Greens', extend='max', alpha=0.5)
-post_tot_cont = ax.contourf(post_tot, t_contours_tot, cmap='Reds', extend='max', alpha=0.75)
 
 print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
 # plt.imsave('post_rv.png', post_rv, origin='lower')
@@ -168,105 +154,7 @@ print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_t
 # plt.show()
 
 
-# While the above a_list and m_list are the random samples, these are log-uniform lists for plotting.
-a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
-m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
+plotter.joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m))
+print('Plotted')
 
 
-min_index_m = hlpw.value2index(min_m, (0, grid_num-1), m_lim)
-min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)
-
-
-# Print out the 2-sigma boundaries for the total posterior
-bounds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
-print('a_lim = ', bounds[0], ' AU')
-print('m_lim = ', bounds[1], ' M_J')
-
-
-mass_rect = ptch.Rectangle((0, 0), grid_num-1, min_index_m, color='gray', alpha=1.0)
-a_rect = ptch.Rectangle((0, 0), min_index_a, grid_num-1, color='gray', alpha=1.0)
-
-ax.add_patch(mass_rect)
-ax.add_patch(a_rect)
-###################################################
-
-############### Adding labels #####################
-label_size = 50
-region_label_size = 50
-restricted_region_label_size = 40
-
-plt.text((19/32)*grid_num, (7/8)*grid_num, 'RV', size=region_label_size, rotation=50)
-plt.text((9/16)*grid_num, (1/4)*grid_num, 'Astrometry', size=region_label_size)
-
-plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Masses disallowed by RVs', size=restricted_region_label_size)
-plt.text((1/3)*(min_index_a-1), (1/8)*grid_num, 'Ruled out by minimum period', size=restricted_region_label_size, rotation=90)
-
-
-ax.set_xlabel('Semi-major Axis (au)', size=label_size)
-ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
-###################################################
-
-######## Adding lines of constant period ##########
-hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
-
-gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
-
-# Time between the midpoints of the two missions
-baseline_days = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)
-gaia_baseline_days = gaia_times[1] - gaia_times[0]
-
-# Log-spaced masses in Jupiter masses
-const_per_m_list = np.logspace(np.log10(min_m), np.log10(m_lim[1]))
-const_per_m_inds = hlpw.value2index(const_per_m_list, (0, grid_num-1), m_lim)
-
-# # Lines of constant period for p = baseline_days/n
-# for f in range(5):
-#
-#     const_per_a_list = hlpw.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
-#     const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
-#
-#     values_in_bounds = np.where(const_per_a_list >= min_a)
-#
-#     plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--k', alpha=0.5)
-
-# # Lines of constant period for p = gaia_baseline_days/n
-# for f in range(5):
-#
-#     const_per_a_list = hlpw.period_lines(const_per_m_list, gaia_baseline_days/(f+1), m_star)
-#     const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
-#
-#     values_in_bounds = np.where(const_per_a_list >= min_a)
-#
-#     plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--r', alpha=0.5)
-###################################################
-
-tick_array = np.linspace(0, grid_num-1, tick_num).astype(int)
-
-# Need the .item() method for larger companions because once m_pl > 0.1*M_star, rvutils.Msini() returns [value] instead of value.
-plt.xticks(tick_array, [np.round(a_list[i], 1).item() for i in tick_array], size=tick_size)
-plt.yticks(tick_array, [np.round(m_list[i], 1).item() for i in tick_array ], size=tick_size)
-
-
-fig.tight_layout()
-fig.savefig('5thCompConstraints_RV_astr.png')
-# fig.savefig('plots/5thCompConstraints_RV_astr.png')
-
-
-##########################################
-plt.close()
-fig, ax = plt.subplots(1,2, figsize=(12,12))
-sma_1d = post_tot.sum(axis=0)
-mass_1d = post_tot.sum(axis=1)
-
-ax[0].plot(range(grid_num), sma_1d)
-plt.sca(ax[0])
-plt.xticks(tick_array, [np.round(a_list[i], 1).item() for i in tick_array], size=10)
-
-ax[1].plot(range(grid_num), mass_1d)
-plt.sca(ax[1])
-plt.xticks(tick_array, [np.round(m_list[i], 1).item() for i in tick_array], size=10)
-
-fig.savefig('1_d_posts.png')
-# fig.savefig('plots/1_d_posts.png')
-
-############################################

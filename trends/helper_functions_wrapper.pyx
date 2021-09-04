@@ -730,15 +730,19 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
     Note that the limits MUST be in this order: if the array has shape (x_num, y_num), 
     then value_spaces must be [x_lims, y_lims].
     """
+    lvls_2sig_list = []
+    inds_2sig_list = []
     bounds_list = []
+    
+    # First compute bounds for a by collapsing along the m (aka i=0) axis
     for i in range(2):
 
         array_1D = prob_array.sum(axis=i)
         grid_num = len(array_1D)
 
 
-        # This gives only the 2-sigma, so that we get the 2-sigma limits at the end
-        sig2 = contour_levels_1D(array_1D, [2])[0]
+        # This gives only the 2-sigma contour level, so that we get the 2-sigma limits at the end
+        lvl_2sig = contour_levels_1D(array_1D, [2])[0]
 
         # Interpolate between the points to get a finer spacing of points. This allows for more precise parameter estimation.
         func = sp.interpolate.interp1d(range(grid_num), array_1D)
@@ -758,14 +762,17 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
         # This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But from what I can tell, this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
 
 
-        inds_2sig = np.where(abs(interp_vals - sig2) < 1e-2*sig2)[0].take((0,-1))
+        inds_2sig = np.where(abs(interp_vals - lvl_2sig) < 1e-2*lvl_2sig)[0].take((0,-1))
 
         # value_bounds is a tuple of actual values, not indices
         value_bounds = index2value(inds_2sig, (0, interp_num-1), value_spaces[::-1][i])
-
+        
+        lvls_2sig_list.append(lvl_2sig)
+        inds_2sig_list.append(inds_2sig * grid_num/interp_num)
+        
         bounds_list.append(value_bounds)
 
-    return bounds_list
+    return bounds_list, lvls_2sig_list, inds_2sig_list
 
 
 def value2index(value, index_space, value_space):
@@ -778,13 +785,15 @@ def value2index(value, index_space, value_space):
 
     min_index, max_index = index_space[0],  index_space[1]
     min_value, max_value = value_space[0], value_space[1]
+    
+    value = np.array(value)
+    value = value[(min_value < value) & (value < max_value)]
 
     index_range = max_index - min_index
     log_value_range = np.log10(max_value) - np.log10(min_value)
     
-    value_arr = np.array(value)
 
-    index = (np.log10(value_arr)-np.log10(min_value))*(index_range/log_value_range) + min_index
+    index = (np.log10(value)-np.log10(min_value))*(index_range/log_value_range) + min_index
     
     # Looking back at this, I don't see any reason to round these values to integers. I am converting them into "index space," but they don't need to be integers for me to plot them.
     #if isinstance(value, (int, float)):
@@ -805,8 +814,8 @@ def index2value(index, index_space, value_space):
     """
     index = np.array(index)
 
-    min_index, max_index = index_space[0],  index_space[1]
-    min_value, max_value = value_space[0], value_space[1]
+    min_index, max_index = index_space
+    min_value, max_value = value_space
 
     index_range = max_index - min_index
     log_value_range = np.log10(max_value) - np.log10(min_value)
