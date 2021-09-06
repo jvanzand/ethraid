@@ -14,6 +14,7 @@ cimport numpy as np
 import scipy as sp
 import scipy.stats as spst
 from astropy.time import Time
+import h5py
 
 import cython
 from libc.math cimport sin, cos, tan, atan, sqrt
@@ -569,7 +570,7 @@ def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_
 
         prob_array[m_i, a_i] += prob_list[i]
 
-    return prob_array
+    return np.array(prob_array)
 
 
 
@@ -591,7 +592,7 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
 
         tot_prob_array[m_i, a_i] += prob
 
-    return tot_prob_array
+    return np.array(tot_prob_array)
 
 #@profile
 cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
@@ -854,8 +855,13 @@ def period_lines(m, per, m_star):
     return a_cm / au
     
     
+def save_array(array, filename):
 
-
+    h5f = h5py.File(filename, 'w')
+    h5f.create_dataset('dataset_1', data=array)
+    h5f.close()
+    
+    return
 
 
 

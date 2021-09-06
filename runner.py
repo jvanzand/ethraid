@@ -118,7 +118,7 @@ try:
                                  m_list, per_list, e_list, i_list, om_list,
                                  M_anom_0, num_points, grid_num)                      
                                  
-    post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
+    post_astro = hlpw.prob_array(astro_list, a_inds, m_inds, grid_num)
     post_astro = post_astro/post_astro.sum()
 
 except:
@@ -131,8 +131,8 @@ except:
 rv_list = hlpw.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, 
                         a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, 
                         num_points, grid_num)
-post_rv = np.array(hlpw.prob_array(rv_list, a_inds, m_inds, grid_num))
-post_tot = np.array(hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds))
+post_rv = hlpw.prob_array(rv_list, a_inds, m_inds, grid_num)
+post_tot = hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds)
 
 post_rv = post_rv/post_rv.sum()
 post_tot = post_tot/post_tot.sum()
@@ -140,9 +140,9 @@ post_tot = post_tot/post_tot.sum()
 ##
 end_time = time.time()
 ##
-
-
 print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
+
+
 # plt.imsave('post_rv.png', post_rv, origin='lower')
 # plt.imsave('post_astro.png', post_astro, origin='lower')
 # plt.imsave('post_tot.png', post_tot, origin='lower')
@@ -155,7 +155,7 @@ print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_t
 # plt.show()
 
 
-plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), period_lines = True)
+plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), period_lines = False)
 print('Plotted')
 
 
