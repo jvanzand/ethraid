@@ -75,8 +75,8 @@ print('Min a is: ', min_a)
 
 # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
 # 191939
-# min_a = 0.5
-# min_m = 0.5
+min_a = 0.5
+min_m = 0.5
 a_lim = (0.8*min_a, 5e1)
 m_lim = (0.8*min_m, 2e2)
 # # HIP97166
@@ -113,18 +113,19 @@ start_time = time.time()
 ##
 
 # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
-if delta_mu == None or delta_mu_err == None:
-    astro_list = np.ones(num_points)
-    post_astro = np.ones((grid_num, grid_num))
-    print('No astrometry data provided. Bounds will be based on RVs only.')
-    
-else:
+try:
     astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
                                  m_list, per_list, e_list, i_list, om_list,
                                  M_anom_0, num_points, grid_num)                      
                                  
     post_astro = np.array(hlpw.prob_array(astro_list, a_inds, m_inds, grid_num))
     post_astro = post_astro/post_astro.sum()
+
+except:
+    astro_list = np.ones(num_points)
+    post_astro = np.ones((grid_num, grid_num))
+    print('No astrometry data provided. Bounds will be based on RVs only.')
+    
     
 
 rv_list = hlpw.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, 
@@ -148,13 +149,13 @@ print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_t
 #
 # plt.imshow(post_rv, origin='lower')
 # plt.show()
-# plt.imshow(post_astro, origin='lower')
+# plt.imshow(post_astro, origin='lower', cmap='jet')
 # plt.show()
 # plt.imshow(post_tot, origin='lower')
 # plt.show()
 
 
-plotter.joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m))
+plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), period_lines = True)
 print('Plotted')
 
 

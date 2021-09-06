@@ -6,8 +6,9 @@ import matplotlib.patches as ptch
 from trends import helper_functions_wrapper as hlpw
 
 
-def joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
+def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
                 min_vals, period_lines = False, marginalized=True):
+    
     tick_num = 6
     tick_size = 30
     
@@ -17,8 +18,7 @@ def joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     
     try:
         t_contours_astro = hlpw.contour_levels(post_astro, [1,2])
-        post_astro_cont = ax.contourf(post_astro, t_contours_astro, 
-                                      scmap='Blues', extend='max', alpha=0.5)
+        post_astro_cont = ax.contourf(post_astro, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
     
     except:
         pass
@@ -69,6 +69,7 @@ def joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     
     # List of round numbers to use as labels for both a and m
     tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
+    #tick_labels = np.array([0.25, 0.5, 2, 4, 8, 16, 32, 64, 128])
 
     # Chop out any labels outside the a or m bounds
     tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])]
@@ -99,7 +100,7 @@ def joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
         gaia_baseline_days = gaia_times[1] - gaia_times[0]
 
         # Log-spaced masses in Jupiter masses
-        const_per_m_list = np.logspace(np.log10(min_m), np.log10(m_lim[1]))
+        const_per_m_list = np.logspace(np.log10(min_m), np.log10(m_lim[1]), 50)
         const_per_m_inds = hlpw.value2index(const_per_m_list, (0, grid_num-1), m_lim)
 
         # Lines of constant period for p = baseline_days/n
@@ -108,9 +109,12 @@ def joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
             const_per_a_list = hlpw.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
             const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
 
-            values_in_bounds = np.where(const_per_a_list >= min_a)
+            
+            values_in_bounds = np.where((a_lim[0] < const_per_a_list)&(const_per_a_list < a_lim[1]))
+            
 
             plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--k', alpha=0.5)
+            #plt.plot(const_per_a_inds, const_per_m_inds, '--k', alpha=0.5)
 
         # Lines of constant period for p = gaia_baseline_days/n
         for f in range(5):
@@ -133,26 +137,37 @@ def joint_plot(post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     bounds, twosig_levels, twosig_inds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
     
     if marginalized:
-        fig, ax = plt.subplots(1,2, figsize=(12,12))
+        
+        title_size = 30
+        label_size = 25
+        tick_num = 6
+        tick_size = 25
+        
+        fig, ax = plt.subplots(1,2, figsize=(12,8))
         sma_1d = post_tot.sum(axis=0)
         mass_1d = post_tot.sum(axis=1)
 
         ax[0].plot(range(grid_num), sma_1d)
         plt.sca(ax[0])
-        plt.xticks(tick_positions_a, tick_labels_a, size=10)
-        plt.title('Semi-major axis posterior')
+        plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
+        plt.yticks(size=tick_size)
+        plt.title('Semi-major axis posterior', size=title_size)
+        plt.xlabel('Companion semi-major axis (AU)', size = label_size)
         ax[0].hlines(twosig_levels[0], 0, grid_num-1, colors='k', linestyles='solid')
         ax[0].vlines(twosig_inds[0][0], 0, 3*twosig_levels[0], colors='r', linestyles='dashed')
         ax[0].vlines(twosig_inds[0][1], 0, 3*twosig_levels[0], colors='r', linestyles='dashed')
 
         ax[1].plot(range(grid_num), mass_1d)
         plt.sca(ax[1])
-        plt.xticks(tick_positions_m, tick_labels_m, size=10)
-        plt.title('Mass posterior')
+        plt.xticks(tick_positions_m, tick_labels_m, size=tick_size)
+        plt.yticks(size=tick_size)
+        plt.xlabel(r'Companion mass ($M_{Jup}$)', size = label_size)
+        plt.title('Mass posterior', size=title_size)
         ax[1].hlines(twosig_levels[1], 0, grid_num-1, colors='k', linestyles='solid')
         ax[1].vlines(twosig_inds[1][0], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
         ax[1].vlines(twosig_inds[1][1], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
         
+        fig.tight_layout()
         fig.savefig('plots/1_d_posts.png')
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior

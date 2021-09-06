@@ -787,7 +787,7 @@ def value2index(value, index_space, value_space):
     min_value, max_value = value_space[0], value_space[1]
     
     value = np.array(value)
-    value = value[(min_value < value) & (value < max_value)]
+    value = value[min_value <= value <= max_value+0.1] # Add 0.1 because highest value was getting cut off
 
     index_range = max_index - min_index
     log_value_range = np.log10(max_value) - np.log10(min_value)
