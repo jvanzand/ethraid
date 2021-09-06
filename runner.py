@@ -78,7 +78,7 @@ print('Min a is: ', min_a)
 min_a = 0.5
 min_m = 0.5
 a_lim = (0.8*min_a, 5e1)
-m_lim = (0.8*min_m, 2e2)
+m_lim = (0.8*min_m, 1e2)
 # # HIP97166
 # a_lim = (1.9, 2e3)
 # m_lim = (0.03, 2e3)
