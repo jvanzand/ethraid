@@ -28,8 +28,8 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
 
     post_rv_cont = ax.contourf(post_rv, t_contours_rv, 
                                cmap='Greens', extend='max', alpha=0.5)
-    # post_tot_cont = ax.contourf(post_tot, t_contours_tot,
-    #                            cmap='Reds', extend='max', alpha=0.75)
+    post_tot_cont = ax.contourf(post_tot, t_contours_tot,
+                       cmap='Reds', extend='max', alpha=0.75)
 
     a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
     m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
@@ -53,8 +53,8 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
 
     plt.text((19/32)*grid_num, (7/8)*grid_num, 'RV', 
               size=region_label_size, rotation=50)
-    plt.text((9/16)*grid_num, (1/4)*grid_num, 'Astrometry', 
-              size=region_label_size)
+    # plt.text((9/16)*grid_num, (1/4)*grid_num, 'Astrometry',
+    #           size=region_label_size)
 
     plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Masses disallowed by RVs', 
               size=restricted_region_label_size)
@@ -69,7 +69,7 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     
     # List of round numbers to use as labels for both a and m
     #tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
-    tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256])
+    tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
 
     # Chop out any labels outside the a or m bounds
     tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])]

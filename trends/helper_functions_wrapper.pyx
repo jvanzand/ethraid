@@ -185,6 +185,7 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per,
     a_tot = a + a_star
     
     #a_cm = a*au
+    #e = 0.84
     #a_star_cm = a_star*au # Convert the planet's a in au into the star's a in cm
     a_tot_cm = a_tot*au
     
@@ -347,6 +348,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         m = m_list[j]
         per = per_list[j]
         e = e_list[j]
+        #e = 0.84
         i = i_list[j]
         om = om_list[j]
         M_anom_0 = M_anom_0_list[j]
