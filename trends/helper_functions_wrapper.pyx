@@ -45,9 +45,11 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 
-hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
+hip_times  = [Time(1989.85, format='decimalyear').jd, 
+              Time(1993.21, format='decimalyear').jd] #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
 
-gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
+gaia_times = [Time('2014-07-25', format='isot').jd, 
+              Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
 
 #@profile
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
@@ -82,7 +84,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
 
     # Match up a_list and m_list and get the period for each pair (in days).
-    per_list = P(a_list, m_star+m_list*(M_jup/M_sun) )
+    per_list = P(a_list, m_star+m_list*(M_jup/M_sun) ) # Use this line when we are actually sampling a_tot, not a_planet
+    #per_list = P(a_list * (m_star+m_list*(M_jup/M_sun))/m_star, m_star+m_list*(M_jup/M_sun) )
 
     # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014).
     e_list = spst.beta(0.867, 3.03).rvs(num_points)
@@ -171,23 +174,18 @@ def gamma_array(double m_star, double [:] a, double [:] Mp,
 cdef (double, double) gamma(double m_star, double a, double Mp, double per, 
       double e, double i, double om, double E):
 
-    cdef double     a_units, sqrt_eterm, tan_E2, nu,\
+    cdef double     a_cm, sqrt_eterm, tan_E2, nu,\
                     cos_E, tan_nu2, cos_E2, sin_i, cos_nu,\
                     sin_nu, cos_nu_om, sin_nu_om, sin_E,\
                     E_dot, nu_dot, prefac, gd_t1, gd_t2,\
                     gamma_dot, gamma_ddot
 
-    #per_sec = per*86400 # 24*3600 to convert days ==> seconds
     Mp_g = Mp*M_jup
     m_star_g = m_star*M_sun
     
-    a_star = a * Mp_g/m_star_g
-    a_tot = a + a_star
-    
-    #a_cm = a*au
-    #e = 0.84
-    #a_star_cm = a_star*au # Convert the planet's a in au into the star's a in cm
-    a_tot_cm = a_tot*au
+    #############
+    a_cm = a*au
+    #############
     
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
@@ -212,7 +210,7 @@ cdef (double, double) gamma(double m_star, double a, double Mp, double per,
     sin_i = sin(i)
     
     # Fischer (analytic)
-    pre_fac = sqrt(G)/sqrt_e_sq_term * Mp_g*sin_i/sqrt((Mp_g+m_star_g)*(a_tot_cm)) * 1/100 # cm/s ==> m/s
+    pre_fac = sqrt(G)/sqrt_e_sq_term * Mp_g*sin_i/sqrt((Mp_g+m_star_g)*(a_cm)) * 1/100 # cm/s ==> m/s
     # Fischer (calculated, a)
     #pre_fac = 28.4329/sqrt_e_sq_term * Mp*sin_i/sqrt(m_star+Mp_g/M_sun)*1/sqrt(a_tot)
     # Fischer (calculated, per)
@@ -317,18 +315,12 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     # Time in days between epoch mid-points
     baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
 
-    mass_ratio_constant = M_jup/(m_star*M_sun)
     cm_2_mas = (206265*1e3)/d_star
     cmd_2_masyr = cm_2_mas * 365.25 # cm/day to milli-arcseconds/year
 
     time_endpoints = [[hip_times[0], gaia_times[0]], [hip_times[1], gaia_times[1]]]
 
-    # Calculate these now so they aren't re-calculated many times in each loop
-    #time_steps[0] = (hip_times[1] - hip_times[0])/(t_num+1)
-    #time_steps[1] = (gaia_times[1] - gaia_times[0])/(t_num+1)
-
-
-    ############   #############
+    ##############################################
 
     cdef double v_vec_pl_list[3]
     cdef double [:] v_vec_pl = v_vec_pl_list
@@ -348,22 +340,22 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         m = m_list[j]
         per = per_list[j]
         e = e_list[j]
-        #e = 0.84
         i = i_list[j]
         om = om_list[j]
         M_anom_0 = M_anom_0_list[j]
         
-        # Terms to use in deeper loops
-        mass_ratio = m*mass_ratio_constant # M_pl/M_star in grams/grams
-        
         a_units = a*au
-        a_star_units = a_units*mass_ratio # Calculate the sma (cm) of the star's orbit around barycenter. 
+        #a_star_units = a_units*mass_ratio # Calculate the sma (cm) of the star's orbit around barycenter. 
+        
+        ######################
+        mass_ratio = (m*M_jup/(m_star*M_sun + m*M_jup))
+        a_star_units = a_units*mass_ratio
+        ######################
         
         mean_motion = two_pi/per # Units of 1/day because per is in days
         sqrt_eterm = sqrt((1+e)/(1-e))
         e_sq = e**2
         rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
-        r_star_num_fac = a_units*(1-e_sq)
 
         for l in range(2): # Hipparcos or Gaia
             start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
@@ -488,6 +480,7 @@ cdef vel_avg(double a, double n, double e, double E1, double E2,
 
     a (cm): semi-major axis
     n (1/days): 2pi/per
+    !!! THHIS FUNCTION doesn't actually use n. It can be removed.
     t1, t2 (days): beginning and ending time to calculate average
     
     returns: Average x and y velocities (cm/day)
@@ -854,7 +847,7 @@ def period_lines(m, per, m_star):
     a_cm = ((per_sec/two_pi)**2*G*(m_grams+m_star_grams))**(0.3333333333)
     
     
-    return a_cm / au
+    return a_cm / au #* (m_star_grams/(m_grams+m_star_grams))
     
     
 def save_array(array, filename):
