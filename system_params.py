@@ -34,10 +34,6 @@ params_hd91204 = (1.15, 51.8*pc_in_cm, -144.69, 0.914247, 0, 0.1,
 params_hd238894 = (1.16, 117.6*pc_in_cm, -0.138, 0.013, 0, 0.1,
                 570, 40, 2459177.6, None, None)
 
-# Synthetic planet params to test trend code
-params_synthetic = (0.79, 21.5*pc_in_cm, 0.088372596, 0.0088372596, -0.0001712052, -0.00001712052,
-                1626, 300, 2457654.089, 47.176, 4.7176)
-
 
 
 
@@ -55,10 +51,14 @@ params_hip67246 = (1.10, 30.6*pc_in_cm, 0.01, 0.002, 4.53e-5, 0.72e-5,
 # HIP63510 aka Ross 458, a binary star system (primary is 0.6 M_sun, secondary is 80 M_J.)
 # https://arxiv.org/pdf/1103.3544.pdf
 params_hip63510 = (0.6, 11.4*pc_in_cm, 1.53, 3*0.153, -1.9e-4, 1.9e-5,
-                2336.7, 500, 2455715.384, 14.465, 0.23)
+                2336.7, 2, 2455715.384, 14.465, 0.23)
+                
+
+# Synthetic parameters from generating an orbit
+params_synth = (1, 10*pc_in_cm, 0.9924, 0.9924/5, -0.002426, 0.002426/5,
+                100, 40, 2459000, 0.049, 0.049/5)
                 
                 
-                
-                
+                #1.1459, 1.1459/5, -0.0028, 0.0028e-5
                 
                 

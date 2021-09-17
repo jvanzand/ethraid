@@ -21,7 +21,7 @@ M_jup = 1.8981245973360504e+30
 
 # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
 m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_hip67246
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_synth
 
 
 # min_per is 4xbaseline because we see ~no curvature yet.
@@ -55,15 +55,15 @@ print('Min a is: ', min_a)
 # # HD91204
 # a_lim = (0.8*min_a, 8e1)
 # m_lim = (0.8*min_m, 1e5)
-# # synthetic
-# a_lim = (0.8*min_a, 5e1)
-# m_lim = (0.8*min_m, 1e5)
+# synthetic
+a_lim = (0.8*min_a, 5e1)
+m_lim = (0.8*min_m, 1e2)
 # # GL758
 # a_lim = (0.5*min_a, 2e2)
 # m_lim = (0.5*min_m, 4e2)
-# HIP67246
-a_lim = (0.5*min_a, 2e2)
-m_lim = (0.5*min_m, 4e2)
+# # HIP67246
+# a_lim = (0.5*min_a, 2e2)
+# m_lim = (0.5*min_m, 4e2)
 # # HIP63510
 # a_lim = (0.5*min_a, 2e2)
 # m_lim = (0.5*min_m, 1e3)
@@ -73,7 +73,7 @@ m_lim = (0.5*min_m, 4e2)
 print(a_lim[0], min_a)
 
 grid_num = 100
-num_points = int(1e8)
+num_points = int(1e6)
 np.set_printoptions(threshold=np.inf)
 
 
@@ -141,7 +141,7 @@ print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_t
 # plt.imshow(post_tot, origin='lower')
 # plt.show()
 
-plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), period_lines = False)
+plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), period_lines = True)
 print('Plotted')
 
 
