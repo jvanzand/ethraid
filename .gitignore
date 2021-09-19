@@ -2,6 +2,7 @@
 /build
 /cython_practice
 /data
+/posts
 
 /trends/c_kepler/build
 /trends/__pycache__
@@ -24,20 +25,13 @@
 
 # Output of kern profiler
 *.lprof
-<<<<<<< HEAD
 *.prof
 *.html
 
 *.o
 *.DS_Store
-=======
-*.html
 
-*.o
-.DS_Store
 *.ipynb
-
-###########################################
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
