@@ -7,7 +7,7 @@ from trends import helper_functions_wrapper as hlpw
 
 
 def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
-                min_vals, period_lines = False, marginalized=True):
+                min_vals, save_name='companion', period_lines = False, marginalized=True):
     
     tick_num = 6
     tick_size = 30
@@ -51,10 +51,10 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     region_label_size = 50
     restricted_region_label_size = 40
 
-    plt.text((19/32)*grid_num, (7/8)*grid_num, 'RV', 
-              size=region_label_size, rotation=50)
-    plt.text((9/16)*grid_num, (1/4)*grid_num, 'Astrometry',
-              size=region_label_size)
+    # plt.text((23/32)*grid_num, (7/8)*grid_num, 'RV',
+    #           size=region_label_size, rotation=50)
+    # plt.text((9/16)*grid_num, (1/4)*grid_num, 'Astrometry',
+    #           size=region_label_size)
 
     plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Masses disallowed by RVs', 
               size=restricted_region_label_size)
@@ -128,13 +128,14 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
 
 
     fig.tight_layout()
-    fig.savefig('plots/5thCompConstraints_RV_astr.png')
+    fig.savefig('plots/' + save_name + '.png')
     plt.close()
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
     # twosig_inds contains the indices where the above horizontal line crosses the posterior. In case it crosses more than twice, it contains the first and last instances.
     bounds, twosig_levels, twosig_inds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+    
     
     if marginalized:
         
@@ -168,7 +169,7 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
         ax[1].vlines(twosig_inds[1][1], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
         
         fig.tight_layout()
-        fig.savefig('plots/1_d_posts.png')
+        fig.savefig('plots/' + save_name + '_1d.png')
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.

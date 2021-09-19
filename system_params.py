@@ -30,8 +30,8 @@ params_hd91204 = (1.15, 51.8*pc_in_cm, -144.69, 0.914247, 0, 0.1,
                 6485.728, 2000, 2455232.024, 3.136, 0.0464)
                 
 # HD238894, Paul Dalba's target with no HIP ID. Can only be constrained using RVs.
-# gdot taken from 2planets_inner_transit setup file (no gddot defined).         
-params_hd238894 = (1.16, 117.6*pc_in_cm, -0.138, 0.013, 0, 0.1,
+# gammas taken from Table 3 in paper. good agreement with preferred radvel       
+params_hd238894 = (1.16, 117.6*pc_in_cm, -0.1205, 0.0043, 2.14e-4, 3.9e-5,
                 570, 40, 2459177.6, None, None)
 
 

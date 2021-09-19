@@ -71,7 +71,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
     cdef long [:] a_inds, m_inds
 
-    np.random.seed(0)
+    #np.random.seed(0)
     tp = 0
     a_min = a_lim[0]
     a_max = a_lim[1]
@@ -109,7 +109,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     # Arguments of peri, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
 
-    # Longitudes of ascending node, uniformly distributed
+    # Longitudes of ascending node, uniformly distributed.
+    # Don't need this b/c RVs are insensitive to Om and astrometry is a difference, so Om is unnecessary
     # Om_list = np.random.uniform(0, 2*pi, num_points)
 
     # Breaking up the (a, M) parameter space into grid_num x grid_num
@@ -168,6 +169,7 @@ def gamma_array(double m_star, double [:] a, double [:] Mp,
 
 
     return gamma_dot, gamma_ddot
+
 
 # It seems gamma() needs to be a cdef function, otherwise it returns nans
 #@profile
