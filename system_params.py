@@ -55,10 +55,11 @@ params_hip63510 = (0.6, 11.4*pc_in_cm, 1.53, 3*0.153, -1.9e-4, 1.9e-5,
                 
 
 # Synthetic parameters from generating an orbit
-params_synth = (1, 10*pc_in_cm, 0.9924, 0.9924/5, -0.002426, 0.002426/5,
-                100, 40, 2459000, 0.049, 0.049/5)
-                
-                
-                #1.1459, 1.1459/5, -0.0028, 0.0028e-5
+params_synth = (1, 10*pc_in_cm, 0.0314, 0.0314/5, -8.49e-5, 8.49e-5/5,
+                300, 200, 2459000, 5.488, 5.488/5)
+
+# # Synthetic parameters from generating an orbit
+# params_synth = (1, 10*pc_in_cm, 0.0186, 0.0186/5, -8.58e-5, 8.58e-5/5,
+#                 600, 200, 2459000, 5.488, 5.488/5)
                 
                 

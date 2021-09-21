@@ -49,12 +49,12 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     ############### In-plot Labels #####################
     label_size = 50
     region_label_size = 50
-    restricted_region_label_size = 40
+    restricted_region_label_size = 35
 
-    # plt.text((23/32)*grid_num, (7/8)*grid_num, 'RV',
-    #           size=region_label_size, rotation=50)
-    # plt.text((9/16)*grid_num, (1/4)*grid_num, 'Astrometry',
-    #           size=region_label_size)
+    plt.text((16/32)*grid_num, (7/8)*grid_num, 'RV',
+              size=region_label_size, rotation=50)
+    plt.text((7/16)*grid_num, (1/4)*grid_num, 'Astrometry',
+              size=region_label_size)
 
     plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Masses disallowed by RVs', 
               size=restricted_region_label_size)
@@ -82,9 +82,26 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
     tick_positions_a = hlpw.value2index(tick_labels_a, (0, grid_num-1), a_lim)
     tick_positions_m = hlpw.value2index(tick_labels_m, (0, grid_num-1), m_lim)
-
+    
     plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
     plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
+    
+    ### Experimental: adding top x-axis to show separations
+    # def au2sep(au):
+    #     """
+    #     Given system distance in pc, converts separation in au into separation in arcsec
+    #     """
+    #     asec = au/10
+    #     return asec
+    #
+    # def sep2au(asec):
+    #     """
+    #     Given system distance in pc, converts separation in arcsec into separation in au
+    #     """
+    #     au = asec*10
+    #     return au
+    #
+    # ax.secondary_xaxis('top', functions=(au2sep, sep2au))
     
     
     if period_lines:

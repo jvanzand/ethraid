@@ -23,12 +23,12 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     
     # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_hd238894
+            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_191939
 
 
     # min_per is 4xbaseline because we see ~no curvature yet.
-    # min_per = 4*rv_baseline
-    min_per = rv_baseline
+    min_per = 4*rv_baseline
+    # min_per = rv_baseline
     min_K = max_rv
 
     min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -43,14 +43,14 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     print('Min a is: ', min_a)
 
     # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-    # # 191939
-    # # min_a = 0.5
-    # # min_m = 0.5
-    # a_lim = (0.8*min_a, 5e1)
-    # m_lim = (0.8*min_m, 1e2)
-    # HD238894 - Paul Dalba's target
-    a_lim = (0.8*min_a, 32.1)
-    m_lim = (0.8*min_m, 3e2)
+    # 191939
+    # min_a = 0.5
+    # min_m = 0.5
+    a_lim = (0.8*min_a, 5e1)
+    m_lim = (0.8*min_m, 1e2)
+    # # HD238894 - Paul Dalba's target
+    # a_lim = (0.8*min_a, 32.1)
+    # m_lim = (0.8*min_m, 3e2)
     # # HD6101
     # a_lim = (0.9*min_a, 6e1)
     # m_lim = (0.9*min_m, 1e5)
@@ -59,7 +59,7 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     # m_lim = (0.8*min_m, 1e5)
     # # synthetic
     # a_lim = (0.8*min_a, 5e1)
-    # m_lim = (0.8*min_m, 1e2)
+    # m_lim = (0.8*min_m, 1e3)
     # # GL758
     # a_lim = (0.5*min_a, 2e2)
     # m_lim = (0.5*min_m, 4e2)
@@ -82,7 +82,9 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     if read_file is not None:
         
         # Load data
-        post_file = h5py.File('posts/'+read_file+'.h5', 'r')
+        post_file_path = 'posts/'+read_file+'.h5'
+        print('Reading posterior in from '+post_file_path)
+        post_file = h5py.File(post_file_path, 'r')
 
         rv_list = np.array(post_file.get('rv_list'))
         astro_list = np.array(post_file.get('astro_list'))
@@ -182,7 +184,8 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
         print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
     
         if save==True:
-            post_file = h5py.File('posts/'+write_file+'.h5', 'w')
+            post_file_path = 'posts/'+write_file+'.h5'
+            post_file = h5py.File(post_file_path, 'w')
             
             # Save the un-binned arrays in case you want to use a different grid_num later
             post_file.create_dataset('rv_list', data=rv_list)
@@ -198,17 +201,18 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
             post_file.create_dataset('min_vals', data=(min_a, min_m))
             
             post_file.close()
-            print('Posterior file saved')
+            print('Posterior file saved to '+post_file_path)
     
     return m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m)
 
 if __name__ == "__main__":
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-                                        run(read_file='dalba_1e8', write_file=None, num_points=1e6, save=True, grid_num=50)
+            run(read_file='191939_1e8', save=True, write_file=None, num_points=1e6, grid_num=75)
 
 
-    plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), save_name='test', period_lines = False)
+    plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
+                        save_name='191939_1e8', period_lines = False)
 
 
 
