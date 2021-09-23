@@ -170,6 +170,11 @@ def gamma_array(double m_star, double [:] a, double [:] Mp,
 
     return gamma_dot, gamma_ddot
 
+#######################################
+def gamma_once(m_star, a, Mp, per, e, i, om, E):
+
+    return gamma(m_star, a, Mp, per, e, i, om, E)
+#######################################
 
 # It seems gamma() needs to be a cdef function, otherwise it returns nans
 #@profile

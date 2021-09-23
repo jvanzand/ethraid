@@ -207,12 +207,13 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
 
 if __name__ == "__main__":
     
+    
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file='191939_1e8', save=True, write_file=None, num_points=1e6, grid_num=75)
+            run(read_file='191939_1e8', save=False, write_file=None, num_points=1e6, grid_num=100)
 
 
     plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
-                        save_name='191939_1e8', period_lines = False)
+                        save_name='191939', period_lines = False)
 
 
 
