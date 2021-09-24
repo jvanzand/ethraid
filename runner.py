@@ -8,10 +8,21 @@ import h5py
 
 import radvel as rv
 
+import os
+import sys
 
-from trends import helper_functions_wrapper as hlpw
+path = os.getcwd()
+sys.path.append(path+'/trends')
+
 import plotter
 import system_params as sp
+
+# Experimental: neat modules to separate RVs and astro
+#########################
+import helper_functions_general as hlp
+import helper_functions_rv as hlp_rv
+import helper_functions_astro as hlp_astro
+#########################
 
 
 ## Constants ##
@@ -21,7 +32,6 @@ M_jup = 1.8981245973360504e+30
 
 def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True):
     
-    # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
             rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_synth
 
@@ -117,31 +127,30 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
             print('No astrometry data provided. Bounds will be based on RVs only.')
             
         else:                                       
-            post_astro = hlpw.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
+            post_astro = hlp.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
             post_astro = post_astro/post_astro.sum()
         
-        post_rv = hlpw.prob_array(rv_list, a_inds, m_inds, grid_num) * prior_array
+        post_rv = hlp.prob_array(rv_list, a_inds, m_inds, grid_num) * prior_array
         post_rv = post_rv/post_rv.sum()
 
-        post_tot = hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds) * prior_array
+        post_tot = hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds) * prior_array
         post_tot = post_tot/post_tot.sum()
         
     # Otherwise, calculate new arrays
     else:
         
-        a_list, m_list, per_list, e_list, i_list, om_list, M_anom_0, E_anom_rv, a_inds, m_inds = \
-                                                    hlpw.make_arrays(m_star, a_lim, m_lim, rv_epoch, grid_num, num_points)
-
+        a_list, m_list, per_list, e_list, i_list,\
+        om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(m_star, a_lim, m_lim, rv_epoch,\
+                                                                grid_num, num_points)
 
         print('made arrays')
-
         ##
         start_time = time.time()
         ##
 
         # Create an array with 1s in allowed regions and 0s in disallowed regions
-        min_index_m = int(np.ceil(hlpw.value2index(min_m, (0, grid_num-1), m_lim)))
-        min_index_a = int(np.ceil(hlpw.value2index(min_a, (0, grid_num-1), a_lim)))
+        min_index_m = int(np.ceil(hlp.value2index(min_m, (0, grid_num-1), m_lim)))
+        min_index_a = int(np.ceil(hlp.value2index(min_a, (0, grid_num-1), a_lim)))
 
         prior_array = np.ones((grid_num, grid_num))
         prior_array[0:min_index_m, :] = 0
@@ -153,11 +162,11 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
         # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
         no_astro = False
         try:
-            astro_list = hlpw.astro_post(delta_mu, delta_mu_err, m_star, d_star, a_list,
-                                         m_list, per_list, e_list, i_list, om_list,
-                                         M_anom_0, num_points, grid_num)                      
+            astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
+                                              om_list, M_anom_0_list, per_list,
+                                              m_star, d_star, delta_mu, delta_mu_err)                     
                                  
-            post_astro = hlpw.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
+            post_astro = hlp.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
             post_astro = post_astro/post_astro.sum()
 
         except:
@@ -168,20 +177,24 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     
 
 
-        rv_list = hlpw.rv_post(gammadot, gammadot_err, gammaddot, gammaddot_err, m_star, 
-                                a_list, m_list, per_list, e_list, i_list, om_list, E_anom_rv, 
-                                num_points, grid_num)
+        rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
+                                per_list, m_star, rv_epoch,
+                                gammadot, gammadot_err, gammaddot, gammaddot_err)
                                 
-        post_rv = hlpw.prob_array(rv_list, a_inds, m_inds, grid_num) * prior_array
+        post_rv = hlp.prob_array(rv_list, a_inds, m_inds, grid_num) * prior_array
         post_rv = post_rv/post_rv.sum()
         
-        post_tot = hlpw.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds) * prior_array
+        post_tot = hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds) * prior_array
         post_tot = post_tot/post_tot.sum()
 
         ##
         end_time = time.time()
         ##
         print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
+        
+        # print('The RV list ', rv_list[:10])
+        # print('The Astro list ', astro_list[:10])
+
     
         if save==True:
             post_file_path = 'posts/'+write_file+'.h5'
@@ -209,11 +222,11 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='test_post', num_points=1e8, grid_num=100)
+            run(read_file=None, save=False, write_file='cleanup', num_points=1e6, grid_num=100)
 
 
     plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
-                        save_name='test', period_lines = False)
+                        save_name='cleanup', period_lines = False)
 
 
 

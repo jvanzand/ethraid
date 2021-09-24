@@ -3,7 +3,7 @@ from astropy.time import Time
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 
-from trends import helper_functions_wrapper as hlpw
+import helper_functions_general as hlp
 
 
 def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
@@ -17,14 +17,14 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
     
     try:
-        t_contours_astro = hlpw.contour_levels(post_astro, [1,2])
+        t_contours_astro = hlp.contour_levels(post_astro, [1,2])
         post_astro_cont = ax.contourf(post_astro, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
     
     except:
         pass
     
-    t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
-    t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
+    t_contours_rv = hlp.contour_levels(post_rv, [1,2])
+    t_contours_tot = hlp.contour_levels(post_tot, [1,2])
 
     post_rv_cont = ax.contourf(post_rv, t_contours_rv, 
                                cmap='Greens', extend='max', alpha=0.5)
@@ -34,8 +34,8 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
     m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
 
-    min_index_m = hlpw.value2index(min_m, (0, grid_num-1), m_lim)
-    min_index_a = hlpw.value2index(min_a, (0, grid_num-1), a_lim)
+    min_index_m = hlp.value2index(min_m, (0, grid_num-1), m_lim)
+    min_index_a = hlp.value2index(min_a, (0, grid_num-1), a_lim)
 
 
     mass_rect = ptch.Rectangle((0, 0), grid_num-1, min_index_m, 
@@ -80,8 +80,8 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_m))
 
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
-    tick_positions_a = hlpw.value2index(tick_labels_a, (0, grid_num-1), a_lim)
-    tick_positions_m = hlpw.value2index(tick_labels_m, (0, grid_num-1), m_lim)
+    tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num-1), a_lim)
+    tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num-1), m_lim)
     
     plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
     plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
@@ -118,13 +118,13 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
 
         # Log-spaced masses in Jupiter masses
         const_per_m_list = np.logspace(np.log10(min_m), np.log10(m_lim[1]), 50)
-        const_per_m_inds = hlpw.value2index(const_per_m_list, (0, grid_num-1), m_lim)
+        const_per_m_inds = hlp.value2index(const_per_m_list, (0, grid_num-1), m_lim)
 
         # Lines of constant period for p = baseline_days/n
         for f in range(5):
 
-            const_per_a_list = hlpw.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
-            const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+            const_per_a_list = hlp.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
+            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num-1), a_lim)
 
             
             values_in_bounds = np.where((a_lim[0] < const_per_a_list)&(const_per_a_list < a_lim[1]))
@@ -136,8 +136,8 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
         # Lines of constant period for p = gaia_baseline_days/n
         for f in range(5):
 
-            const_per_a_list = hlpw.period_lines(const_per_m_list, gaia_baseline_days/(f+1), m_star)
-            const_per_a_inds = hlpw.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+            const_per_a_list = hlp.period_lines(const_per_m_list, gaia_baseline_days/(f+1), m_star)
+            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num-1), a_lim)
 
             values_in_bounds = np.where(const_per_a_list >= min_a)
 
@@ -151,7 +151,7 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
     # twosig_inds contains the indices where the above horizontal line crosses the posterior. In case it crosses more than twice, it contains the first and last instances.
-    bounds, twosig_levels, twosig_inds = hlpw.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+    bounds, twosig_levels, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
     
     
     if marginalized:
