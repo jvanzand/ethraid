@@ -51,6 +51,7 @@ hip_times  = [Time(1989.85, format='decimalyear').jd,
 gaia_times = [Time('2014-07-25', format='isot').jd, 
               Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
 
+np.random.seed(0)
 #@profile
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
 
