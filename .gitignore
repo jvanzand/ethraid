@@ -2,7 +2,7 @@
 /build
 /cython_practice
 /data
-/posts
+/posts/*
 
 /trends/c_kepler/build
 /trends/__pycache__
