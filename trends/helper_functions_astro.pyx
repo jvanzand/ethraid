@@ -119,9 +119,8 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
 
     cdef double mu[2]
     #######################################
-
-    mass_ratio_constant = M_jup/(m_star*M_sun)
-    mass_ratio = m*mass_ratio_constant
+    
+    mass_ratio = (m*M_jup/(m_star*M_sun + m*M_jup))
     cm_2_mas = (206265*1e3)/d_star
     cmd_2_masyr = cm_2_mas * 365.25 # cm/day to milli-arcseconds/year
 
@@ -137,7 +136,6 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     e_sq = e**2
     rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
     r_star_num_fac = a_units*(1-e_sq)
-
     
     for l in range(2): # Hipparcos or Gaia
         start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
@@ -147,6 +145,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
         M1 = (mean_motion*start_time + M_anom_0)%two_pi
         M2 = (mean_motion*end_time + M_anom_0)%two_pi
+
 
         E1 = kepler_single(M1, e)
         E2 = kepler_single(M2, e)
@@ -201,15 +200,14 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         ###############################################################
 
     mu_gaia = mu_avg[1]
-
     # To get the positional avg., subtract the epoch positions and divide by the time between in years.
     # First index tells Hip ([0]) or Gaia ([1]), second index tells x ([0]) or y ([1])
     # Units of mas/yr
     mu_hg[0] = (ang_pos_avg[1][0] - ang_pos_avg[0][0])/baseline_yrs # x-comp. = gaia_x - hip_x
     mu_hg[1] = (ang_pos_avg[1][1] - ang_pos_avg[0][1])/baseline_yrs # y-comp. = gaia_y - hip_y
-
+    
     dmu_model = sqrt((mu_hg[0] - mu_gaia[0])**2 + (mu_hg[1] - mu_gaia[1])**2)
-
+    
     return dmu_model
 
 

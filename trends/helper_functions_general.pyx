@@ -20,7 +20,7 @@ M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 pc_in_cm = 3.086e18
 
-
+np.random.seed(0)
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
 
     cdef double tp, a_min, a_max, m_min, m_max
@@ -55,7 +55,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
     # Match up a_list and m_list and get the period for each pair (in days).
     per_list = P_list(a_list, m_list, m_star) # Use this line when we are actually sampling a_tot, not a_planet
     #per_list = P(a_list * (m_star+m_list*(M_jup/M_sun))/m_star, m_star+m_list*(M_jup/M_sun) )
-
+    
     # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014).
     e_list = spst.beta(0.867, 3.03).rvs(num_points)
     e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
@@ -170,7 +170,7 @@ cpdef P(double a, double m, double m_star):
 
     sec_2_days = 1./(24*3600) # Note the 1.; with 1, the result would be 0
 
-    P_days = sqrt((2*pi)**2*(a*au)**3/(G*(m_g + m_star_g))) * sec_2_days
+    P_days = sqrt((two_pi)**2*(a*au)**3/(G*(m_g + m_star_g))) * sec_2_days
 
     return P_days
     

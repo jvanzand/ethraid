@@ -58,13 +58,13 @@ params_hip63510 = (0.6, 11.4*pc_in_cm, 1.53, 3*0.153, -1.9e-4, 1.9e-5,
 # params_synth = (1, 10*pc_in_cm, 0.0314, 0.0314/5, -8.58e-5, 8.58e-5/5,
 #                 300, 5, 2459000, 5.488, 5.488/5)
 
-# # Synthetic: m = 17, a = 47, i = pi/2, tiny astro signal
-params_synth = (1, 10*pc_in_cm, -0.02944, 0.02944/5, 1.88e-5, 1.88e-5/5,
-                300, 3.5, 2459000, 0.59, 0.59/5)
+# # # Synthetic: a = 17, m = 47, i = pi/2, tiny astro signal
+# params_synth = (1, 10*pc_in_cm, -0.02944, 0.02944/5, 1.88e-5, 1.88e-5/5,
+#                 300, 3.5, 2459000, 0.59, 0.59/5)
                 
-# # # Synthetic: m = 17, a = 47, i = pi/3, larger astro signal
-# params_synth = (1, 10*pc_in_cm, -0.0255, 0.0231/5, 1.63e-5, 1.63e-5/5,
-#                 300, 100, 2459000, 3.282, 3.283/5)
+# # Synthetic: a = 17, m = 47, i = pi/3, larger astro signal
+params_synth = (1, 10*pc_in_cm, -0.0255, 0.0231/5, 1.63e-5, 1.63e-5/5,
+                300, 100, 2459000, 3.282, 3.283/5)
                 
                 
                 
