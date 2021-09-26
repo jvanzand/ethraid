@@ -24,7 +24,6 @@ import helper_functions_rv as hlp_rv
 import helper_functions_astro as hlp_astro
 #########################
 
-
 ## Constants ##
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
@@ -222,12 +221,12 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='test_post', num_points=1e6, grid_num=100)
+            run(read_file=None, save=True, write_file='after_merge', num_points=1e6, grid_num=100)
 
 
 
     plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m),
-            save_name='cleanup', period_lines = False)
+            save_name='after_merge', period_lines = False)
 
 
 

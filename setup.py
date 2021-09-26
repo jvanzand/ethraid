@@ -20,7 +20,8 @@ import numpy as np
 
 ###########################################
 
-
+# First path is where to put build files (.c and .html).
+# Second is where to 1) find .pyx files and 2) store .so files.
 extensions = [
     Extension("c_kepler._kepler",
              ['c_kepler/_kepler.pyx'],
@@ -39,6 +40,7 @@ extensions = [
 
 ##############################
 
+# Specify a build directory to store the .c and .html files separately. The .so files are what I need to call, so those get put in the same directory as their .pyx file. Improves readability.
 setup(
-    ext_modules = cythonize(extensions, language_level='3', annotate=True)
+    ext_modules = cythonize(extensions, build_dir = 'trends/compiled', language_level='3', annotate=True)
 )

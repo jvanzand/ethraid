@@ -21,7 +21,7 @@ ctypedef np.float64_t DTYPE_t
 
 # create the wrapper code, with numpy type annotations
 @cython.boundscheck(False)
-def kepler_array(double [:,] M, double [:,] e):
+cpdef kepler_array(double [:,] M, double [:,] e):
     cdef int size, i
 
     size = M.shape[0]
@@ -33,7 +33,7 @@ def kepler_array(double [:,] M, double [:,] e):
 
     return E
 
-def kepler_single(double M, double e):
+cpdef kepler_single(double M, double e):
     
     cdef double E
     E = kepler(M, e)
@@ -43,7 +43,7 @@ def kepler_single(double M, double e):
 
 # create the wrapper code, with numpy type annotations
 @cython.boundscheck(False)
-def rv_drive_array(np.ndarray[DTYPE_t, ndim=1] t, double per, double tp, 
+cpdef rv_drive_array(np.ndarray[DTYPE_t, ndim=1] t, double per, double tp, 
                    double e, double om, double k):
     cdef int size, i 
     size = t.shape[0]

@@ -142,6 +142,7 @@ def P_list(double [:] a_list, double [:] m_list, double m_star):
     """
 
     cdef int length, j
+    cdef double a, m
     length = a_list.size
     
     cdef np.ndarray[double, ndim=1] per_list = np.ndarray(shape=(length,), dtype=np.float64)
@@ -151,7 +152,7 @@ def P_list(double [:] a_list, double [:] m_list, double m_star):
         m = m_list[j]
         per_list[j] = P(a, m, m_star)
         
-    return np.array(per_list)
+    return per_list
 
 cpdef P(double a, double m, double m_star):
     """

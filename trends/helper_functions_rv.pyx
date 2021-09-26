@@ -1,5 +1,5 @@
 # cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False
-## cython: binding=True
+# cython: binding=True
 
 #import os
 #import sys
@@ -10,6 +10,7 @@ cimport numpy as np
 from c_kepler._kepler import kepler_single
 
 from astropy.time import Time
+from tqdm import tqdm
 import cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
@@ -38,18 +39,19 @@ pc_in_cm = 3.086e18
 # Just need the "zero time" to evolve mean anomaly into the rv_epoch
 hip_beginning = Time(1989.85, format='decimalyear').jd
 
-
-def rv_list(np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] e_list, 
+def rv_list(double [:] a_list, double [:] m_list, double [:] e_list, 
                double [:] i_list, double [:] om_list, double [:] M_anom_0_list,
                double [:] per_list, double m_star, double rv_epoch, 
                double gdot, double gdot_err, double gddot, double gddot_err):
     
     cdef int num_points, j
+    cdef double a, m, e, i, om, M_anom_0, per, log_lik
     num_points = a_list.shape[0]
                
     cdef np.ndarray[double, ndim=1] lik_list = np.ndarray(shape=(num_points,), dtype=np.float64)
     
-    for j in range(num_points):
+    print('Running RV models')
+    for j in tqdm(range(num_points)):
        
         a  =  a_list[j]
         m  =  m_list[j]
@@ -103,11 +105,11 @@ cpdef (double, double) gamma(double a, double m, double e,
                              double i, double om, double E, 
                              double per, double m_star):
 
-    cdef double     a_units, sqrt_eterm, tan_E2, nu,\
-                    cos_E, tan_nu2, cos_E2, sin_i, cos_nu,\
-                    sin_nu, cos_nu_om, sin_nu_om, sin_E,\
-                    E_dot, nu_dot, prefac, gd_t1, gd_t2,\
-                    gamma_dot, gamma_ddot
+    cdef double     m_g, m_star_g, a_cm, e_term, sqrt_eterm,\
+                    sqrt_e_sq_term, cos_E, sin_E,\
+                    tan_Eovr2, nu, nu_dot, nu_ddot,\
+                    cos_nu_om, sin_nu_om, sin_i,\
+                    pre_fac, gamma_dot, gamma_ddot
 
     #per_sec = per*86400 # 24*3600 to convert days ==> seconds
     m_g = m*M_jup
@@ -153,6 +155,7 @@ cpdef M_2_evolvedE(double M0, double per, double e, double rv_epoch):
     rv_epoch is the bjd corresponding to the ~midpoint of the RV baseline. 
     It is where gdot and gddot are measured
     """
+    # Fewer python references with no declarations
     
     M_evolved = ((two_pi/per)*(rv_epoch - hip_beginning) + M0)%two_pi
 

@@ -1,13 +1,12 @@
 # cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False
-## cython: binding=True
+# cython: binding=True
+# cython: profile=True
+# cython: linetrace=True
 
-#import os
-#import sys
-#path = os.getcwd()
-#sys.path.append(path+'/trends') # To import c_kepler
 from c_kepler._kepler import kepler_single
 
 from astropy.time import Time
+from tqdm import tqdm
 import numpy as np
 import cython
 cimport numpy as np
@@ -37,19 +36,19 @@ gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='i
 baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
 
 
-
-def astro_list(np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] e_list, 
+def astro_list(double [:] a_list, double [:] m_list, double [:] e_list, 
                double [:] i_list, double [:] om_list, double [:] M_anom_0_list, 
                double [:] per_list, 
                double m_star, double d_star, double delta_mu, double delta_mu_err):
       
     cdef int num_points, j
+    cdef double a, m, e, i, om, M_anom_0, per, log_lik
     num_points = a_list.shape[0]     
         
     cdef np.ndarray[double, ndim=1] lik_list = np.ndarray(shape=(num_points,), dtype=np.float64)
     
-    
-    for j in range(num_points):
+    print('Running astrometry models')
+    for j in tqdm(range(num_points)):
        
         a = a_list[j]
         m = m_list[j]
@@ -66,7 +65,7 @@ def astro_list(np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] 
         lik_list[j] = math_e**log_lik
     
     return lik_list
-                   
+
 
 def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom_0, 
                 double per, double m_star, double d_star,
@@ -74,6 +73,7 @@ def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom
     """
     Compute the log-likelihood of a given state given the astrometry data
     """
+    cdef double dmu_model, log_likelihood
     
     dmu_model = dmu(a, m, e, i, om, M_anom_0, per, m_star, d_star)
     
@@ -81,17 +81,16 @@ def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom
     
     return log_likelihood
 
-
-
 def dmu(double a, double m, double e, double i, double om, double M_anom_0, 
         double per, double m_star, double d_star):
     """
     Compute delta_mu for a set of model parameters
     """
-    cdef double mean_motion, M1, M2, E1, E2
+    cdef double mass_ratio, cm_2_mas, cmd_2_masyr
+    cdef double mean_motion, sqrt_eterm, M1, M2, E1, E2
     cdef double x_pos_avg, y_pos_avg, x_vel_avg, y_vel_avg
     
-    cdef double [:,::1] rot_mtrx # This makes rot_mtrx a memview
+    cdef double [:,:] rot_mtrx # This makes rot_mtrx a memview
     rot_mtrx = np.zeros((3,3),dtype=np.float64)
     
     cdef double r_vec_list[3]
@@ -210,7 +209,6 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     
     return dmu_model
 
-
 cdef pos_avg(double a, double n, double e, double E1, double E2, 
                   double t1, double t2):
     """
@@ -283,7 +281,7 @@ cdef vel_avg(double a, double n, double e, double E1, double E2,
     return x_avg, y_avg
 
 #@profile
-cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
+cdef void rot_matrix(double i, double om, double Om, double [:,:] rot_mtrx):
     """
     This is P3*P2*P1 from Murray & Dermott. It is not given explicitly in the text. 
     They multiply it immediately by r*[cos(f), sin(f), 0] because this gives the 
