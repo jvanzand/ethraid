@@ -32,12 +32,12 @@ M_jup = 1.8981245973360504e+30
 def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True):
     
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_synth
+            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_gl758
 
 
     # min_per is 4xbaseline because we see ~no curvature yet.
-    min_per = 4*rv_baseline
-    # min_per = rv_baseline
+    # min_per = 4*rv_baseline
+    min_per = rv_baseline
     min_K = max_rv
 
     min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -66,12 +66,12 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     # # HD91204
     # a_lim = (0.8*min_a, 8e1)
     # m_lim = (0.8*min_m, 1e5)
-    # synthetic
-    a_lim = (0.8*min_a, 5e1)
-    m_lim = (0.8*min_m, 1e3)
-    # # GL758
-    # a_lim = (0.5*min_a, 2e2)
-    # m_lim = (0.5*min_m, 4e2)
+    # # synthetic
+    # a_lim = (0.8*min_a, 5e1)
+    # m_lim = (0.8*min_m, 1e3)
+    # GL758
+    a_lim = (0.5*min_a, 2e2)
+    m_lim = (0.5*min_m, 4e2)
     # # HIP67246
     # a_lim = (0.5*min_a, 2e2)
     # m_lim = (0.5*min_m, 4e2)
@@ -221,7 +221,7 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='after_merge', num_points=1e6, grid_num=100)
+            run(read_file=None, save=True, write_file='after_merge', num_points=1e7, grid_num=100)
 
 
 
