@@ -37,7 +37,6 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     # # Experimental: revised min_m using gdot. The idea is to find the smallest mass that could produce the observed gdot at the known minimum period. This is not completely right because it uses min_K to get min_m, min_m to get min_a, and then min_a to get a new value for min_m.
     #
     # min_m = (gammadot*100/(24*3600))*((min_per*24*3600)/6.283185)**2*(m_star*M_sun)/(min_a*14959787070000.0) / M_jup
-    # print('!!!', min_m)
 
     print('Min m is: ', min_m)
     print('Min a is: ', min_a)
