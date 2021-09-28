@@ -87,7 +87,7 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     np.set_printoptions(threshold=np.inf)
     
     
-    # If you are loading in existing data
+    # If you are loading in existing data:
     if read_file is not None:
         
         # Load data
