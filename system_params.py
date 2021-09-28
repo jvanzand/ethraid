@@ -43,6 +43,10 @@ params_hd238894 = (1.16, 117.6*pc_in_cm, -0.1205, 0.0043, 2.14e-4, 3.9e-5,
 params_gl758 = (0.95, 15.5*pc_in_cm, -0.00633, 0.00025, -8.19e-7, 0.67e-7,
                 8413.010, 60, 2454995.123, 1.0397, 0.0261)
                 
+# HD4747, an example star in Tim Brandt's Orvara code. Using this to compare results.
+params_hd4747 = (0.83, 18.8*pc_in_cm, -0.10605, 0.10605/5, 1.1276e-5, 1.1276e-5/5,
+                8473, 200, 2455015.622, 3.74, 0.049)
+                
 # HIP67246, a confirmed giant published by Sarah Blunt. I truncated the timeseries to get gdot/gddot as a test.
 # gdot/gddot fit with scipy.optimize.curve_fit bc rvsearch gave weird results
 params_hip67246 = (1.10, 30.6*pc_in_cm, 0.01, 0.002, 4.53e-5, 0.72e-5,

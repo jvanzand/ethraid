@@ -23,12 +23,12 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     
     # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_synth
+            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_hd4747
 
 
     # min_per is 4xbaseline because we see ~no curvature yet.
-    min_per = 4*rv_baseline
-    # min_per = rv_baseline
+    # min_per = 4*rv_baseline
+    min_per = rv_baseline
     min_K = max_rv
 
     min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -56,9 +56,9 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     # # HD91204
     # a_lim = (0.8*min_a, 8e1)
     # m_lim = (0.8*min_m, 1e5)
-    # synthetic
-    a_lim = (0.8*min_a, 5e1)
-    m_lim = (0.8*min_m, 1e3)
+    # # synthetic
+    # a_lim = (0.8*min_a, 5e1)
+    # m_lim = (0.8*min_m, 1e3)
     # # GL758
     # a_lim = (0.5*min_a, 2e2)
     # m_lim = (0.5*min_m, 4e2)
@@ -68,9 +68,9 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     # # HIP63510
     # a_lim = (0.5*min_a, 2e2)
     # m_lim = (0.5*min_m, 1e3)
-    # # 12572
-    # a_lim = (0.5*min_a, 5e1)
-    # m_lim = (0.5*min_m, 1e2)
+    # hd4747
+    a_lim = (0.8*min_a, 5e1)
+    m_lim = (0.8*min_m, 1e3)
     print(a_lim[0], min_a)
 
     num_points = int(num_points)
@@ -208,11 +208,11 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='test_post', num_points=1e6, grid_num=100)
+            run(read_file=None, save=True, write_file='hd4747', num_points=1e6, grid_num=100)
 
 
     plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
-                        save_name='test', period_lines = False)
+                        save_name='hd4747', period_lines = False)
 
 
 
