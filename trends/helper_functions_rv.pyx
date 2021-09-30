@@ -25,16 +25,14 @@ import helper_functions_rv as hlp_rv
 #    double rv_drive(double t, double per, double tp, double e, double cosom, double sinom, double k )
 ##########################################
 
-cdef float pi, two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, hip_beginning
+cdef float two_pi, math_e, G, M_sun, M_jup, au, hip_beginning
 
-pi = 3.141592653589793
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
 G = 6.674299999999999e-08
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
-pc_in_cm = 3.086e18
 
 # Just need the "zero time" to evolve mean anomaly into the rv_epoch
 hip_beginning = Time(1989.85, format='decimalyear').jd

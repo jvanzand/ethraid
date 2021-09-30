@@ -15,11 +15,10 @@ from libc.math cimport sin, cos, tan, atan, sqrt, log
 
 #import helper_functions_general as hlp
 
-cdef float pi, two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, baseline_yrs
+cdef float two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, baseline_yrs
 cdef float hip_times[2]
 cdef float gaia_times[2]
 
-pi = 3.141592653589793
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
 G = 6.674299999999999e-08
