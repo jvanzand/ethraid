@@ -23,7 +23,7 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     
     # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_hd4747
+            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_9986
 
 
     # min_per is 4xbaseline because we see ~no curvature yet.
@@ -43,34 +43,28 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
 
     # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
     # # 191939
-    # # min_a = 0.5
-    # # min_m = 0.5
+    # min_a = 0.5
+    # min_m = 0.5
     # a_lim = (0.8*min_a, 5e1)
     # m_lim = (0.8*min_m, 1e2)
     # # HD238894 - Paul Dalba's target
     # a_lim = (0.8*min_a, 32.1)
     # m_lim = (0.8*min_m, 3e2)
-    # # HD6101
-    # a_lim = (0.9*min_a, 6e1)
-    # m_lim = (0.9*min_m, 1e5)
-    # # HD91204
-    # a_lim = (0.8*min_a, 8e1)
-    # m_lim = (0.8*min_m, 1e5)
     # # synthetic
     # a_lim = (0.8*min_a, 5e1)
     # m_lim = (0.8*min_m, 1e3)
     # # GL758
     # a_lim = (0.5*min_a, 2e2)
     # m_lim = (0.5*min_m, 4e2)
-    # # HIP67246
-    # a_lim = (0.5*min_a, 2e2)
-    # m_lim = (0.5*min_m, 4e2)
-    # # HIP63510
-    # a_lim = (0.5*min_a, 2e2)
-    # m_lim = (0.5*min_m, 1e3)
-    # hd4747
-    a_lim = (0.8*min_a, 5e1)
-    m_lim = (0.8*min_m, 1e3)
+    # hd9986
+    a_lim = (0.8*min_a, 3e1)
+    m_lim = (0.8*min_m, 3e1)
+    
+    # # wide
+    # min_a = 0.5
+    # min_m = 0.2
+    # a_lim = (0.8*min_a, 1e4)
+    # m_lim = (0.8*min_m, 2e4)
     print(a_lim[0], min_a)
 
     num_points = int(num_points)
@@ -208,11 +202,11 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='hd4747', num_points=1e6, grid_num=100)
+            run(read_file=None, save=True, write_file='validation/', num_points=1e8, grid_num=100)
 
 
     plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
-                        save_name='hd4747', period_lines = False)
+                        save_name='validation/', period_lines = False)
 
 
 

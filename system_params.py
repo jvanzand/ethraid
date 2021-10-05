@@ -21,9 +21,9 @@ params_12572 = (0.91, 65.9*pc_in_cm, -0.0613, 0.0025, 0, 0.1,
 params_HIP97166 = (0.91, 68*pc_in_cm, 0.013, 0.03, -3e-6, 3.2e-5,
                     440, 1, 2458683.353840575, 0.036354497, 0.037699807)
                 
-# HD6106, the highest-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated. Trend/curv taken from manual radvel run.          
-params_hd6101 = (0.79, 21.5*pc_in_cm, 0.25858, 0.022, -4.64671e-05, 4.8e-05,
-                1626, 300, 2457654.089, 19.411242, 0.240018)
+# HD6106, Legacy detection. Binary with P ~ 10k day/29 year, M_comp = 1.17-0.79 = 0.38 (Balega2006)   
+params_hd6101 = (0.79, 21.5*pc_in_cm, 0.254547, 0.0211, -1.008e-4, 8.825e-05,
+                1626, 1000, 2457663.942, 19.411242, 0.240018)
                 
 # HD91204, a high-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
 params_hd91204 = (1.15, 51.8*pc_in_cm, -144.69, 0.914247, 0, 0.1,
@@ -57,6 +57,26 @@ params_hip67246 = (1.10, 30.6*pc_in_cm, 0.01, 0.002, 4.53e-5, 0.72e-5,
 params_hip63510 = (0.6, 11.4*pc_in_cm, 1.53, 3*0.153, -1.9e-4, 1.9e-5,
                 2336.7, 2, 2455715.384, 14.465, 0.23)
                 
+
+# # HD 3795, Legacy detection. Jump says low-mass star ~300 M_J at ~20 AU
+# params_hd3795 = (0.85, 28.6*pc_in_cm, 0.327, 0.0019, -3.226e-5, 2.63e-6,
+#                 5135.03, 2000, 2452933.471, 23.8876, 0.089482)
+#
+# # HD 3795 again, but now with full curv (not just trend)
+# params_hd3795_curv = (0.85, 28.6*pc_in_cm, 0.6585, 0.01155, 7.082e-5, 4.283e-6,
+#                 9118, 2000, 2454924.91172, 23.8876, 0.089482)
+
+# HD 4614, Legacy trend detection.
+params_hd4614 = (0.91, 6.0*pc_in_cm, 0.004466, 0.001344, -2.153e-6, 4.79e-7,
+                9505, 100, 2454722.410, 6.01, 0.19523)
+
+# HD 9446, Legacy warm Jupiter at 190 days (second giant at 30 days). Truncated for trend.
+params_9446 = (1.05, 52.9*pc_in_cm, 1.18499, 0.21784, 0.00407164, 0.02181313,
+                88.9, 45, 2458758.475, 0.10379, 0.05413)
+                
+# HD 9986, Legacy target showing ~3000 day planet. Jump comments suggest possible activity. Truncated.
+params_9986 = (1.03, 25.7*pc_in_cm, -0.0275133, 0.00315776, 4.30867e-5, 1.8516651e-5,
+                1307.3, 15, 2458803.4015, 0.03779, 0.052464)
 
 # # Synthetic: m = 32, a = 10
 # params_synth = (1, 10*pc_in_cm, 0.0314, 0.0314/5, -8.58e-5, 8.58e-5/5,

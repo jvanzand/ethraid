@@ -24,10 +24,11 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
         pass
     
     t_contours_rv = hlpw.contour_levels(post_rv, [1,2])
-    t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
 
-    post_rv_cont = ax.contourf(post_rv, t_contours_rv, 
+    post_rv_cont = ax.contourf(post_rv, t_contours_rv,
                                cmap='Greens', extend='max', alpha=0.5)
+                               
+    t_contours_tot = hlpw.contour_levels(post_tot, [1,2])
     post_tot_cont = ax.contourf(post_tot, t_contours_tot,
                        cmap='Reds', extend='max', alpha=0.75)
 
@@ -68,8 +69,8 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     ############ Axis ticks and labels ################
     
     # List of round numbers to use as labels for both a and m
-    #tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
-    tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
+    #tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900, 2700])
+    tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048])
 
     # Chop out any labels outside the a or m bounds
     tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])]
