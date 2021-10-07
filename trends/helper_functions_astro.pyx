@@ -255,22 +255,19 @@ cdef vel_avg(double a, double n, double e, double E1, double E2,
     """
 
     cdef double x_term_1, x_term_2, x_integral, x_avg,\
-                y_term_1, y_term_2, y_integral, y_avg,\
-                r1, r2
+                y_term_1, y_term_2, y_integral, y_avg
 
-    r1 = a*(1-e*cos(E1))
-    r2 = a*(1-e*cos(E2))
 
-    x_term_1 = a**2/r1 * (cos(E1) + e/2 * sin(E1)**2)
-    x_term_2 = a**2/r2 * (cos(E2) + e/2 * sin(E2)**2)
+    x_term_1 = a*cos(E1)
+    x_term_2 = a*cos(E2)
 
     x_integral = x_term_2 - x_term_1
 
     x_avg = 1/(t2-t1) * x_integral
 
 
-    y_term_1 = a**2*sqrt(1-e**2)/r1 * (sin(E1) - e/2 * (E1 + 0.5*sin(2*E1)) )
-    y_term_2 = a**2*sqrt(1-e**2)/r2 * (sin(E2) - e/2 * (E2 + 0.5*sin(2*E2)) )
+    y_term_1 = a*sqrt(1-e**2)*sin(E1)
+    y_term_2 = a*sqrt(1-e**2)*sin(E2)
 
     y_integral = y_term_2 - y_term_1
 
