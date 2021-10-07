@@ -360,8 +360,8 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         ######################
         
         mean_motion = two_pi/per # Units of 1/day because per is in days
-        sqrt_eterm = sqrt((1+e)/(1-e))
-        e_sq = e**2
+        #sqrt_eterm = sqrt((1+e)/(1-e))
+        #e_sq = e**2
         rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
 
         for l in range(2): # Hipparcos or Gaia
@@ -406,7 +406,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
                 continue
             
             # Get velocity of the star
-            x_vel_avg, y_vel_avg = vel_avg(a_star_units, mean_motion, e, E1, E2, start_time, end_time)
+            x_vel_avg, y_vel_avg = vel_avg(a_star_units, e, E1, E2, start_time, end_time)
 
             # Since we're using the E_anom for the planet, the star is moving in the opposite direction
             v_vec_star[0] = -x_vel_avg
@@ -449,12 +449,14 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 cdef pos_avg(double a, double n, double e, double E1, double E2, 
                   double t1, double t2):
     """
+    Derived from Murray & Dermott eq. 2.41
     Calculate the average x/y positions of an object on an elliptical orbit, 
-    where (0,0) is the focus.
+    where (0,0) is the focus and E = M = 0 is periastron, which is along the x-axis.
     
     a (cm): semi-major axis
     n (1/days): 2pi/per
-    t1, t2 (days): beginning and ending time to calculate average
+    E1, E2 (radians): beginning and ending eccentric anomaly
+    t1, t2 (days): beginning and ending time (corresp.to E1, E2) to calculate average
     
     returns: Average x and y positions (cm)
     """
@@ -479,7 +481,7 @@ cdef pos_avg(double a, double n, double e, double E1, double E2,
     
     return x_avg, y_avg
 
-cdef vel_avg(double a, double n, double e, double E1, double E2, 
+cdef vel_avg(double a, double e, double E1, double E2, 
                   double t1, double t2):
     """
     Calculate the average x/y positions of an object on an elliptical orbit, 
@@ -487,29 +489,33 @@ cdef vel_avg(double a, double n, double e, double E1, double E2,
 
     a (cm): semi-major axis
     n (1/days): 2pi/per
-    !!! THHIS FUNCTION doesn't actually use n. It can be removed.
+    !!! THIS FUNCTION doesn't actually use n. n can be removed.
     t1, t2 (days): beginning and ending time to calculate average
     
     returns: Average x and y velocities (cm/day)
     """
     
     cdef double x_term_1, x_term_2, x_integral, x_avg,\
-                y_term_1, y_term_2, y_integral, y_avg,\
-                r1, r2
-    
-    r1 = a*(1-e*cos(E1))
-    r2 = a*(1-e*cos(E2))
-
-    x_term_1 = a**2/r1 * (cos(E1) + e/2 * sin(E1)**2)
-    x_term_2 = a**2/r2 * (cos(E2) + e/2 * sin(E2)**2)
+               y_term_1, y_term_2, y_integral, y_avg
+    #
+    #r1 = a*(1-e*cos(E1))
+    #r2 = a*(1-e*cos(E2))
+    #
+    #x_term_1 = a**2/r1 * (cos(E1) + e/2 * sin(E1)**2)
+    #x_term_2 = a**2/r2 * (cos(E2) + e/2 * sin(E2)**2)
+    x_term_1 = a*cos(E1)
+    x_term_2 = a*cos(E2)
 
     x_integral = x_term_2 - x_term_1
 
     x_avg = 1/(t2-t1) * x_integral
 
 
-    y_term_1 = a**2*sqrt(1-e**2)/r1 * (sin(E1) - e/2 * (E1 + 0.5*sin(2*E1)) )
-    y_term_2 = a**2*sqrt(1-e**2)/r2 * (sin(E2) - e/2 * (E2 + 0.5*sin(2*E2)) )
+    #y_term_1 = a**2*sqrt(1-e**2)/r1 * (sin(E1) - e/2 * (E1 + 0.5*sin(2*E1)) )
+    #y_term_2 = a**2*sqrt(1-e**2)/r2 * (sin(E2) - e/2 * (E2 + 0.5*sin(2*E2)) )
+    
+    y_term_1 = a*sqrt(1-e**2)*sin(E1)
+    y_term_2 = a*sqrt(1-e**2)*sin(E2)
  
     y_integral = y_term_2 - y_term_1
  

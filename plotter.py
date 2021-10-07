@@ -143,7 +143,16 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
             values_in_bounds = np.where(const_per_a_list >= min_a)
 
             plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--r', alpha=0.5)
-
+    
+    ###########
+    # synth_a = 5
+    # synth_m = 30
+    #
+    # inds = hlpw.value2index(synth_a, (0, grid_num-1), a_lim),\
+    #        hlpw.value2index(synth_m, (0, grid_num-1), m_lim)
+    #
+    # ax.scatter(inds[0], inds[1], s=600, c='yellow', marker='*')
+    ###########
 
     fig.tight_layout()
     fig.savefig('plots/' + save_name + '.png')
