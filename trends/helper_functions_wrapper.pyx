@@ -4,10 +4,11 @@
 import os
 import sys
 
-path = os.getcwd()
-sys.path.append(path+'/trends')
-
-from kern_profiler_dummy import *
+## Commenting out kern_prof stuff for now
+#path = os.getcwd()
+#sys.path.append(path+'/trends')
+#
+#from kern_profiler_dummy import *
 
 import numpy as np
 cimport numpy as np
@@ -23,6 +24,8 @@ from cpython cimport array
 import radvel as rv
 from c_kepler import _kepler as ck
 
+#from libc.stdio cimport printf
+
 ##########################################
 #### Kepler solver for one M and one e
 # Wrapping kepler(M,e) a simple function that takes two doubles as
@@ -33,9 +36,9 @@ cdef extern from "../c_kepler/kepler.c":
 ##########################################
 ## Constants ##
 
-cdef float pi, two_pi, math_e, G, M_sun, M_jup, au
-cdef float hip_times[2]
-cdef float gaia_times[2]
+cdef double pi, two_pi, math_e, G, M_sun, M_jup, au
+cdef double hip_times[2]
+cdef double gaia_times[2]
 
 pi = 3.141592653589793
 two_pi = 6.283185307179586
@@ -50,6 +53,7 @@ hip_times  = [Time(1989.85, format='decimalyear').jd,
 
 gaia_times = [Time('2014-07-25', format='isot').jd, 
               Time('2017-05-28', format='isot').jd] #https://www.cosmos.esa.int/web/gaia/earlydr3
+
 
 #@profile
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
@@ -71,7 +75,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
     cdef long [:] a_inds, m_inds
 
-    #np.random.seed(0)
+    np.random.seed(0)
     tp = 0
     a_min = a_lim[0]
     a_max = a_lim[1]
@@ -124,7 +128,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
 
 
-cdef P(double [:] a, double [:] Mtotal):
+def P(double [:] a, double [:] Mtotal):
     """
     Uses Kepler's third law to find the period of a planet (in days) given its
     semimajor axis and the total mass of the system.
@@ -136,7 +140,7 @@ cdef P(double [:] a, double [:] Mtotal):
     cdef double sec_2_days
 
     size = a.shape[0]
-    sec_2_days = 1./(24*3600) # Note the 1.; with 1, the result would be 0 for some reason
+    sec_2_days = 1./(24.*3600.) # Note the 1.; with 1, the result would be 0 for some reason
 
     cdef np.ndarray[double, ndim=1] P_days = np.ndarray(shape=(size,), dtype=np.float64)
 
@@ -315,9 +319,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     cdef double mu_gaia[2]
     cdef double mu_hg[2]
 
-    # I don't think I can declare a c-type array with size (grid_num, grid_num)
     cdef double [:] astro_prob_list = np.zeros(shape=(num_points), dtype=np.float64)
-    cdef double [:,:] astro_prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
 
     # Time in days between epoch mid-points
     baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
@@ -352,12 +354,10 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         M_anom_0 = M_anom_0_list[j]
         
         a_units = a*au
-        #a_star_units = a_units*mass_ratio # Calculate the sma (cm) of the star's orbit around barycenter. 
         
-        ######################
+        # Can't take this out of loop bc it depends on companion mass m (top and bottom)
         mass_ratio = (m*M_jup/(m_star*M_sun + m*M_jup))
         a_star_units = a_units*mass_ratio
-        ######################
         
         mean_motion = two_pi/per # Units of 1/day because per is in days
         #sqrt_eterm = sqrt((1+e)/(1-e))
@@ -368,7 +368,6 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
             end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
             
-            
             ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
             M1 = mean_motion*start_time + M_anom_0
             M2 = mean_motion*end_time + M_anom_0
@@ -376,9 +375,12 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             E1 = kepler(M1, e)
             E2 = kepler(M2, e)
             
+            #print(two_pi, per, mean_motion)
+            #print('Anomalies ', l, M1, M2, E1, E2)
             # Get position of the STAR.
             x_pos_avg, y_pos_avg = pos_avg(a_star_units, mean_motion, e, E1, E2, start_time, end_time)
             
+            #print('Positions', l, x_pos_avg, y_pos_avg)
 
             # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
             # Since we're using the E_anom for the planet, the star is located in the opposite direction
@@ -386,7 +388,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             r_vec[1] = -y_pos_avg
             r_vec[2] = 0
             
-
+            #print('RVEC', r_vec[0], r_vec[1], r_vec[2])
             # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
             mat_mul(rot_mtrx, r_vec, rot_vec)
 
@@ -407,7 +409,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             
             # Get velocity of the star
             x_vel_avg, y_vel_avg = vel_avg(a_star_units, e, E1, E2, start_time, end_time)
-
+            print('VELOS', l, x_vel_avg, y_vel_avg)
             # Since we're using the E_anom for the planet, the star is moving in the opposite direction
             v_vec_star[0] = -x_vel_avg
             v_vec_star[1] = -y_vel_avg

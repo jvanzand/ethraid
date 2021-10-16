@@ -23,12 +23,12 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     
     # rv_epoch is the epoch where DATA values of g_dot and g_ddot are computed. Taken from radvel setup file.
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_synth
+            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_191939
 
 
     # min_per is 4xbaseline because we see ~no curvature yet.
-    # min_per = 4*rv_baseline
-    min_per = rv_baseline
+    min_per = 4*rv_baseline
+    # min_per = rv_baseline
     min_K = max_rv
 
     min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
@@ -42,17 +42,17 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     print('Min a is: ', min_a)
 
     # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-    # # 191939
-    # # min_a = 0.5
-    # # min_m = 0.5
-    # a_lim = (0.8*min_a, 5e1)
-    # m_lim = (0.8*min_m, 1e2)
+    # 191939
+    # min_a = 0.5
+    # min_m = 0.5
+    a_lim = (0.8*min_a, 5e1)
+    m_lim = (0.8*min_m, 1e2)
     # # HD238894 - Paul Dalba's target
     # a_lim = (0.8*min_a, 32.1)
     # m_lim = (0.8*min_m, 3e2)
-    # synthetic
-    a_lim = (0.8*min_a, 5e1)
-    m_lim = (0.8*min_m, 1e3)
+    # # synthetic
+    # a_lim = (0.8*min_a, 5e1)
+    # m_lim = (0.8*min_m, 1e3)
     # # GL758
     # a_lim = (0.5*min_a, 2e2)
     # m_lim = (0.5*min_m, 4e2)
