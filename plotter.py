@@ -52,10 +52,10 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     region_label_size = 50
     restricted_region_label_size = 35
 
-    # plt.text((16/32)*grid_num, (7/8)*grid_num, 'RV',
-    #           size=region_label_size, rotation=50)
-    # plt.text((7/16)*grid_num, (1/4)*grid_num, 'Astrometry',
-    #           size=region_label_size)
+    plt.text((12/32)*grid_num, (5/8)*grid_num, 'RV',
+              size=region_label_size, rotation=50)
+    plt.text((6/16)*grid_num, (3/16)*grid_num, 'Astrometry',
+              size=region_label_size)
 
     plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Masses disallowed by RVs', 
               size=restricted_region_label_size)
@@ -69,7 +69,7 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     ############ Axis ticks and labels ################
     
     # List of round numbers to use as labels for both a and m
-    #tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900, 2700])
+    # tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900, 2700])
     tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048])
 
     # Chop out any labels outside the a or m bounds
@@ -144,15 +144,15 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
 
             plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--r', alpha=0.5)
     
-    ###########
-    synth_a = 3.5
-    synth_m = 15
-
-    inds = hlpw.value2index(synth_a, (0, grid_num-1), a_lim),\
-           hlpw.value2index(synth_m, (0, grid_num-1), m_lim)
-
-    ax.scatter(inds[0], inds[1], s=600, c='yellow', marker='*')
-    ###########
+    # ###########
+    # synth_a = 3.5
+    # synth_m = 15
+    #
+    # inds = hlpw.value2index(synth_a, (0, grid_num-1), a_lim),\
+    #        hlpw.value2index(synth_m, (0, grid_num-1), m_lim)
+    #
+    # ax.scatter(inds[0], inds[1], s=600, c='yellow', marker='*')
+    # ###########
 
     fig.tight_layout()
     fig.savefig('plots/' + save_name + '.png')

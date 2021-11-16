@@ -68,7 +68,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
                                     cosi_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     i_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     M_anom_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
-                                    T_anom_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     om_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     a_bins = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     m_bins = np.ndarray(shape=(num_points,), dtype=np.float64)
@@ -108,7 +107,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
     # Not evolving for use in astrometry calculations (b/c these are the STARTING angles ~1991)
     #E_anom_astro = ck.kepler_array(M_anom_list, e_list)
-    #T_anom_astro = 2*np.arctan(np.sqrt((1+e_list)/(1-e_list)) * np.tan(E_anom_astro/2)) # Used in post_astro as T_anom_0.
 
     # Arguments of peri, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
@@ -290,7 +288,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
     cdef double [:,::1] rot_mtrx # This makes rot_mtrx a memview
     rot_mtrx = np.zeros((3,3),dtype=np.float64)
 
-    cdef double M_anom, E_anom, T_anom, r_pl, r_star, mass_ratio
+    cdef double M_anom, E_anom, r_pl, r_star, mass_ratio
 
     cdef double r_vec_list[3]
     cdef double [:] r_vec = r_vec_list
@@ -377,7 +375,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             
             #print(two_pi, per, mean_motion)
             #print('Anomalies ', l, M1, M2, E1, E2)
-            # Get position of the STAR.
+            # Get position of the STAR w/ rsp to barycenter.
             x_pos_avg, y_pos_avg = pos_avg(a_star_units, mean_motion, e, E1, E2, start_time, end_time)
             
             #print('Positions', l, x_pos_avg, y_pos_avg)
@@ -409,7 +407,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             
             # Get velocity of the star
             x_vel_avg, y_vel_avg = vel_avg(a_star_units, e, E1, E2, start_time, end_time)
-            print('VELOS', l, x_vel_avg, y_vel_avg)
+            #print('VELOS', l, x_vel_avg, y_vel_avg)
             # Since we're using the E_anom for the planet, the star is moving in the opposite direction
             v_vec_star[0] = -x_vel_avg
             v_vec_star[1] = -y_vel_avg
@@ -432,7 +430,6 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
 
         mu_gaia = mu_avg[1]
-
         # To get the positional avg., subtract the epoch positions and divide by the time between in years.
         # First index tells Hip ([0]) or Gaia ([1]), second index tells x ([0]) or y ([1])
         # Units of mas/yr
@@ -453,7 +450,8 @@ cdef pos_avg(double a, double n, double e, double E1, double E2,
     """
     Derived from Murray & Dermott eq. 2.41
     Calculate the average x/y positions of an object on an elliptical orbit, 
-    where (0,0) is the focus and E = M = 0 is periastron, which is along the x-axis.
+    where (0,0) is the focus and E = M = 0 is periastron, which 
+    in this unrotated reference frame is along the positive x-axis.
     
     a (cm): semi-major axis
     n (1/days): 2pi/per
@@ -528,7 +526,8 @@ cdef double likelihood_astro(double data, double data_err, double model):
 
     chi_sq = ((data-model)/data_err)**2
 
-    prob = math_e**(-chi_sq/2)
+    #prob = math_e**(-chi_sq/2)
+    prob = -chi_sq/2
 
     return prob
 
@@ -549,7 +548,8 @@ cdef double likelihood_rv(double [:] model, double [:] data, double [:] data_err
 
         chi_sq += ((data[i]-model[i])/data_err[i])**2
 
-    prob = math_e**(-chi_sq/2)
+    #prob = math_e**(-chi_sq/2)
+    prob = -chi_sq/2
 
     return prob
 
@@ -568,7 +568,7 @@ def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_
         a_i = a_inds[i]
         m_i = m_inds[i]
 
-        prob_array[m_i, a_i] += prob_list[i]
+        prob_array[m_i, a_i] += math_e**(prob_list[i])
 
     return np.array(prob_array)
 
@@ -588,9 +588,9 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
         a_i = a_inds[i]
         m_i = m_inds[i]
 
-        prob = rv_post_list[i]*astro_post_list[i]
+        prob = rv_post_list[i]+astro_post_list[i]
 
-        tot_prob_array[m_i, a_i] += prob
+        tot_prob_array[m_i, a_i] += math_e**prob
 
     return np.array(tot_prob_array)
 

@@ -202,11 +202,11 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='validation/synth', num_points=1e6, grid_num=100)
+            run(read_file=None, save=True, write_file='validation/tester', num_points=1e6, grid_num=100)
 
 
     plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
-                        save_name='validation/synth', period_lines = False)
+                        save_name='validation/tester', period_lines = False)
 
 
 
