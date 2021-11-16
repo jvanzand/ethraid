@@ -32,12 +32,12 @@ M_jup = 1.8981245973360504e+30
 def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True):
     
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_gl758
+            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = sp.params_191939
 
 
     # min_per is 4xbaseline because we see ~no curvature yet.
-    # min_per = 4*rv_baseline
-    min_per = rv_baseline
+    min_per = 4*rv_baseline
+    # min_per = rv_baseline
     min_K = max_rv
 
     min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
