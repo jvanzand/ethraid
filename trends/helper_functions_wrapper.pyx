@@ -128,8 +128,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
 def P(double [:] a, double [:] Mtotal):
     """
-    Uses Kepler's third law to find the period of a planet (in days) given its
-    semimajor axis and the total mass of the system.
+    Uses Kepler's third law to find the period of a planet (in days) given the
+    total semimajor axis and the total mass of the system.
 
     a (au): semi-major axis
     Mtotal (Msun): Mass of star + mass of object
@@ -270,7 +270,7 @@ def rv_post(double gammadot, double gammadot_err,
         model[0] = gammadot_list[i]
         model[1] = gammaddot_list[i]
 
-        prob = likelihood_rv(model, data, err)
+        prob = log_likelihood_rv(model, data, err)
 
         rv_prob_list[i] = prob
 
@@ -439,7 +439,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
 
         delta_mu_model = sqrt((mu_hg[0] - mu_gaia[0])**2 + (mu_hg[1] - mu_gaia[1])**2)
 
-        prob = likelihood_astro(delta_mu, delta_mu_err, delta_mu_model)
+        prob = log_likelihood_astro(delta_mu, delta_mu_err, delta_mu_model)
 
         astro_prob_list[j] = prob
 
@@ -515,9 +515,9 @@ cdef vel_avg(double a, double e, double E1, double E2,
     return x_avg, y_avg
 
 
-cdef double likelihood_astro(double data, double data_err, double model):
+cdef double log_likelihood_astro(double data, double data_err, double model):
     """
-    Simple calculation of likelihood given data and model
+    Simple calculation of log-likelihood given data and model
     assuming gaussian uncertainties and uniform priors.
     """
 
@@ -527,13 +527,13 @@ cdef double likelihood_astro(double data, double data_err, double model):
     chi_sq = ((data-model)/data_err)**2
 
     #prob = math_e**(-chi_sq/2)
-    prob = -chi_sq/2
+    log_prob = -chi_sq/2
 
-    return prob
+    return log_prob
 
-cdef double likelihood_rv(double [:] model, double [:] data, double [:] data_err):
+cdef double log_likelihood_rv(double [:] model, double [:] data, double [:] data_err):
     """
-    Simple calculation of likelihood given data and model
+    Simple calculation of log-likelihood given data and model
     assuming gaussian uncertainties and uniform priors. Accepts lists of
     data points because RV uses both gdot and gddot.
     """
@@ -549,9 +549,9 @@ cdef double likelihood_rv(double [:] model, double [:] data, double [:] data_err
         chi_sq += ((data[i]-model[i])/data_err[i])**2
 
     #prob = math_e**(-chi_sq/2)
-    prob = -chi_sq/2
+    log_prob = -chi_sq/2
 
-    return prob
+    return log_prob
 
 def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_num):
     """
@@ -860,7 +860,7 @@ def save_array(array, filename):
     h5f = h5py.File(filename, 'w')
     h5f.create_dataset('dataset_1', data=array)
     h5f.close()
-    
+
     return
 
 
