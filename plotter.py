@@ -6,8 +6,12 @@ import matplotlib.patches as ptch
 from trends import helper_functions_wrapper as hlpw
 
 
-def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
+def joint_plot(m_star, d_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
                 min_vals, save_name='companion', period_lines = False, marginalized=True):
+    """
+    m_star: Stellar mass (M_sun)
+    d_star: distance to star (parsecs)
+    """
     
     tick_num = 6
     tick_size = 30
@@ -75,11 +79,17 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     # Chop out any labels outside the a or m bounds
     tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])]
     tick_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])]
+    
+    # Adding a top axis for separation. d_star must be in parsecs
+    tick_labels_angsep = tick_labels_a / d_star
+    
 
     # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
-    tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_a))
-    tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_m))
-
+    round_lambda = lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2)
+    tick_labels_a = list(map(round_lambda, tick_labels_a))
+    tick_labels_m = list(map(round_lambda, tick_labels_m))
+    tick_labels_angsep = list(map(round_lambda, tick_labels_angsep))
+    
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
     tick_positions_a = hlpw.value2index(tick_labels_a, (0, grid_num-1), a_lim)
     tick_positions_m = hlpw.value2index(tick_labels_m, (0, grid_num-1), m_lim)
@@ -87,22 +97,14 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
     plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
     
-    ### Experimental: adding top x-axis to show separations
-    # def au2sep(au):
-    #     """
-    #     Given system distance in pc, converts separation in au into separation in arcsec
-    #     """
-    #     asec = au/10
-    #     return asec
-    #
-    # def sep2au(asec):
-    #     """
-    #     Given system distance in pc, converts separation in arcsec into separation in au
-    #     """
-    #     au = asec*10
-    #     return au
-    #
-    # ax.secondary_xaxis('top', functions=(au2sep, sep2au))
+    # Configuring secondary axes for angular separation and Δmag
+    scnd_ax_label_size = 35
+    scnd_ax_tick_size = 24
+    ax_top = ax.twiny()
+    ax_top.set_xlim(0, grid_num-1)
+    plt.sca(ax_top)
+    plt.xticks(tick_positions_a, [str(i) for i in tick_labels_angsep], size=scnd_ax_tick_size)
+    ax_top.set_xlabel('Angular separation (arcsec)', size=scnd_ax_label_size, labelpad=15)
     
     
     if period_lines:
@@ -204,3 +206,20 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     print('m_lim = ', bounds[1], ' M_J')
     
     return
+
+## Experimental: adding top x-axis to show separations
+def au2sep(au, d_star):
+    """
+    Given system distance in pc, converts separation in au into separation in arcsec
+    """
+    asec = au/d_star
+    return asec
+
+# def sep2au(asec, d_star):
+#     """
+#     Given system distance in pc, converts separation in arcsec into separation in au
+#     """
+#     au = asec*d_star
+#     return au
+
+# ax.secondary_xaxis('top', functions=(au2sep, sep2au))

@@ -13,6 +13,11 @@ from trends import helper_functions_wrapper as hlpw
 import plotter
 import system_params as sp
 
+#######
+# Things to change in code:
+# 1) Choose one unit for each dimension (probably au for distance and M_Jup for mass)
+# 2) Identify cause of 3x slowdown in modular code and switch overe
+
 
 ## Constants ##
 M_sun = 1.988409870698051e+33
@@ -196,17 +201,18 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
             post_file.close()
             print('Posterior file saved to '+post_file_path)
     
-    return m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m)
+    return m_star, d_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m)
 
 if __name__ == "__main__":
     
     
-    m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
+    m_star, d_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
             run(read_file=None, save=True, write_file='validation/tester', num_points=1e6, grid_num=100)
 
-
-    plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
-                        save_name='validation/tester', period_lines = False)
+    # Temporary until I standardize distance. Eventually this will take d_star in au, instead of cm / (cm/pc) = pc
+    pc_in_cm = 3.086e18
+    plotter.joint_plot(m_star, d_star/pc_in_cm, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m), 
+                        save_name='validation/tester', marginalized=True, period_lines = False)
 
 
 
