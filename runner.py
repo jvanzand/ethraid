@@ -19,7 +19,6 @@ import system_params as sp
 # 2) Identify cause of 3x slowdown in modular code and switch overe
 
 
-
 ## Constants ##
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
