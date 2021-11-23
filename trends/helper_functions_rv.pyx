@@ -14,7 +14,7 @@ from tqdm import tqdm
 import cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
-import helper_functions_rv as hlp_rv
+#import helper_functions_rv as hlp_rv
 
 ##########################################
 #### Kepler solver for one M and one e
@@ -80,7 +80,7 @@ def log_lik_gamma(double a, double m, double e, double i, double om, double M_an
     cdef double log_likelihood_gdot, log_likelihood_gddot, log_likelihood_total
     
     #per = hlp.P(a, m, m_star)
-    E = hlp_rv.M_2_evolvedE(M_anom_0, per, e, rv_epoch)
+    E = M_2_evolvedE(M_anom_0, per, e, rv_epoch)
 
     gdot_model, gddot_model = gamma(a, m, e, i, om, E, per, m_star)
 
