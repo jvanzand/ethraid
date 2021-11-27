@@ -1,11 +1,17 @@
-pc_in_cm = 3.086e18
+M_sun = 1.988409870698051e+33
+M_jup = 1.8981245973360504e+30
+pc_in_cm = 3.086e18 # DELETE
+pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
+Ms2Mj = M_sun/M_jup
 
 # params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), max_rv of residuals, rv_epoch, delta_mu, delta_mu_err)
 
 
 ############## Syetems for papers #########################
-params_191939 = (0.807, 58.3*pc_in_cm, 0.114, 0.006, -6e-5, 1.9e-5, 
+# params_191939 = (0.807, 58.3*pc_in_cm, 0.114, 0.006, -6e-5, 1.9e-5,
+#                 430.2527364352718, 40.0581900021484, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
+params_191939 = (0.807*Ms2Mj, 58.3, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 40.0581900021484, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
 # Potential interesting DG paper. No gddot defined in RVS preferred fit.

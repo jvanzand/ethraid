@@ -13,19 +13,18 @@ cimport numpy as np
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
 
-#import helper_functions_general as hlp
-
 cdef float two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, baseline_yrs
 cdef float hip_times[2]
 cdef float gaia_times[2]
 
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
-G = 6.674299999999999e-08
-M_sun = 1.988409870698051e+33
-M_jup = 1.8981245973360504e+30
-au = 14959787070000.0
-pc_in_cm = 3.086e18
+
+old_G = 6.674299999999999e-08
+# G in AU, M_Jup, day units.
+G = 2.824760877012879e-07 # (c.G.cgs*(1/c.au.cgs)**3 * (c.M_jup.cgs) * (24*3600)**2).value
+
+pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 
 #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
 hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] 
@@ -66,7 +65,7 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
     return lik_list
 
 
-def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom_0, 
+cdef log_lik_dmu(double a, double m, double e, double i, double om, double M_anom_0, 
                 double per, double m_star, double d_star,
                 double dmu_data, double dmu_data_err):
     """
@@ -80,12 +79,30 @@ def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom
     
     return log_likelihood
 
-def dmu(double a, double m, double e, double i, double om, double M_anom_0, 
+cdef dmu(double a, double m, double e, double i, double om, double M_anom_0, 
         double per, double m_star, double d_star):
     """
     Compute delta_mu for a set of model parameters
+    
+    Arguments:
+        a (float, AU): Semi-major axis
+        m (float, M_jup): Companion mass
+        e (float): Orbital eccentricity
+        i (float, radians): Orbital inclination
+        om (float, radians): Argument of periastron
+        M_anom_0 (float, radians): Mean anomaly at the beginning
+                                   of the Hipparcos mission
+        per (float, days): Orbital period
+        m_star (float, M_jup): Host star mass
+        d_star (float, parsecs): Distance of system from Earth
+    
+    Returns:
+        dmu_model (float, mas/yr): Magnitude of difference between
+                                   Gaia pm and positional average
+                                   pm between Gaia and Hipparcos. 
+        
     """
-    cdef double mass_ratio, cm_2_mas, cmd_2_masyr
+    cdef double mass_ratio, au_2_mas, aud_2_masyr
     cdef double mean_motion, sqrt_eterm, M1, M2, E1, E2
     cdef double x_pos_avg, y_pos_avg, x_vel_avg, y_vel_avg
     
@@ -118,22 +135,20 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     cdef double mu[2]
     #######################################
     
-    mass_ratio = (m*M_jup/(m_star*M_sun + m*M_jup))
-    cm_2_mas = (206265*1e3)/d_star
-    cmd_2_masyr = cm_2_mas * 365.25 # cm/day to milli-arcseconds/year
+    mass_ratio = m/(m_star + m)
+    au_2_mas = 1e3/d_star # milli-arcseconds
+    aud_2_masyr = au_2_mas * 365.25 # au/day to milli-arcseconds/year
 
     time_endpoints = [[hip_times[0], gaia_times[0]], 
                       [hip_times[1], gaia_times[1]]]
 
 
-    #per = hlp.P(a, m, m_star)
     mean_motion = two_pi/per
     sqrt_eterm = sqrt((1+e)/(1-e))
-    a_units = a*au
-    a_star_units = a_units*mass_ratio
+    a_star = a*mass_ratio
     e_sq = e**2
     rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
-    r_star_num_fac = a_units*(1-e_sq)
+    r_star_num_fac = a*(1-e_sq)
     
     for l in range(2): # Hipparcos or Gaia
         start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
@@ -148,8 +163,8 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         E1 = kepler_single(M1, e)
         E2 = kepler_single(M2, e)
 
-        # Get position of the STAR.
-        x_pos_avg, y_pos_avg = pos_avg(a_star_units, mean_motion, e, 
+        # Get position of the STAR (au).
+        x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
 
         # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
@@ -162,8 +177,8 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         mat_mul(rot_mtrx, r_vec, rot_vec)
 
         # ang_pos is the angular position of the star relative to barycenter in milli-arcseconds.
-        ang_pos[0] = rot_vec[0]*cm_2_mas
-        ang_pos[1] = rot_vec[1]*cm_2_mas
+        ang_pos[0] = rot_vec[0]*au_2_mas
+        ang_pos[1] = rot_vec[1]*au_2_mas
 
         ang_pos_avg[l][0] = ang_pos[0]
         ang_pos_avg[l][1] = ang_pos[1]
@@ -174,8 +189,8 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         if l == 0:
             continue
 
-        # Get velocity of the star
-        x_vel_avg, y_vel_avg = vel_avg(a_star_units, mean_motion, e, 
+        # Get velocity of the star (au/day)
+        x_vel_avg, y_vel_avg = vel_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
 
         # Since we're using the E_anom for the planet, the star is moving in the opposite direction
@@ -187,8 +202,8 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
 
         # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
         # Since period is in days and a_star_units in cm, velocities are in cm/day.
-        mu[0] = rotated_v_vec[0]*cmd_2_masyr
-        mu[1] = rotated_v_vec[1]*cmd_2_masyr
+        mu[0] = rotated_v_vec[0]*aud_2_masyr
+        mu[1] = rotated_v_vec[1]*aud_2_masyr
 
         # mu_avg is a 2x2 array. The top row stays empty because we skip Hip. The bottom row is Gaia prop. motion
         mu_avg[l][0] = mu[0]
@@ -214,11 +229,11 @@ cdef pos_avg(double a, double n, double e, double E1, double E2,
     Calculate the average x/y positions of an object on an elliptical orbit, 
     where (0,0) is the focus.
 
-    a (cm): semi-major axis
+    a (au): semi-major axis
     n (1/days): 2pi/per
     t1, t2 (days): beginning and ending time to calculate average
 
-    returns: Average x and y positions (cm)
+    returns: Average x and y positions (au)
     """
 
     cdef double x_term_1, x_term_2, x_integral, x_avg,\
@@ -247,11 +262,11 @@ cdef vel_avg(double a, double n, double e, double E1, double E2,
     Calculate the average x/y positions of an object on an elliptical orbit, 
     where (0,0) is the focus.
 
-    a (cm): semi-major axis
+    a (au): semi-major axis
     n (1/days): 2pi/per
     t1, t2 (days): beginning and ending time to calculate average
 
-    returns: Average x and y velocities (cm/day)
+    returns: Average x and y velocities (au/day)
     """
 
     cdef double x_term_1, x_term_2, x_integral, x_avg,\
@@ -314,7 +329,6 @@ cdef void rot_matrix(double i, double om, double Om, double [:,:] rot_mtrx):
     #return rot_mtrx
 
 
-#@profile
 cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with

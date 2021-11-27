@@ -1,4 +1,9 @@
-from setuptools import setup
+# from setuptools import setup
+# from Cython.Build import cythonize
+# from distutils.extension import Extension
+# import numpy as np
+
+from distutils.core import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
 import numpy as np
@@ -7,16 +12,16 @@ import numpy as np
 # profile = line_profiler.LineProfiler()
 
 ####################
-# Extra stuff to profile code using kernprof -l -v file.py after it is compiled
-# Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
-
-# # from Cython.Compiler.Options import get_directive_defaults
-# # directive_defaults = get_directive_defaults()
-# import Cython
-# directive_defaults = Cython.Compiler.Options.get_directive_defaults()
+# # Extra stuff to profile code using kernprof -l -v file.py after it is compiled
+# # Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
 #
-# directive_defaults['linetrace'] = True
-# directive_defaults['binding'] = True
+# from Cython.Compiler.Options import get_directive_defaults
+# directive_defaults = get_directive_defaults()
+import Cython
+directive_defaults = Cython.Compiler.Options.get_directive_defaults()
+
+directive_defaults['linetrace'] = True
+directive_defaults['binding'] = True
 
 ###########################################
 

@@ -1,12 +1,12 @@
-# cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False
-## cython: binding=True
+# cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False, linetrace=True
+# cython: binding=True
 
 import numpy as np
 cimport numpy as np
 import scipy as sp
 import scipy.stats as spst
 
-import cython
+cimport cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
 cdef float pi, two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm
@@ -14,7 +14,10 @@ cdef float pi, two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm
 pi = 3.141592653589793
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
-G = 6.674299999999999e-08
+old_G = 6.674299999999999e-08
+
+G = 2.824760877012879e-07 # c.G.cgs.value*(1/c.au.cgs.value)**3 * (c.M_jup.cgs.value) * (24*3600)**2
+
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
@@ -22,9 +25,33 @@ pc_in_cm = 3.086e18
 
 np.random.seed(0)
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
+    """
+    Create the parameter arrays which will be used for the RV and astrometry posteriors.
+    
+    Arguments:
+        m_star (float, M_sun): Mass of host star.
+        a_lim (tuple of floats, au): Semi-major axis limits to consider, 
+                                     in the form (a_min, a_max).
+        m_lim (tuple of floats, M_jup): Mass limits, (m_min, m_max).
+        rv_epoch (float, BJD): Date at which gdot and gddot will be evaluated. 
+                               Should be near the time series midpoint
+        grid_num (int): Dimensions of (a,m) grid.
+        num_points (int): Number of random orbital models to simulate.
+    
+    Returns:
+        a_list, m_list, per_list, e_list, 
+        i_list, om_list, M_anom_0_list (numpy arrays, len = num_points):
+                                        Lists of randomly sampled semi-major axis, mass,
+                                        eccentricity, inclination, argument of
+                                        periastron, and initial mean anomaly. per_list is
+                                        not randomly sampled.
+        a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
+                                        (a, m, per, e, i, om, M_anom_0) model 
+                                        will be placed, based on the model's 
+                                        a and m values.
+    """
 
     cdef double tp, a_min, a_max, m_min, m_max
-
 
     cdef np.ndarray[double, ndim=1] a_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     m_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
@@ -40,7 +67,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
     cdef long [:] a_inds, m_inds
 
-    #np.random.seed(0)
+    np.random.seed(0)
     tp = 0
     a_min = a_lim[0]
     a_max = a_lim[1]
@@ -50,11 +77,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
     # These semimajor axes are distances between the planet and the barycenter of the system. The star is on its own orbit, which we will get later.
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
+    print(m_min, m_max)
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
 
     # Match up a_list and m_list and get the period for each pair (in days).
-    per_list = P_list(a_list, m_list, m_star) # Use this line when we are actually sampling a_tot, not a_planet
-    #per_list = P(a_list * (m_star+m_list*(M_jup/M_sun))/m_star, m_star+m_list*(M_jup/M_sun) )
+    # Calculate this now to avoid having to do it twice for RVs and astrometry.
+    per_list = P_list(a_list, m_list, m_star) # Use this line when we are sampling a_tot, not a_planet
     
     # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014).
     e_list = spst.beta(0.867, 3.03).rvs(num_points)
@@ -65,11 +93,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
 
     # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
     M_anom_0_list = np.random.uniform(0, two_pi, num_points)
-
-    # Evolving M_anom forward to the epoch of RV calculations.
-    # Commenting out because I evolve forward individually in the RV helper module
-    #M_anom_evolved = M_anom_0 + two_pi*((rv_epoch - hip_times[0])/per_list)
-    #E_anom_rv = ck.kepler_array(M_anom_evolved, e_list) # Used in post_rv
 
     # Arguments of peri, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
@@ -88,8 +111,27 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
             long [:] a_inds, long [:] m_inds):
             
     """
-    Start with 2 1D lists and multiply them element-wise. 
-    THEN form the result into a 2D array.
+    Start with 2 1D lists and multiply them element-wise, THEN form 
+    the result into a 2D array. This function is for the total posterior;
+    the individual RV and astrometry posteriors are handled by the 
+    prob_array() function below.
+    
+    Arguments:
+        rv_post_list (np array of floats, len=num_points): List of model likelihoods
+                     given the RV data.
+        rv_post_list (np array of floats, len=num_points): List of model likelihoods
+                    given the astrometry data.
+        grid_num (int): Dimension of square (a,m) grid.
+        a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
+                                        (a, m, per, e, i, om, M_anom_0) model will 
+                                        be placed, based on the model's 
+                                        a and m values.
+                                        
+    Returns:
+        tot_prob_array (numpy array, dim = grid_num x grid_dum): 2-D array of binned
+                       (aka marginalized) posterior probabilities. Note, the binning
+                       process itself is what applies my priors, converting the
+                       individual likelihoods into posterior probabilities.
     """
 
     cdef int size, i, a_i, m_i
@@ -106,13 +148,28 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
         prob = rv_post_list[i]*astro_post_list[i]
 
         tot_prob_array[m_i, a_i] += prob
-
-    return np.array(tot_prob_array)
+    
+    tot_prob_array = np.array(tot_prob_array)
+    
+    return tot_prob_array
 
 
 def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_num):
     """
-    Form a list of probabilities into a 2D array
+    Form a list of probabilities into a 2D array.
+    
+    Arguments:
+        prob_list (list/array): List of probabilities to be be reshaped.
+        a_inds, m_inds (numpy arrays of ints): Coordinates where each probability
+                                               will be placed. Probabilities with
+                                               matching coordinates are summed 
+                                               (marginalized).
+        grid_num (int): Dimension of square array into which prob_list will be 
+                        formed.
+    
+    Returns:
+        prob_array (np array, dim = grid_num x grid_num): Array of binned 
+                                                         probabilities
     """
 
     cdef int i, size, a_i, m_i
@@ -126,8 +183,10 @@ def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_
         m_i = m_inds[i]
 
         prob_array[m_i, a_i] += prob_list[i]
-
-    return np.array(prob_array)
+    
+    prob_array = np.array(prob_array)
+    
+    return prob_array
 
 
 def P_list(double [:] a_list, double [:] m_list, double m_star):
@@ -149,32 +208,31 @@ def P_list(double [:] a_list, double [:] m_list, double m_star):
     
     for j in range(length):
         a = a_list[j]
-        m = m_list[j]
-        per_list[j] = P(a, m, m_star)
+        mp = m_list[j]
+        per_list[j] = P(a, mp, m_star)
         
     return per_list
 
-cpdef P(double a, double m, double m_star):
+cpdef P(double a, double m_planet, double m_star):
     """
     Uses Kepler's third law to find the period of a planet (in days) given its
-    semimajor axis, the planet mass, and the stellar mass.
-
-    a (au): semi-major axis
-    Mp (M_Jup): companion mass
-    Ms (M_sun): stellar mass
+    semimajor axis, planet mass, and stellar mass.
+    
+    Arguments:
+        a (float, au): Semi-major axis
+        m_planet (float, M_jup): Planet mass
+        m_star (float, M_jup): Stellar mass
+    
+    Returns:
+        per (float, days): Companion orbital period
     """
     
-    cdef double m_g, m_star_g, sec_2_days, P_days
-
-    m_g = m*M_jup
-    m_star_g = m_star*M_sun
-
-    sec_2_days = 1./(24*3600) # Note the 1.; with 1, the result would be 0
-
-    P_days = sqrt((two_pi)**2*(a*au)**3/(G*(m_g + m_star_g))) * sec_2_days
-
-    return P_days
+    cdef double per
     
+    per = two_pi * a**(1.5) * (G*(m_planet+m_star))**(-0.5)
+    
+    return per
+
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
     """

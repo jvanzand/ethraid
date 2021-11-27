@@ -24,13 +24,31 @@ import helper_functions_rv as hlp_rv
 import helper_functions_astro as hlp_astro
 #########################
 
-from line_profiler import LineProfiler
 
 ## Constants ##
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
-      
-@profile
+
+    
+# from line_profiler import LineProfiler
+# func = hlp.value2index
+# prof = LineProfiler(func)
+# prof.runcall(func, 2, (0, 99), (1.2, 3))
+# prof.print_stats()
+
+# from line_profiler import LineProfiler
+# func = hlp_astro.log_lik_dmu
+# prof = LineProfiler(func)
+# # Put the lines below down where the actual call is made
+# prof.runcall(func, 1,1,0.5,0.5,0.5,0,1,1,1, 1, 1)
+# print(hlp_astro.log_lik_dmu(1,1,0.5,0.5,0.5,0,1,1,1, 1, 1))
+#
+# prof.print_stats()
+# print('GOT HERE')
+# fdf
+
+
+# @profile
 def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True):
     
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
@@ -41,9 +59,10 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     min_per = 4*rv_baseline
     # min_per = rv_baseline
     min_K = max_rv
-
-    min_m = rv.utils.Msini(min_K, min_per, m_star, e=0, Msini_units='jupiter')
-    min_a = rv.utils.semi_major_axis(min_per, (m_star + min_m*(M_jup/M_sun)))
+    
+    m_star_Ms = m_star * M_jup/M_sun
+    min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
+    min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
 
     # # Experimental: revised min_m using gdot. The idea is to find the smallest mass that could produce the observed gdot at the known minimum period. This is not completely right because it uses min_K to get min_m, min_m to get min_a, and then min_a to get a new value for min_m.
     #
@@ -223,7 +242,7 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='after_merge', num_points=1e4, grid_num=100)
+            run(read_file=None, save=True, write_file='after_merge', num_points=1e5, grid_num=100)
 
 
 
