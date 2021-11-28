@@ -24,8 +24,6 @@ old_G = 6.674299999999999e-08
 # G in AU, M_Jup, day units.
 G = 2.824760877012879e-07 # (c.G.cgs*(1/c.au.cgs)**3 * (c.M_jup.cgs) * (24*3600)**2).value
 
-pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-
 #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
 hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] 
 #https://www.cosmos.esa.int/web/gaia/earlydr3
@@ -94,7 +92,7 @@ cdef dmu(double a, double m, double e, double i, double om, double M_anom_0,
                                    of the Hipparcos mission
         per (float, days): Orbital period
         m_star (float, M_jup): Host star mass
-        d_star (float, parsecs): Distance of system from Earth
+        d_star (float, AU): Distance of system from Earth
     
     Returns:
         dmu_model (float, mas/yr): Magnitude of difference between
@@ -136,6 +134,7 @@ cdef dmu(double a, double m, double e, double i, double om, double M_anom_0,
     #######################################
     
     mass_ratio = m/(m_star + m)
+    d_star = d_star/206264.80624548031 # Divide by (c.pc.cgs/c.au.cgs).value to get units of pc
     au_2_mas = 1e3/d_star # milli-arcseconds
     aud_2_masyr = au_2_mas * 365.25 # au/day to milli-arcseconds/year
 
