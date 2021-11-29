@@ -1,8 +1,3 @@
-# from setuptools import setup
-# from Cython.Build import cythonize
-# from distutils.extension import Extension
-# import numpy as np
-
 from distutils.core import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
@@ -17,11 +12,11 @@ import numpy as np
 #
 # from Cython.Compiler.Options import get_directive_defaults
 # directive_defaults = get_directive_defaults()
-import Cython
-directive_defaults = Cython.Compiler.Options.get_directive_defaults()
-
-directive_defaults['linetrace'] = True
-directive_defaults['binding'] = True
+# import Cython
+# directive_defaults = Cython.Compiler.Options.get_directive_defaults()
+#
+# directive_defaults['linetrace'] = True
+# directive_defaults['binding'] = True
 
 ###########################################
 

@@ -29,24 +29,6 @@ import helper_functions_astro as hlp_astro
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 
-    
-# from line_profiler import LineProfiler
-# func = hlp.value2index
-# prof = LineProfiler(func)
-# prof.runcall(func, 2, (0, 99), (1.2, 3))
-# prof.print_stats()
-
-# from line_profiler import LineProfiler
-# func = hlp_astro.log_lik_dmu
-# prof = LineProfiler(func)
-# # Put the lines below down where the actual call is made
-# prof.runcall(func, 1,1,0.5,0.5,0.5,0,1,1,1, 1, 1)
-# print(hlp_astro.log_lik_dmu(1,1,0.5,0.5,0.5,0,1,1,1, 1, 1))
-#
-# prof.print_stats()
-# print('GOT HERE')
-# fdf
-
 
 def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True):
     
@@ -175,9 +157,6 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
         prior_array[0:min_index_m, :] = 0
         prior_array[:, 0:min_index_a] = 0
 
-        # plt.imshow(prior_array, origin='lower')
-        # plt.show()
-
         # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
         no_astro = False
         try:
@@ -210,9 +189,6 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
         end_time = time.time()
         ##
         print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
-        
-        # print('The RV list ', rv_list[:10])
-        # print('The Astro list ', astro_list[:10])
 
     
         if save==True:

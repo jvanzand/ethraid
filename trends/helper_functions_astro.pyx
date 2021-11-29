@@ -107,14 +107,11 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     cdef double [:,:] rot_mtrx # This makes rot_mtrx a memview
     rot_mtrx = np.zeros((3,3),dtype=np.float64)
     
-    cdef double r_vec_list[3]
-    cdef double [:] r_vec = r_vec_list
-
-    cdef double rot_vec_list[3]
-    cdef double [:] rot_vec = rot_vec_list
-
-    cdef double ang_pos_list[2]
-    cdef double [:] ang_pos = ang_pos_list
+    # vec holds various values throughout dmu(). After each value
+    # has served its purpose, it is overwritten so that only one
+    # vector needs to be allocated. This saves time.
+    cdef double vec_list[3]
+    cdef double [:] vec = vec_list
     
     cdef double time_endpoints[2][2]
     cdef double ang_pos_avg[2][2]
@@ -122,20 +119,9 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     cdef double mu_gaia[2]
     cdef double mu_hg[2]
     
-    
-    #######################################
-    cdef double v_vec_star_list[3]
-    cdef double [:] v_vec_star = v_vec_star_list
-
-    cdef double rotated_v_vec_list[3]
-    cdef double [:] rotated_v_vec = rotated_v_vec_list
-
-    cdef double mu[2]
-    #######################################
-    
     mass_ratio = m/(m_star + m)
     d_star = d_star/206264.80624548031 # Divide by (c.pc.cgs/c.au.cgs).value to get units of pc
-    au_2_mas = 1e3/d_star # milli-arcseconds
+    au_2_mas = 1e3/d_star # Conversion factor btwn au and milli-arcseconds
     aud_2_masyr = au_2_mas * 365.25 # au/day to milli-arcseconds/year
 
     time_endpoints = [[hip_times[0], gaia_times[0]], 
@@ -166,21 +152,18 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
 
-        # r_vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
+        # vec points from barycenter to the *star* (note the - sign) in the orbital plane, and has magnitude r_star. Like r_star, it has units of cm.
         # Since we're using the E_anom for the planet, the star is located in the opposite direction
-        r_vec[0] = -x_pos_avg
-        r_vec[1] = -y_pos_avg
-        r_vec[2] = 0
+        vec[0] = -x_pos_avg
+        vec[1] = -y_pos_avg
+        vec[2] = 0
 
-        # rot_vec points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth
-        mat_mul(rot_mtrx, r_vec, rot_vec)
+        # vec is overwritten and replaced by the rotated version. The rotated version points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth.
+        mat_mul(rot_mtrx, vec, vec)
 
-        # ang_pos is the angular position of the star relative to barycenter in milli-arcseconds.
-        ang_pos[0] = rot_vec[0]*au_2_mas
-        ang_pos[1] = rot_vec[1]*au_2_mas
-
-        ang_pos_avg[l][0] = ang_pos[0]
-        ang_pos_avg[l][1] = ang_pos[1]
+        # Angular position of the star relative to barycenter in milli-arcseconds.
+        ang_pos_avg[l][0] = vec[0]*au_2_mas
+        ang_pos_avg[l][1] = vec[1]*au_2_mas
 
         ################### Angular Velocities ########################
 
@@ -191,22 +174,22 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         # Get velocity of the star (au/day)
         x_vel_avg, y_vel_avg = vel_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
+        
+        # vec is overwritten again to store the stellar velocity instead of position.
+        # Since we're using the E_anom for the planet, the star is moving in the opposite direction (neg. sign)
+        vec[0] = -x_vel_avg
+        vec[1] = -y_vel_avg
+        vec[2] = 0
 
-        # Since we're using the E_anom for the planet, the star is moving in the opposite direction
-        v_vec_star[0] = -x_vel_avg
-        v_vec_star[1] = -y_vel_avg
-        v_vec_star[2] = 0
+        # vec takes its final definition as the rotated stellar velocity.
+        mat_mul(rot_mtrx, vec, vec)
 
-        mat_mul(rot_mtrx, v_vec_star, rotated_v_vec)
-
-        # mu is the proper motion of the star due to the planet's orbit in milli-arcseconds per year.
-        # Since period is in days and a_star_units in cm, velocities are in cm/day.
-        mu[0] = rotated_v_vec[0]*aud_2_masyr
-        mu[1] = rotated_v_vec[1]*aud_2_masyr
 
         # mu_avg is a 2x2 array. The top row stays empty because we skip Hip. The bottom row is Gaia prop. motion
-        mu_avg[l][0] = mu[0]
-        mu_avg[l][1] = mu[1]
+        # The proper motion of the star due to the planet's orbit is in milli-arcseconds per year.
+        # Since period is in days and a_star_units in au, velocities are in au/day.
+        mu_avg[l][0] = vec[0]*aud_2_masyr
+        mu_avg[l][1] = vec[1]*aud_2_masyr
 
         ###############################################################
         ###############################################################
@@ -346,21 +329,41 @@ cdef void rot_matrix(double i, double om, double Om, double [:,:] rot_mtrx):
 #I want to do this because it will allow me to allocate fewer arrays in the dmu function,
 #hopefully giving significant speedups.
 #
-cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
+cpdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with
-    r_unit_vec (3x1) and later v_vec_star (3x1) in astro_post_dense_loop.
+    vec (3x1) in the dmu function. Saves time by receiving its "output" 
+    (out_vec) as an argument and modifying it in place without returning 
+    anything.
     """
 
-    cdef int i, k
-    cdef double count
-
-    for i in range(3):
-        count = 0
-        for k in range(3):
-            count += mat[i][k]*in_vec[k]
-
-        out_vec[i] = count
+    cdef double m00, m01, m02,\
+                m10, m11, m12,\
+                m20, m21, m22,\
+                iv0, iv1, iv2,\
+                ov0, ov1, ov2
+    
+    m00 = mat[0][0]
+    m01 = mat[0][1]
+    m02 = mat[0][2]
+    m10 = mat[1][0]
+    m11 = mat[1][1]
+    m12 = mat[1][2]
+    m20 = mat[2][0]
+    m21 = mat[2][1]
+    m22 = mat[2][2]
+    
+    iv0 = in_vec[0]
+    iv1 = in_vec[1]
+    iv2 = in_vec[2]
+    
+    ov0 = m00*iv0 + m01*iv1 + m02*iv2
+    ov1 = m10*iv0 + m11*iv1 + m12*iv2
+    ov2 = m20*iv0 + m21*iv1 + m22*iv2
+    
+    out_vec[0] = ov0
+    out_vec[1] = ov1
+    out_vec[2] = ov2
             
              
             
