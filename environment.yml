@@ -99,8 +99,9 @@ dependencies:
     - sphinxcontrib-serializinghtml==1.1.4
     - testpath==0.4.4
     - tornado==6.1
+    - tqdm==4.62.3
     - traitlets==5.0.5
     - urllib3==1.26.4
     - wcwidth==0.2.5
     - webencodings==0.5.1
-prefix: /Users/judahvz/opt/anaconda3/envs/trends
+prefix: /Users/judahvz/opt/anaconda3/envs/trends_env
