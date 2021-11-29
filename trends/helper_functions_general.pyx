@@ -1,6 +1,6 @@
 # cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False, linetrace=True
 # cython: binding=True
-
+from kern_profiler_dummy import *
 import numpy as np
 cimport numpy as np
 import scipy as sp

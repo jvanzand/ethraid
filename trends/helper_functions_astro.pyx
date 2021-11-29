@@ -2,7 +2,7 @@
 # cython: binding=True
 # cython: profile=True
 # cython: linetrace=True
-
+from kern_profiler_dummy import *
 from c_kepler._kepler import kepler_single
 
 from astropy.time import Time
@@ -30,7 +30,6 @@ hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='deci
 gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] 
 
 baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
-
 
 def astro_list(double [:] a_list, double [:] m_list, double [:] e_list, 
                double [:] i_list, double [:] om_list, double [:] M_anom_0_list, 
@@ -63,7 +62,7 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
     return lik_list
 
 
-cdef log_lik_dmu(double a, double m, double e, double i, double om, double M_anom_0, 
+def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom_0, 
                 double per, double m_star, double d_star,
                 double dmu_data, double dmu_data_err):
     """
@@ -77,7 +76,8 @@ cdef log_lik_dmu(double a, double m, double e, double i, double om, double M_ano
     
     return log_likelihood
 
-cdef dmu(double a, double m, double e, double i, double om, double M_anom_0, 
+#@profile
+def dmu(double a, double m, double e, double i, double om, double M_anom_0, 
         double per, double m_star, double d_star):
     """
     Compute delta_mu for a set of model parameters
@@ -328,6 +328,24 @@ cdef void rot_matrix(double i, double om, double Om, double [:,:] rot_mtrx):
     #return rot_mtrx
 
 
+#cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
+#    """
+#    This is written specifically to matrix multiply rot_matrix (3x3) with
+#    r_unit_vec (3x1) and later v_vec_star (3x1) in astro_post_dense_loop.
+#    """
+#
+#    cdef int i, k
+#
+#    for i in range(3):
+#        out_vec[i] = 0
+#        for k in range(3):
+#            out_vec[i] += mat[i][k]*in_vec[k]
+            
+
+#THIS version of the function will let me input the same vector as in_vec and out_vec.
+#I want to do this because it will allow me to allocate fewer arrays in the dmu function,
+#hopefully giving significant speedups.
+#
 cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with
@@ -335,11 +353,14 @@ cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
 
     cdef int i, k
+    cdef double count
 
     for i in range(3):
-        out_vec[i] = 0
+        count = 0
         for k in range(3):
-            out_vec[i] += mat[i][k]*in_vec[k]
+            count += mat[i][k]*in_vec[k]
+
+        out_vec[i] = count
             
-            
+             
             
