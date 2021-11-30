@@ -4,6 +4,12 @@
 /data
 /posts/*
 
+# exclude contents of posts/ and plots/ but keep the folders
+posts/*
+plots/*
+!posts/.gitkeep
+!plots/.gitkeep
+
 /trends/c_kepler/build
 /trends/__pycache__
 
