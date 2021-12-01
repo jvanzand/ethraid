@@ -5,10 +5,10 @@ import os
 import sys
 
 ## Commenting out kern_prof stuff for now
-#path = os.getcwd()
-#sys.path.append(path+'/trends')
-#
-#from kern_profiler_dummy import *
+path = os.getcwd()
+sys.path.append(path+'/trends')
+
+from kern_profiler_dummy import *
 
 import numpy as np
 cimport numpy as np
@@ -24,15 +24,13 @@ from cpython cimport array
 import radvel as rv
 from c_kepler import _kepler as ck
 
-#from libc.stdio cimport printf
-
 ##########################################
 #### Kepler solver for one M and one e
 # Wrapping kepler(M,e) a simple function that takes two doubles as
 # arguments and returns a double
 cdef extern from "../c_kepler/kepler.c":
     double kepler(double M, double e)
-    double rv_drive(double t, double per, double tp, double e, double cosom, double sinom, double k )
+    double rv_drive(double t, double per, double tp, double e, double cosom, double sinom, double k)
 ##########################################
 ## Constants ##
 
@@ -277,7 +275,7 @@ def rv_post(double gammadot, double gammadot_err,
     return rv_prob_list
 
 
-#@profile
+@profile
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
                double [:] e_list, double [:] i_list, double [:] om_list, double [:] M_anom_0_list,
@@ -632,19 +630,41 @@ cdef void rot_matrix(double i, double om, double Om, double [:,::1] rot_mtrx):
     #return rot_mtrx
 
 
-#@profile
-cdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
+cpdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This is written specifically to matrix multiply rot_matrix (3x3) with
-    r_unit_vec (3x1) and later v_vec_star (3x1) in astro_post_dense_loop.
+    vec (3x1) in the dmu function. Saves time by receiving its "output" 
+    (out_vec) as an argument and modifying it in place without returning 
+    anything.
     """
 
-    cdef int i, k
+    cdef double m00, m01, m02,\
+                m10, m11, m12,\
+                m20, m21, m22,\
+                iv0, iv1, iv2,\
+                ov0, ov1, ov2
 
-    for i in range(3):
-        out_vec[i] = 0
-        for k in range(3):
-            out_vec[i] += mat[i][k]*in_vec[k]
+    m00 = mat[0][0]
+    m01 = mat[0][1]
+    m02 = mat[0][2]
+    m10 = mat[1][0]
+    m11 = mat[1][1]
+    m12 = mat[1][2]
+    m20 = mat[2][0]
+    m21 = mat[2][1]
+    m22 = mat[2][2]
+
+    iv0 = in_vec[0]
+    iv1 = in_vec[1]
+    iv2 = in_vec[2]
+
+    ov0 = m00*iv0 + m01*iv1 + m02*iv2
+    ov1 = m10*iv0 + m11*iv1 + m12*iv2
+    ov2 = m20*iv0 + m21*iv1 + m22*iv2
+
+    out_vec[0] = ov0
+    out_vec[1] = ov1
+    out_vec[2] = ov2
 
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):

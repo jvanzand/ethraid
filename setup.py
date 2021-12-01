@@ -10,11 +10,11 @@ import numpy as np
 # Extra stuff to profile code using kernprof -l -v file.py after it is compiled
 # Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
 
-# from Cython.Compiler.Options import get_directive_defaults
-# directive_defaults = get_directive_defaults()
-#
-# directive_defaults['linetrace'] = True
-# directive_defaults['binding'] = True
+from Cython.Compiler.Options import get_directive_defaults
+directive_defaults = get_directive_defaults()
+
+directive_defaults['linetrace'] = True
+directive_defaults['binding'] = True
 
 ###########################################
 
@@ -25,8 +25,14 @@ import numpy as np
 
 
 extensions = [
-    Extension("c_kepler._kepler", ['c_kepler/_kepler.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
-    Extension("trends.helper_functions_wrapper", ['trends/helper_functions_wrapper.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
+    Extension("c_kepler._kepler", 
+             ['c_kepler/_kepler.pyx'], 
+              include_dirs=[np.get_include()], 
+              define_macros=[('CYTHON_TRACE', '1')]),
+    Extension("trends.helper_functions_wrapper", 
+             ['trends/helper_functions_wrapper.pyx'], 
+              include_dirs=[np.get_include()], 
+              define_macros=[('CYTHON_TRACE', '1')])
     
 ]
 
