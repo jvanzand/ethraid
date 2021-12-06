@@ -13,9 +13,9 @@ cimport numpy as np
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
 
-cdef float two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, baseline_yrs
-cdef float hip_times[2]
-cdef float gaia_times[2]
+cdef double two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, baseline_yrs
+cdef double hip_times[2]
+cdef double gaia_times[2]
 
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
@@ -135,6 +135,8 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
     r_star_num_fac = a*(1-e_sq)
     
+    
+    
     for l in range(2): # Hipparcos or Gaia
         start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0. For Gaia, it is the time between Hip_start and Gaia_start
         end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
@@ -143,10 +145,16 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
         M1 = (mean_motion*start_time + M_anom_0)%two_pi
         M2 = (mean_motion*end_time + M_anom_0)%two_pi
+        
+        #print(start_time, end_time)
 
 
         E1 = kepler_single(M1, e)
         E2 = kepler_single(M2, e)
+        
+        #print(per)
+        #print(E1, E2)
+        #dfdf
 
         # Get position of the STAR (au).
         x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 

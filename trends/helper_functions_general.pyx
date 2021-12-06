@@ -9,7 +9,7 @@ import scipy.stats as spst
 cimport cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
-cdef float pi, two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm
+cdef double pi, two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm
 
 pi = 3.141592653589793
 two_pi = 6.283185307179586

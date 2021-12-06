@@ -11,7 +11,7 @@ import cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
 
-cdef float two_pi, math_e, G, auday2ms, hip_beginning
+cdef double two_pi, math_e, G, auday2ms, hip_beginning
 
 two_pi = 6.283185307179586
 math_e = 2.718281828459045

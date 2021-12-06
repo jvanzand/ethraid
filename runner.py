@@ -30,6 +30,12 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 
 
+# #TEST
+# print('This is the period')
+# print(hlp.P(5, 1, 1000))
+# sdfds
+
+
 def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True):
     
     m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
@@ -217,7 +223,7 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='base', num_points=1e6, grid_num=100)
+            run(read_file=None, save=True, write_file='base', num_points=1e7, grid_num=100)
 
 
 
