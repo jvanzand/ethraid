@@ -334,7 +334,10 @@ cpdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     This is written specifically to matrix multiply rot_matrix (3x3) with
     vec (3x1) in the dmu function. Saves time by receiving its "output" 
     (out_vec) as an argument and modifying it in place without returning 
-    anything.
+    anything. I made this function even more idiosyncratic by removing
+    the for-loop over vector elements. This lets me pass the same vector
+    as both the input and the output, which saves time by only allocating
+    one array.
     """
 
     cdef double m00, m01, m02,\

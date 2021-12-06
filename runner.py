@@ -80,9 +80,9 @@ def run(read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True
     # # HIP63510
     # a_lim = (0.5*min_a, 2e2)
     # m_lim = (0.5*min_m, 1e3)
-    # # 12572
-    # a_lim = (0.5*min_a, 5e1)
-    # m_lim = (0.5*min_m, 1e2)
+    # General
+    # a_lim = (0.8*min_a, 1e2)
+    # m_lim = (0.8*min_m, 2e2)
     print(a_lim[0], min_a)
 
     num_points = int(num_points)
@@ -217,12 +217,12 @@ if __name__ == "__main__":
     
     
     m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='after_merge', num_points=1e5, grid_num=100)
+            run(read_file=None, save=True, write_file='base', num_points=1e6, grid_num=100)
 
 
 
     plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m),
-            save_name='after_merge', period_lines = False)
+            save_name='base', period_lines = False)
 
 
 
