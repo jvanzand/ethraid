@@ -365,8 +365,11 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
             
             ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
-            M1 = (mean_motion*start_time + M_anom_0)%two_pi
-            M2 = (mean_motion*end_time + M_anom_0)%two_pi
+            # Mod 2π should be the same, but it changes the answer. Staying with no mod in case mod introduces error.
+            ## M1 = (mean_motion*start_time + M_anom_0)%two_pi
+            ## M2 = (mean_motion*end_time + M_anom_0)%two_pi
+            M1 = mean_motion*start_time + M_anom_0
+            M2 = mean_motion*end_time + M_anom_0
             
             E1 = kepler(M1, e)
             E2 = kepler(M2, e)
