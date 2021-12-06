@@ -143,18 +143,15 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
 
 
         ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
-        M1 = (mean_motion*start_time + M_anom_0)%two_pi
-        M2 = (mean_motion*end_time + M_anom_0)%two_pi
-        
-        #print(start_time, end_time)
-
+        # Mod 2π should be the same, but it changes the answer. Staying with no mod in case mod introduces error.
+        ## M1 = (mean_motion*start_time + M_anom_0)%two_pi
+        ## M2 = (mean_motion*end_time + M_anom_0)%two_pi
+        M1 = mean_motion*start_time + M_anom_0
+        M2 = mean_motion*end_time + M_anom_0
 
         E1 = kepler_single(M1, e)
         E2 = kepler_single(M2, e)
         
-        #print(per)
-        #print(E1, E2)
-        #dfdf
 
         # Get position of the STAR (au).
         x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 
