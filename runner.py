@@ -207,7 +207,7 @@ if __name__ == "__main__":
     
     
     m_star, d_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(read_file=None, save=True, write_file='validation/tester', num_points=1e4, grid_num=100)
+            run(read_file=None, save=True, write_file='validation/tester', num_points=1e7, grid_num=100)
 
     # Temporary until I standardize distance. Eventually this will take d_star in au, instead of cm / (cm/pc) = pc
     pc_in_cm = 3.086e18

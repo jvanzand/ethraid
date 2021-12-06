@@ -275,7 +275,7 @@ def rv_post(double gammadot, double gammadot_err,
     return rv_prob_list
 
 
-@profile
+#@profile
 def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_star,
                np.ndarray[double, ndim=1] a_list, double [:] m_list, double [:] per_list,
                double [:] e_list, double [:] i_list, double [:] om_list, double [:] M_anom_0_list,
@@ -348,7 +348,7 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
         i = i_list[j]
         om = om_list[j]
         M_anom_0 = M_anom_0_list[j]
-        
+
         a_units = a*au
         
         # Can't take this out of loop bc it depends on companion mass m (top and bottom)
@@ -365,11 +365,12 @@ def astro_post(double delta_mu, double delta_mu_err, double m_star, double d_sta
             end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
             
             ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
-            M1 = mean_motion*start_time + M_anom_0
-            M2 = mean_motion*end_time + M_anom_0
+            M1 = (mean_motion*start_time + M_anom_0)%two_pi
+            M2 = (mean_motion*end_time + M_anom_0)%two_pi
             
             E1 = kepler(M1, e)
             E2 = kepler(M2, e)
+            
             
             #print(two_pi, per, mean_motion)
             #print('Anomalies ', l, M1, M2, E1, E2)

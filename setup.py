@@ -1,4 +1,8 @@
-from setuptools import setup
+# from setuptools import setup
+# from Cython.Build import cythonize
+# from distutils.extension import Extension
+# import numpy as np
+from distutils.core import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
 import numpy as np
@@ -10,11 +14,11 @@ import numpy as np
 # Extra stuff to profile code using kernprof -l -v file.py after it is compiled
 # Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
 
-from Cython.Compiler.Options import get_directive_defaults
-directive_defaults = get_directive_defaults()
-
-directive_defaults['linetrace'] = True
-directive_defaults['binding'] = True
+# from Cython.Compiler.Options import get_directive_defaults
+# directive_defaults = get_directive_defaults()
+#
+# directive_defaults['linetrace'] = True
+# directive_defaults['binding'] = True
 
 ###########################################
 
@@ -39,5 +43,5 @@ extensions = [
 ##############################
 
 setup(
-    ext_modules = cythonize(extensions, language_level='3', annotate=True)
+    ext_modules = cythonize(extensions, build_dir = 'trends/compiled', language_level='3', annotate=True)
 )
