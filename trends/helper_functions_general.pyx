@@ -311,18 +311,38 @@ def contour_levels_1D(prob_list, sig_list, t_num = 1e3):
 
     return t_contours
 
-def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
+def bounds_1D(prob_array, value_spaces, sig, interp_num = 1e4):
     """
     Given a 2D probability array, this function collapses the array along each 
-    axis to find the 68% confidence interval.
-    value_spaces represents the parameter intervals covered by the array along each axis.
-    It is expected in the form [(min_value1, max_value1), (min_value2, max_value2)], 
-    where 1 and 2 refer to the 0th and 1st axes.
-    Note that the limits MUST be in this order: if the array has shape (x_num, y_num), 
-    then value_spaces must be [x_lims, y_lims].
+    axis to find the desired confidence interval.
+    
+    Arguments:
+        prob_array (np.array of floats): Square array of probabilities
+        value_spaces (list of 2 2-tuples): Mass and semi-major axis limits, in the form 
+                                         [(min_value_m, max_value_m), (min_value_a, max_value_a)]
+        sig (int): Standard deviation limits to compute. If sig==1, compute the 68% ~ 1σ limits.
+        interp_num (int): Number of points to interpolate between the probabilities in the array.
+                          Should be greater than the side length of prob_array, otherwise you won't
+                          get a better estimate of the probability function.
+    
+    Returns:
+        lvls_sig_list (list of 2 floats): Probability values at which the a and m 1D "contours" 
+                                          (in 1D distributions, contours are just points) should 
+                                          be drawn for the provided sig value. Given in the form
+                                          [a_prob, m_prob]. For example, if a_prob = 0.029,
+                                          then a horizontal line at height 0.029 overlaid on
+                                          the 1D a posterior will intersect the posterior at
+                                          the min and max allowed a for the given sig value.
+                                          
+        inds_sig_list (list of 2 lists): The indices on the horizontal axis where the vertical line
+                                         described above intersects the 1D poterios. Represents the
+                                         estimated 1D bounds at the sigma level provided, in the form
+                                         [[a_ind_min, a_ind_max], [m_ind_min, m_ind_max]]
+                                         
+        bounds_list (list of 2 lists): a/m values corresponding to the indices above.
     """
-    lvls_2sig_list = []
-    inds_2sig_list = []
+    lvls_sig_list = []
+    inds_sig_list = []
     bounds_list = []
 
     # First compute bounds for a by collapsing along the m (aka i=0) axis
@@ -333,12 +353,12 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
 
 
         # This gives only the 2-sigma contour level, so that we get the 2-sigma limits at the end
-        lvl_2sig = contour_levels_1D(array_1D, [2])[0]
+        lvl_sig = contour_levels_1D(array_1D, [sig])[0]
 
         # Interpolate between the points to get a finer spacing of points. This allows for more precise parameter estimation.
         func = sp.interpolate.interp1d(range(grid_num), array_1D)
 
-        # Array over the same interval, but spaced (probably) more finely
+        # Array over the same interval, but spaced more finely (as long as interp_num > grid_num, which it should be)
         fine_array = np.linspace(0, grid_num-1, int(interp_num))
 
         # This is analogous to the original array_1D, but finer
@@ -350,20 +370,21 @@ def bounds_1D(prob_array, value_spaces, interp_num = 1e4):
         #plt.show()
 
 
-        # This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But from what I can tell, this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
+        # This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
 
 
-        inds_2sig = np.where(abs(interp_vals - lvl_2sig) < 1e-2*lvl_2sig)[0].take((0,-1))
+        inds_sig = np.where(abs(interp_vals - lvl_sig) < 1e-2*lvl_sig)[0].take((0,-1))
 
-        # value_bounds is a tuple of actual values, not indices
-        value_bounds = index2value(inds_2sig, (0, interp_num-1), value_spaces[::-1][i])
+        # value_bounds is a tuple of actual values, not indices.
+        # Reverse the order of value_spaces because if we collapse along m, we are interested in the a bounds
+        value_bounds = index2value(inds_sig, (0, interp_num-1), value_spaces[::-1][i])
     
-        lvls_2sig_list.append(lvl_2sig)
-        inds_2sig_list.append(inds_2sig * grid_num/interp_num)
+        lvls_sig_list.append(lvl_sig)
+        inds_sig_list.append(inds_sig * grid_num/interp_num)
     
         bounds_list.append(value_bounds)
 
-    return bounds_list, lvls_2sig_list, inds_2sig_list
+    return bounds_list, lvls_sig_list, inds_sig_list
 
 
 def value2index(value, index_space, value_space):
