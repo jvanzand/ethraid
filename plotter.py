@@ -151,7 +151,7 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
     # twosig_inds contains the indices where the above horizontal line crosses the posterior. In case it crosses more than twice, it contains the first and last instances.
-    bounds, twosig_levels, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], interp_num = 1e4)
+    bounds, twosig_levels, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2, interp_num = 1e4)
     
     
     if marginalized:
