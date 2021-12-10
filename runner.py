@@ -25,15 +25,20 @@ import load_save as ls
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 
-def run(params=None, read_file=None, write_file=None, num_points=1e6, grid_num=100, save=True):
+# params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
+#               rv_baseline(days), max_rv of residuals, rv_epoch, delta_mu, delta_mu_err)
+def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
+        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err,
+        num_points=1e6, grid_num=100, save=True, plot=True, 
+        read_file=None, write_file=None):
     
-    m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-            rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params
+    # m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
+    #         rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params
 
 
     # min_per is 4xbaseline for 191939 because we see ~no curvature yet.
-    # min_per = 4*rv_baseline
-    min_per = rv_baseline
+    min_per = 4*rv_baseline
+    # min_per = rv_baseline
     min_K = max_rv
     
     m_star_Ms = m_star * M_jup/M_sun
@@ -55,12 +60,12 @@ def run(params=None, read_file=None, write_file=None, num_points=1e6, grid_num=1
     # # 191939
     # # min_a = 0.5
     # # min_m = 0.5
-    # a_lim = (0.8*min_a, 5e1)
-    # m_lim = (0.8*min_m, 1e2)
+    a_lim = (0.8*min_a, 5e1)
+    m_lim = (0.8*min_m, 1e2)
     
     # General
-    a_lim = (0.8*min_a, 1e2)
-    m_lim = (0.8*min_m, 2e2)
+    # a_lim = (0.8*min_a, 1e2)
+    # m_lim = (0.8*min_m, 2e2)
     print(a_lim[0], min_a)
 
     num_points = int(num_points)
@@ -119,7 +124,8 @@ def run(params=None, read_file=None, write_file=None, num_points=1e6, grid_num=1
             post_astro = hlp.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
             post_astro = post_astro/post_astro.sum()
 
-        except:
+        except Exception as e:
+            print(e)
             astro_list = np.ones(num_points)
             post_astro = np.ones((grid_num, grid_num))
             no_astro = True
@@ -146,16 +152,14 @@ def run(params=None, read_file=None, write_file=None, num_points=1e6, grid_num=1
         if save==True:
             ls.save(rv_list, astro_list, no_astro, a_list, m_list,
                     a_lim, m_lim, min_a, min_m, write_file, extension='posts/')
+        if plot==True:
+            plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m),
+                    save_name='base', period_lines = False)
     
-    return m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m)
+    return
 
 
 if __name__ == "__main__":
     
-    m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m) = \
-            run(sp.params_191939, read_file=None, save=True, write_file='base', num_points=1e6, grid_num=100)
+    run(*sp.params_191939, num_points=1e6, grid_num=100, save=True, plot=True, read_file=None, write_file='base')
 
-
-
-    plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m),
-            save_name='base', period_lines = False)
