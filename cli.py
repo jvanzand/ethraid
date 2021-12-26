@@ -19,9 +19,9 @@ parser.add_argument('-gd', '--gdot', type=float, metavar='\b', required=True,
                     help='Linear trend in RVs in m/s/day')
 parser.add_argument('-gde', '--gdot_err', type=float, metavar='\b', required=True,
                     help='Error on gamma_dot')
-parser.add_argument('-gdd', '--gddot', type=float, metavar='\b', required=False,
+parser.add_argument('-gdd', '--gddot', type=float, metavar='\b', required=True,
                     help='Curvature in RVs in m/s/day/day')
-parser.add_argument('-gdde', '--gddot_err', type=float, metavar='\b', required=False,
+parser.add_argument('-gdde', '--gddot_err', type=float, metavar='\b', required=True,
                     help='Error on gamma_ddot')
 parser.add_argument('-bl', '--baseline', type=float, metavar='\b', required=True,
                     help='Length of RV time baseline in days')
