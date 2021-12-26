@@ -23,7 +23,6 @@ M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 pc_in_cm = 3.086e18
 
-np.random.seed(0)
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
     """
     Create the parameter arrays which will be used for the RV and astrometry posteriors.

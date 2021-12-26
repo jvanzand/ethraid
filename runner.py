@@ -37,8 +37,8 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
 
 
     # min_per is 4xbaseline for 191939 because we see ~no curvature yet.
-    min_per = 4*rv_baseline
-    # min_per = rv_baseline
+    # min_per = 4*rv_baseline
+    min_per = rv_baseline
     min_K = max_rv
     
     m_star_Ms = m_star * M_jup/M_sun
@@ -60,12 +60,12 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
     # # 191939
     # # min_a = 0.5
     # # min_m = 0.5
-    a_lim = (0.8*min_a, 5e1)
-    m_lim = (0.8*min_m, 1e2)
+    # a_lim = (0.8*min_a, 5e1)
+    # m_lim = (0.8*min_m, 1e2)
     
     # General
-    # a_lim = (0.8*min_a, 1e2)
-    # m_lim = (0.8*min_m, 2e2)
+    a_lim = (0.8*min_a, 1e2)
+    m_lim = (0.8*min_m, 2e2)
     print(a_lim[0], min_a)
 
     num_points = int(num_points)
