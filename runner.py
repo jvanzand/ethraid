@@ -26,20 +26,18 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 
 # params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
-#               rv_baseline(days), max_rv of residuals, rv_epoch, delta_mu, delta_mu_err)
+#               rv_baseline(days), rv_range, rv_epoch, delta_mu, delta_mu_err)
 def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
-        rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err,
+        rv_baseline, rv_range, rv_epoch, delta_mu, delta_mu_err,
         num_points=1e6, grid_num=100, save=True, plot=True, 
         read_file=None, write_file=None):
-    
-    # m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,\
-    #         rv_baseline, max_rv, rv_epoch, delta_mu, delta_mu_err = params
-
 
     # min_per is 4xbaseline for 191939 because we see ~no curvature yet.
     # min_per = 4*rv_baseline
     min_per = rv_baseline
-    min_K = max_rv
+    
+    # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
+    min_K = rv_range/2
     
     m_star_Ms = m_star * M_jup/M_sun
     # One way to make this more general would be to choose an eccentricity that is ~2σ from the

@@ -25,8 +25,8 @@ parser.add_argument('-gdde', '--gddot_err', type=float, metavar='\b', required=T
                     help='Error on gamma_ddot')
 parser.add_argument('-bl', '--baseline', type=float, metavar='\b', required=True,
                     help='Length of RV time baseline in days')
-parser.add_argument('-rvm', '--rv_max', type=float, metavar='\b', required=True,
-                    help='Maximum absolute value of RV time series')
+parser.add_argument('-rvr', '--rv_range', type=float, metavar='\b', required=True,
+                    help='Difference between max and min RV values in the timeseries')
 parser.add_argument('-rvep', '--rv_epoch', type=float, metavar='\b', required=True,
                     help='Epoch of RV timeseries in BJD, usually around baseline midpoint')
 parser.add_argument('-dmu', '--delta_mu', type=float, metavar='\b', required=False,
