@@ -37,12 +37,21 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
     min_per = rv_baseline
     
     # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
+    # Idea: Erik noted that using the single min/max points is subject to error. Why not instead use gdot and gddot? Plot this parabola over the baseline and take the min/max of that. Significant curvature would necessitate taking the actual max value, not the last value. Also need to be careful with negative trend values.
+    #min_K_experimental = 0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
+    
     min_K = rv_range/2
     
     m_star_Ms = m_star * M_jup/M_sun
+    
+    
+    # The argument for min_m is this: suppose period is min_per, which is where m can be smallest. What is the smallest that m can be? It can be so small that the current max RV is the highest the RV will ever be. Then m is so small that 1) it attains the lowest possible K and 2) it does so as close in as possible (any farther out would mean a larger planet). NOTE: this happens at e=0, which is NOT concordant with minimum m. See below for idea.
+
     # One way to make this more general would be to choose an eccentricity that is ~2σ from the
-    # Most likely value. Roughly speaking, we could then say we were only cutting out 2σ discrepant models.
+    # most likely value. Roughly speaking, we could then say we were only cutting out 2σ discrepant models for min_m.
     min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
+    
+    # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
     min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
 
     ###################################
