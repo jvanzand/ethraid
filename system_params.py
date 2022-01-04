@@ -6,15 +6,17 @@ Ms2Mj = M_sun/M_jup
 # params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), rv_range, rv_epoch, delta_mu, delta_mu_err)
 
-
 ############## Syetems for papers #########################
-params_191939 = (0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
-                430.2527364352718, 80, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
+params_191939 = (0.807*Ms2Mj, 58.3*pc_in_au, 0.1116, 0.0037, -3.44e-5, 5.1e-6, 
+                778.855, 80, 2459192.641, 0.12767382507786398, 0.034199052901953214)
 
 # Potential interesting DG paper. No gddot defined in RVS preferred fit.
 params_12572 = (0.91*Ms2Mj, 65.9*pc_in_au, -0.0613, 0.0025, 0, 0.1,
                 600, 40, 2459183.889, 0.075, 0.045)
 ###########################################################
+
+params_191939_old = (0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
+                430.2527364352718, 40, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
 
 # HIP97166 params. rv_baseline and max_rv are estimated for ease.
