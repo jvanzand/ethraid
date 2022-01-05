@@ -24,35 +24,56 @@ import load_save as ls
 ## Constants ##
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
+M_earth = 5.972167867791379e+27
 
 # params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), rv_range, rv_epoch, delta_mu, delta_mu_err)
 def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
-        rv_baseline, rv_range, rv_epoch, delta_mu, delta_mu_err,
+        rv_baseline, rv_epoch, delta_mu, delta_mu_err,
         num_points=1e6, grid_num=100, save=True, plot=True, 
         read_file=None, write_file=None):
+        
+    """
+    Primary function to run trend code.
+        
+    Arguments:
+        m_star (Jupiter masses): Mass of host star
+        d_star (AU): Distance to host star
+        gammadot (m/s/day): RV trend term
+        gammadot_err (m/s/day): Error on gammadot
+        gammaddot (m/s/day/day): RV curvature term
+        gammaddot_err (m/s/day/day): Error on gammaddot
+        rv_baseline (days): Time star has been observed
+        rv_epoch (BJD): Date at which model gammadot and 
+                        gammaddot will be evaluated. 
+                        Typically ~halfway through the baseline
+        delta_mu (milli-arcseconds/year): Magnitude of the change
+                        in astrometric proper motion between 
+                        Hipparcos and Gaia epochs.
+        delta_mu_err: Error on delta_mu
+    """
         
 
     # If no data to read in, calculate new arrays
     if read_file is None:
-        # min_per is 4xbaseline for 191939 because we see ~no curvature yet.
-        # min_per = 4*rv_baseline
+        
+        ##### Determination of minimum mass constraint. Kind of a headache but could be useful.
+        ##### Replacing for now with blanket m_min = 1 Earth mass
+        # # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
+        # min_K = rv_range/2 # This is prone to errors because it relies on the individual end points.
+        #
+        # # This still has the issue that the end of the timeseries might not be the most extreme point, namely if there is enough curvature to reach a maximum and then come back down (or up). Fortunately, this just means I would be sampling masses that were too small, rather than cutting any out. Still could use some refinement.
+        # # min_K = abs(0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
+        #
+        #
+        # # The argument for min_m is this: suppose period is min_per, which is where m can be smallest. What is the smallest that m can be? It can be so small that the current max RV is the highest the RV will ever be. Then m is so small that 1) it attains the lowest possible K and 2) it does so as close in as possible (any farther out would mean a larger planet). NOTE: this happens at e=0, which is NOT concordant with minimum m. See below for idea on how to fix this.
+        # # One way to make this more general would be to choose an eccentricity that is ~2σ from the most likely value. Roughly speaking, we could then say we were only cutting out 2σ discrepant models for min_m.
+        # min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
+        ####################################################################################
+        
         min_per = rv_baseline
-    
-        # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
-        min_K = rv_range/2 # This is prone to errors because it relies on the individual end points.
-    
-        # This still has the issue that the end of the timeseries might not be the most extreme point, namely if there is enough curvature to reach a maximum and then come back down (or up). Fortunately, this just means I would be sampling masses that were too small, rather than cutting any out. Still could use some refinement.
-        # min_K = abs(0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
-    
+        min_m = M_earth/M_jup
         m_star_Ms = m_star * M_jup/M_sun
-    
-    
-        # The argument for min_m is this: suppose period is min_per, which is where m can be smallest. What is the smallest that m can be? It can be so small that the current max RV is the highest the RV will ever be. Then m is so small that 1) it attains the lowest possible K and 2) it does so as close in as possible (any farther out would mean a larger planet). NOTE: this happens at e=0, which is NOT concordant with minimum m. See below for idea on how to fix this.
-
-        # One way to make this more general would be to choose an eccentricity that is ~2σ from the most likely value. Roughly speaking, we could then say we were only cutting out 2σ discrepant models for min_m.
-        min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
-    
         # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
         min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
 
@@ -82,7 +103,7 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
     
         
         a_list, m_list, per_list, e_list, i_list,\
-        om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(m_star, a_lim, m_lim, rv_epoch,\
+        om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(m_star, a_lim, m_lim,\
                                                                 grid_num, num_points)
 
         print('made arrays')
@@ -151,8 +172,8 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
 
 if __name__ == "__main__":
     
-    # run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=True, plot=True, read_file=None, write_file='base')
-    run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=False, plot=True, read_file='base', write_file='')
+    run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=True, plot=True, read_file=None, write_file='base')
+    # run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=False, plot=True, read_file='base', write_file='')
     
     
     
