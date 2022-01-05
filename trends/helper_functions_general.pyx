@@ -23,7 +23,7 @@ M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 pc_in_cm = 3.086e18
 
-def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int grid_num, int num_points):
+def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_points):
     """
     Create the parameter arrays which will be used for the RV and astrometry posteriors.
     
@@ -32,8 +32,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, double rv_epoch, int gr
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max).
         m_lim (tuple of floats, M_jup): Mass limits, (m_min, m_max).
-        rv_epoch (float, BJD): Date at which gdot and gddot will be evaluated. 
-                               Should be near the time series midpoint
         grid_num (int): Dimensions of (a,m) grid.
         num_points (int): Number of random orbital models to simulate.
     
