@@ -31,78 +31,55 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
         rv_baseline, rv_range, rv_epoch, delta_mu, delta_mu_err,
         num_points=1e6, grid_num=100, save=True, plot=True, 
         read_file=None, write_file=None):
-
-    # min_per is 4xbaseline for 191939 because we see ~no curvature yet.
-    # min_per = 4*rv_baseline
-    min_per = rv_baseline
-    
-    # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
-    # Idea: Erik noted that using the single min/max points is subject to error. Why not instead use gdot and gddot? Plot this parabola over the baseline and take the min/max of that. Significant curvature would necessitate taking the actual max value, not the last value. Also need to be careful with negative trend values.
-    #min_K_experimental = 0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
-    
-    min_K = rv_range/2
-    
-    m_star_Ms = m_star * M_jup/M_sun
-    
-    
-    # The argument for min_m is this: suppose period is min_per, which is where m can be smallest. What is the smallest that m can be? It can be so small that the current max RV is the highest the RV will ever be. Then m is so small that 1) it attains the lowest possible K and 2) it does so as close in as possible (any farther out would mean a larger planet). NOTE: this happens at e=0, which is NOT concordant with minimum m. See below for idea.
-
-    # One way to make this more general would be to choose an eccentricity that is ~2σ from the
-    # most likely value. Roughly speaking, we could then say we were only cutting out 2σ discrepant models for min_m.
-    min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
-    
-    # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
-    min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
-
-    ###################################
-    # # Experimental: revised min_m using gdot. The idea is to find the smallest mass that could produce the observed gdot at the known minimum period. This is not completely right because it uses min_K to get min_m, min_m to get min_a, and then min_a to get a new value for min_m.
-    #
-    # min_m = (gammadot*100/(24*3600))*((min_per*24*3600)/6.283185)**2*(m_star*M_sun)/(min_a*14959787070000.0) / M_jup
-    ###################################
-
-    print('Min m is: ', min_m)
-    print('Min a is: ', min_a)
-
-    # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
-    # # 191939
-    # # min_a = 0.5
-    # # min_m = 0.5
-    # a_lim = (0.8*min_a, 5e1)
-    # m_lim = (0.8*min_m, 1e2)
-    
-    # General
-    a_lim = (0.8*min_a, 1e2)
-    m_lim = (0.8*min_m, 2e2)
-    print(a_lim[0], min_a)
-
-    num_points = int(num_points)
-    np.set_printoptions(threshold=np.inf)
-    
-    
-    # If you are loading in existing data:
-    if read_file is not None:
         
-        a_inds, m_inds, min_index_m, min_index_a, prior_array = ls.load(read_file, 
-                                                                        extension='posts/')
-        
-        if no_astro:
-            num_points = len(rv_list)
-            astro_list = np.ones(num_points)
-            post_astro = np.ones((grid_num, grid_num))
-            print('No astrometry data provided. Bounds will be based on RVs only.')
-            
-        else:                                       
-            post_astro = hlp.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
-            post_astro = post_astro/post_astro.sum()
-        
-        post_rv = hlp.prob_array(rv_list, a_inds, m_inds, grid_num) * prior_array
-        post_rv = post_rv/post_rv.sum()
 
-        post_tot = hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds) * prior_array
-        post_tot = post_tot/post_tot.sum()
-        
-    # Otherwise, calculate new arrays
-    else:
+    # If no data to read in, calculate new arrays
+    if read_file is None:
+        # min_per is 4xbaseline for 191939 because we see ~no curvature yet.
+        # min_per = 4*rv_baseline
+        min_per = rv_baseline
+    
+        # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
+        min_K = rv_range/2 # This is prone to errors because it relies on the individual end points.
+    
+        # This still has the issue that the end of the timeseries might not be the most extreme point, namely if there is enough curvature to reach a maximum and then come back down (or up). Fortunately, this just means I would be sampling masses that were too small, rather than cutting any out. Still could use some refinement.
+        # min_K = abs(0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
+    
+        m_star_Ms = m_star * M_jup/M_sun
+    
+    
+        # The argument for min_m is this: suppose period is min_per, which is where m can be smallest. What is the smallest that m can be? It can be so small that the current max RV is the highest the RV will ever be. Then m is so small that 1) it attains the lowest possible K and 2) it does so as close in as possible (any farther out would mean a larger planet). NOTE: this happens at e=0, which is NOT concordant with minimum m. See below for idea on how to fix this.
+
+        # One way to make this more general would be to choose an eccentricity that is ~2σ from the most likely value. Roughly speaking, we could then say we were only cutting out 2σ discrepant models for min_m.
+        min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
+    
+        # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
+        min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
+
+        ###################################
+        # # Experimental: revised min_m using gdot. The idea is to find the smallest mass that could produce the observed gdot at the known minimum period. This is not completely right because it uses min_K to get min_m, min_m to get min_a, and then min_a to get a new value for min_m.
+        #
+        # min_m = (gammadot*100/(24*3600))*((min_per*24*3600)/6.283185)**2*(m_star*M_sun)/(min_a*14959787070000.0) / M_jup
+        ###################################
+
+        print('Min m is: ', min_m)
+        print('Min a is: ', min_a)
+
+        # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
+        # # 191939
+        # # min_a = 0.5
+        # # min_m = 0.5
+        # a_lim = (0.8*min_a, 5e1)
+        # m_lim = (0.8*min_m, 1e2)
+    
+        # General
+        a_lim = (0.8*min_a, 1e2)
+        m_lim = (0.8*min_m, 2e2)
+        print(a_lim[0], min_a)
+
+        num_points = int(num_points)
+        np.set_printoptions(threshold=np.inf)
+    
         
         a_list, m_list, per_list, e_list, i_list,\
         om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(m_star, a_lim, m_lim, rv_epoch,\
@@ -159,14 +136,24 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
         if save==True:
             ls.save(rv_list, astro_list, no_astro, a_list, m_list,
                     a_lim, m_lim, min_a, min_m, write_file, extension='posts/')
-        if plot==True:
-            plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m),
-                    save_name='base', period_lines = False)
+    
+    # Otherwise, load in existing data:
+    else:
+        post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m = ls.load(read_file, grid_num, extension='posts/')
+        
+        
+    if plot==True:
+        plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m),
+                save_name='base', period_lines = False)
     
     return
 
 
 if __name__ == "__main__":
     
-    run(*sp.params_191939, num_points=1e6, grid_num=100, save=True, plot=True, read_file=None, write_file='base')
+    # run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=True, plot=True, read_file=None, write_file='base')
+    run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=False, plot=True, read_file='base', write_file='')
+    
+    
+    
 
