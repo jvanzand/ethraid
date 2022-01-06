@@ -6,8 +6,8 @@ import matplotlib.patches as ptch
 import helper_functions_general as hlp
 
 
-def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
-                min_vals, save_name='companion', period_lines = False, marginalized=True):
+def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
+                min_vals, period_lines = False, marginalized=True):
     
     tick_num = 6
     tick_size = 30
@@ -145,7 +145,8 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
 
 
     fig.tight_layout()
-    fig.savefig('plots/' + save_name + '.png')
+    save_dir = 'results/'+star_name+'/'
+    fig.savefig(save_dir + star_name + '.png')
     plt.close()
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
@@ -186,7 +187,7 @@ def joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
         ax[1].vlines(twosig_inds[1][1], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
         
         fig.tight_layout()
-        fig.savefig('plots/' + save_name + '_1d.png')
+        fig.savefig(save_dir + star_name + '_1d.png')
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.

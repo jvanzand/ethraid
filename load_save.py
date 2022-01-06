@@ -1,13 +1,14 @@
-import h5py
+import os
 import numpy as np
+import h5py
 
 import helper_functions_general as hlp
 
 
-def load(read_file, grid_num, extension='posts/'):
+def load(read_file, grid_num):
     
     
-    post_file_path = extension+read_file+'.h5'
+    post_file_path = read_file+'.h5'
     
     print('Reading posterior in from '+post_file_path)
     
@@ -57,10 +58,20 @@ def load(read_file, grid_num, extension='posts/'):
     return post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m
 
 
-def save(rv_list, astro_list, no_astro, a_list, m_list,
-         a_lim, m_lim, min_a, min_m, write_file, extension='posts/'):
+def save(star_name, rv_list, astro_list, no_astro, a_list, m_list,
+         a_lim, m_lim, min_a, min_m):
     
-    post_file_path = extension+write_file+'.h5'
+    if not os.path.exists('results'):
+        os.makedirs('results')
+        
+    save_dir = 'results/'+star_name+'/'
+        
+    if not os.path.exists(save_dir):
+        os.makedirs(save_dir)
+    
+    
+    
+    post_file_path = save_dir+star_name+'.h5'
     post_file = h5py.File(post_file_path, 'w')
     
     # Save the un-binned arrays in case you want to use a different grid_num later

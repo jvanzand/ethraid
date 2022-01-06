@@ -28,15 +28,16 @@ M_earth = 5.972167867791379e+27
 
 # params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), rv_range, rv_epoch, delta_mu, delta_mu_err)
-def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
+def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
         rv_baseline, rv_epoch, delta_mu, delta_mu_err,
         num_points=1e6, grid_num=100, save=True, plot=True, 
-        read_file=None, write_file=None):
+        read_file=None):
         
     """
     Primary function to run trend code.
         
     Arguments:
+        star_name (str): Name of host star
         m_star (Jupiter masses): Mass of host star
         d_star (AU): Distance to host star
         gammadot (m/s/day): RV trend term
@@ -155,25 +156,25 @@ def run(m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
 
     
         if save==True:
-            ls.save(rv_list, astro_list, no_astro, a_list, m_list,
-                    a_lim, m_lim, min_a, min_m, write_file, extension='posts/')
+            ls.save(star_name, rv_list, astro_list, no_astro, a_list, m_list,
+                    a_lim, m_lim, min_a, min_m)
     
     # Otherwise, load in existing data:
     else:
-        post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m = ls.load(read_file, grid_num, extension='posts/')
+        post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m = ls.load(read_file, grid_num)
         
         
     if plot==True:
-        plotter.joint_plot(m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, (min_a, min_m),
-                save_name='base', period_lines = False)
+        plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, 
+                a_lim, m_lim, (min_a, min_m), period_lines = False)
     
     return
 
 
 if __name__ == "__main__":
     
-    run(*sp.params_191939_old, num_points=1e7, grid_num=100, save=True, plot=True, read_file=None, write_file='base')
-    # run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=False, plot=True, read_file='base', write_file='')
+    run(*sp.params_191939_old, num_points=1e5, grid_num=100, save=True, plot=True, read_file=None)
+    # run(*sp.params_191939_old, num_points=1e6, grid_num=100, save=False, plot=True, read_file='base')
     
     
     
