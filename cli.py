@@ -11,6 +11,8 @@ import system_params as sp
 
 parser = ArgumentParser(description="Perform trend analysis")
 
+parser.add_argument('-sn', '--star_name', type=str, metavar='\b', required=True,
+                    help='Name of host star')
 parser.add_argument('-ms', '--m_star', type=float, metavar='\b', required=True,
                     help='Stellar mass in units of Jupiter masses')
 parser.add_argument('-ds', '--d_star', type=float, metavar='\b', required=True,
@@ -41,17 +43,15 @@ parser.add_argument('-p', '--plot', type=bool, metavar='\b', required=False,
                     help='Whether to plot joint (a,m) posterior')
 parser.add_argument('-r', '--read', type=str, metavar='\b', required=False,
                     help='File path to read in already-calculated posterior array')
-parser.add_argument('-w', '--write', type=str, metavar='\b', required=False,
-                    help='File path to store newly-calculated posterior array')
 
 args = parser.parse_args()
 
 if __name__=="__main__":
-    run(args.m_star, args.d_star, args.gdot, args.gdot_err, 
+    run(args.star_name, args.m_star, args.d_star, args.gdot, args.gdot_err, 
         args.gddot, args.gddot_err, args.baseline, 
         args.rv_epoch, args.delta_mu, args.delta_mu_err, 
         num_points=args.num_points, grid_num=args.grid_num, 
-        save=args.save, plot=args.plot, read_file=args.read, write_file=args.writes)
+        save=args.save, plot=args.plot, read_file=args.read)
         
         
         
