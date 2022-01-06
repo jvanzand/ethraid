@@ -64,7 +64,8 @@ def save(star_name, rv_list, astro_list, no_astro, a_list, m_list,
     if not os.path.exists('results'):
         os.makedirs('results')
         
-    save_dir = 'results/'+star_name+'/'
+    # save_dir = 'results/'+star_name+'/' # Each star gets its own folder
+    save_dir = 'results/post_arrays/' # Arrays for all stars go in one folder
         
     if not os.path.exists(save_dir):
         os.makedirs(save_dir)

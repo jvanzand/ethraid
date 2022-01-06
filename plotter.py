@@ -146,10 +146,11 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
 
 
     fig.tight_layout()
-    save_dir = 'results/'+star_name+'/'
-    if not os.path.isdir(save_dir):
-        os.makedirs(save_dir)
-    fig.savefig(save_dir + star_name + '.png')
+    # save_dir_2D = 'results/'+star_name+'/' # Each star gets its own folder
+    save_dir_2D = 'results/2D_posts/' # 2D images of all stars in one folder, 1D images in another
+    if not os.path.isdir(save_dir_2D):
+        os.makedirs(save_dir_2D)
+    fig.savefig(save_dir_2D + star_name + '.png')
     plt.close()
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
@@ -189,8 +190,12 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
         ax[1].vlines(twosig_inds[1][0], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
         ax[1].vlines(twosig_inds[1][1], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
         
+        save_dir_1D = 'results/1D_posts/' # 2D images of all stars in one folder, 1D images in another
+        if not os.path.isdir(save_dir_1D):
+            os.makedirs(save_dir_1D)
+        
         fig.tight_layout()
-        fig.savefig(save_dir + star_name + '_1d.png')
+        fig.savefig(save_dir_1D + star_name + '_1d.png')
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
