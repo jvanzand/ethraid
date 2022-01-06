@@ -25,8 +25,6 @@ parser.add_argument('-gdde', '--gddot_err', type=float, metavar='\b', required=T
                     help='Error on gamma_ddot')
 parser.add_argument('-bl', '--baseline', type=float, metavar='\b', required=True,
                     help='Length of RV time baseline in days')
-parser.add_argument('-rvr', '--rv_range', type=float, metavar='\b', required=True,
-                    help='Difference between max and min RV values in the timeseries')
 parser.add_argument('-rvep', '--rv_epoch', type=float, metavar='\b', required=True,
                     help='Epoch of RV timeseries in BJD, usually around baseline midpoint')
 parser.add_argument('-dmu', '--delta_mu', type=float, metavar='\b', required=False,
@@ -51,9 +49,9 @@ args = parser.parse_args()
 if __name__=="__main__":
     run(args.m_star, args.d_star, args.gdot, args.gdot_err, 
         args.gddot, args.gddot_err, args.baseline, 
-        args.rv_max, args.rv_epoch, args.delta_mu, args.delta_mu_err, 
+        args.rv_epoch, args.delta_mu, args.delta_mu_err, 
         num_points=args.num_points, grid_num=args.grid_num, 
-        save=True, plot=True, read_file=None, write_file='base')
+        save=args.save, plot=args.plot, read_file=args.read, write_file=args.writes)
         
         
         
