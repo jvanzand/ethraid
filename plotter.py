@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from astropy.time import Time
 import matplotlib.pyplot as plt
@@ -146,6 +147,8 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
 
     fig.tight_layout()
     save_dir = 'results/'+star_name+'/'
+    if not os.path.isdir(save_dir):
+        os.makedirs(save_dir)
     fig.savefig(save_dir + star_name + '.png')
     plt.close()
     
