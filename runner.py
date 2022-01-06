@@ -73,7 +73,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         ####################################################################################
         
         min_per = rv_baseline
-        min_m = M_earth/M_jup
+        # min_m = M_earth/M_jup
+        min_m = 1
         m_star_Ms = m_star * M_jup/M_sun
         # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
         min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
