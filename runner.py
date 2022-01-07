@@ -174,8 +174,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    # run(*sp.params_191939_old, num_points=1e5, grid_num=100, save=True, plot=True, read_file=None)
-    run(*sp.params_hd24916, num_points=1e6, grid_num=100, save=False, plot=True)
+    run(*sp.params_191939_old, num_points=1e5, grid_num=100, plot=True, read_file=None)
+    # run(*sp.params_hd24916, num_points=1e6, grid_num=100, save=False, plot=True)
     
     
     
