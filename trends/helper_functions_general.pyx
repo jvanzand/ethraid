@@ -111,7 +111,8 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
     Start with 2 1D lists and multiply them element-wise, THEN form 
     the result into a 2D array. This function is for the total posterior;
     the individual RV and astrometry posteriors are handled by the 
-    prob_array() function below.
+    prob_array() function below. Don't normalize yet because we still
+    need to multiply all arrays by the prior array to enforce bounds.
     
     Arguments:
         rv_post_list (np array of floats, len=num_points): List of model likelihoods
@@ -275,38 +276,75 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
 
     return t_contours
 
-def contour_levels_1D(prob_list, sig_list, t_num = 1e3):
-    """
-    Same as contour_levels, but adapted for 1D arrays. 
-    Hopefully I can condense these into 1 in the future.
-    """
+#def contour_levels_1D(prob_list, sig_list, t_num = 1e3):
+#    """
+#    Same as contour_levels, but adapted for 1D arrays. 
+#    Hopefully I can condense these into 1 in the future.
+#    
+#    sig_list looks like [1,3] to mean 1σ and 3σ intervals.
+#    """
+#
+#
+#    # An array of probabilites from 0 to prob_max in rate_array
+#    t = np.linspace(0, prob_list.max(), int(t_num))
+#    
+#    # The first comparison creates a 2D array of T/F. Each column represents a value in prob_list: if that value is larger than the first value in t[:,None], then put T in that column. Move down, and compare the same value of prob_list to the next value in t[:,None]. Therefor each ROW tells you which probabilities in prob_list are larger than a fixed value in t[:,None], so by summing along the ROWS (axis=1), you get the 'integral' of all probabilities that are greater than that t.
+#    # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t
+#    # THE IDEA is to be able to take a (normalized) probability array, pick some value and say "Suppose summed the probabilities of all entries greater than or equal to this. What would they sum to?" That's what t_list ==> integral gives you. The more useful question is the reverse: "If I want only those probabilities which sum to some total, what probability value should I start at?" That's what interpolate does below.
+#    integral = ((prob_list >= t[:, None])*prob_list).sum(axis=(1))
+#
+#    # Now create a function that takes integral as the x (not the y) and then returns the corresponding prob value from the t array. Interpolating between integral values allows me to choose any enclosed total prob. value (ie, integral value) and get the corresponding prob. value to use as my contour.
+#    f = sp.interpolate.interp1d(integral, t)
+#
+#    contour_list = []
+#    prob_list = [0.68, 0.95, 0.997]
+#
+#    for i in sig_list:
+#        contour_list.append(prob_list[i-1])
+#
+#    # The plt.contourf function requires at least 2 levels. So if we want just one level, include a tiny contour that encompasses a small fraction of the total probability. In this case, the contour we want will be at the 0th index.
+#    if len(sig_list) == 1:
+#        contour_list.append(contour_list[0]-1e-4)
+#
+#    # Make sure the list of integrals is in descending order (eg, 99.7%, 95%, 68%). This will make the list of probabilities be in ascending order (eg, 0.05, 0.01, 0.007). These correspond to descending sigma levels (3, 2, 1).
+#    t_contours = f(np.array(sorted(contour_list, reverse=True)))
+#
+#
+#    return t_contours
 
-
-    # An array of probabilites from 0 to prob_max in rate_array
-    t = np.linspace(0, prob_list.max(), int(t_num))
-
-    # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t
-
-    integral = ((prob_list >= t[:, None])*prob_list).sum(axis=(1))
-
-    # Now create a function that takes integral as the x (not the y) and then returns the corresponding prob value from the t array. Interpolating between integral values allows me to choose any enclosed total prob. value (ie, integral value) and get the corresponding prob. value to use as my contour.
-    f = sp.interpolate.interp1d(integral, t)
-
-    contour_list = []
-    prob_list = [0.68, 0.95, 0.997]
-
+def CDF_contours(prob_list, sig_list):
+    
+    # First make a list of indices in prob_list. This list is one element longer than prob_list (see below).
+    ind = np.linspace(0, len(prob_list), len(prob_list)+1)
+    
+    # The input prob_list is the PDF. Use cumsum to calculate the CDF.
+    CDF = np.cumsum(prob_list)
+    # Insert 0 at the beginning of the cumulative sum (now the length matched ind). Matching this up with ind, we are saying that before the 0th index, we have 0 prob. Before the 1st index (and after adding the 0th), we have the prob corresponding to the 1th probability sum, and so on. Depending on where the index is actually placed (I believe it's in the center of each grid block), this could incur a ~pixel-level error.
+    CDF = np.insert(CDF,0,0)
+    
+    # Now we have a list of indices, running from eg low mass to high mass, AND the cumulative sum at (before) each index.
+    # I want to be able to put in a cumulative probability and get out the index where the CDF attains that value.
+    f = sp.interpolate.interp1d(CDF, ind)
+    
+    # n_sig_inds will be a list of 2-tuples. Each 2-tuple contains the indices marking the nth-sigma interval.
+    nsig_inds = []
+    nsig_prob_list = [0.68, 0.95, 0.997]
+    
     for i in sig_list:
-        contour_list.append(prob_list[i-1])
-
-    # The plt.contourf function requires at least 2 levels. So if we want just one level, include a tiny contour that encompasses a small fraction of the total probability. In this case, the contour we want will be at the 0th index.
-    if len(sig_list) == 1:
-        contour_list.append(contour_list[0]-1e-4)
-
-    # Make sure the list of integrals is in descending order (eg, 99.7%, 95%, 68%). This will make the list of probabilities be in ascending order (eg, 0.05, 0.01, 0.007). These correspond to descending sigma levels (3, 2, 1).
-    t_contours = f(np.array(sorted(contour_list, reverse=True)))
-
-
-    return t_contours
+        prob = nsig_prob_list[i-1]
+        
+        prob1 = (1 - prob)/2 # Eg, (1-0.95)/2 gives the 2.5% as the first prob
+        prob2 = 1 - prob1 # And 97.5% as the second
+        
+        bounds_indices = f(prob1), f(prob2)
+        
+        nsig_inds.append(bounds_indices)
+    
+    #prob_fine = np.linspace(0, 1, int(interp_num))
+    #ind_fine = f(prob_fine)
+    return nsig_inds
+    
+    
 
 def bounds_1D(prob_array, value_spaces, sig, interp_num = 1e4):
     """
@@ -348,40 +386,44 @@ def bounds_1D(prob_array, value_spaces, sig, interp_num = 1e4):
         array_1D = prob_array.sum(axis=i)
         grid_num = len(array_1D)
 
-
-        # This gives only the 2-sigma contour level, so that we get the 2-sigma limits at the end
-        lvl_sig = contour_levels_1D(array_1D, [sig])[0]
-
-        # Interpolate between the points to get a finer spacing of points. This allows for more precise parameter estimation.
-        func = sp.interpolate.interp1d(range(grid_num), array_1D)
-
-        # Array over the same interval, but spaced more finely (as long as interp_num > grid_num, which it should be)
-        fine_array = np.linspace(0, grid_num-1, int(interp_num))
-
-        # This is analogous to the original array_1D, but finer
-        interp_vals = func(fine_array)
-
-        #import matplotlib.pyplot as plt
-
-        #plt.plot(range(len(fine_array)), interp_vals)
-        #plt.show()
-
-
-        # This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
-
-
-        inds_sig = np.where(abs(interp_vals - lvl_sig) < 1e-2*lvl_sig)[0].take((0,-1))
-
-        # value_bounds is a tuple of actual values, not indices.
-        # Reverse the order of value_spaces because if we collapse along m, we are interested in the a bounds
-        value_bounds = index2value(inds_sig, (0, interp_num-1), value_spaces[::-1][i])
+        ################# This could be replaced by the CDF method
+        ### This gives only the 2-sigma contour level, so that we get the 2-sigma limits at the end
+        ##lvl_sig = contour_levels_1D(array_1D, [sig])[0]
+        ##
+        ### Interpolate between the points to get a finer spacing of points. This allows for more precise parameter estimation.
+        ##func = sp.interpolate.interp1d(range(grid_num), array_1D)
+        ##
+        ### Array over the same interval, but spaced more finely (as long as interp_num > grid_num, which it should be)
+        ##fine_array = np.linspace(0, grid_num-1, int(interp_num))
+        ##
+        ### This is analogous to the original array_1D, but finer
+        ##interp_vals = func(fine_array)
+        ##
+        ###import matplotlib.pyplot as plt
+        ##
+        ###plt.plot(range(len(fine_array)), interp_vals)
+        ###plt.show()
+        ##
+        ##
+        ### This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
+        ##inds_sig = np.where(abs(interp_vals - lvl_sig) < 1e-2*lvl_sig)[0].take((0,-1))
+        ########################################################################################
+        
+        
+        inds_sig = CDF_contours(array_1D, [sig])[0]
+        
+        ### # value_bounds is a tuple of actual values, not indices.
+        ### # Reverse the order of value_spaces because if we collapse along m, we are interested in the a bounds
+        ### value_bounds = index2value(inds_sig, (0, interp_num-1), value_spaces[::-1][i])
+        value_bounds = index2value(inds_sig, (0, grid_num-1), value_spaces[::-1][i])
     
-        lvls_sig_list.append(lvl_sig)
-        inds_sig_list.append(inds_sig * grid_num/interp_num)
+        #lvls_sig_list.append(lvl_sig)
+        #inds_sig_list.append(inds_sig * grid_num/interp_num)
+        inds_sig_list.append(inds_sig)
     
         bounds_list.append(value_bounds)
 
-    return bounds_list, lvls_sig_list, inds_sig_list
+    return bounds_list, inds_sig_list
 
 
 def value2index(value, index_space, value_space):

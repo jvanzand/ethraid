@@ -61,10 +61,12 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         ##### Determination of minimum mass constraint. Kind of a headache but could be useful.
         ##### Replacing for now with blanket m_min = 1 Earth mass
         # # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
-        # min_K = rv_range/2 # This is prone to errors because it relies on the individual end points.
+        # # min_K = rv_range/2 # This is prone to errors because it relies on the individual end points.
         #
+        # m_star_Ms = m_star * M_jup/M_sun
+        # min_per = rv_baseline
         # # This still has the issue that the end of the timeseries might not be the most extreme point, namely if there is enough curvature to reach a maximum and then come back down (or up). Fortunately, this just means I would be sampling masses that were too small, rather than cutting any out. Still could use some refinement.
-        # # min_K = abs(0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
+        # min_K = abs(0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
         #
         #
         # # The argument for min_m is this: suppose period is min_per, which is where m can be smallest. What is the smallest that m can be? It can be so small that the current max RV is the highest the RV will ever be. Then m is so small that 1) it attains the lowest possible K and 2) it does so as close in as possible (any farther out would mean a larger planet). NOTE: this happens at e=0, which is NOT concordant with minimum m. See below for idea on how to fix this.
@@ -97,7 +99,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
     
         # General
         a_lim = (0.8*min_a, 1e2)
-        m_lim = (0.8*min_m, 2e3)
+        m_lim = (0.8*min_m, 1e2)
         print(a_lim[0], min_a)
 
         num_points = int(num_points)
@@ -174,7 +176,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_191939_old, num_points=1e5, grid_num=100, plot=True, read_file=None)
+    run(*sp.params_191939_old, num_points=1e7, grid_num=100, plot=True, read_file=None)
     # run(*sp.params_hd24916, num_points=1e6, grid_num=100, save=False, plot=True)
     
     

@@ -156,9 +156,9 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
     # twosig_inds contains the indices where the above horizontal line crosses the posterior. In case it crosses more than twice, it contains the first and last instances.
-    bounds, twosig_levels, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2, interp_num = 1e4)
+    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2, interp_num = 1e4)
     
-    
+    print(twosig_inds)
     if marginalized:
         
         title_size = 30
@@ -170,25 +170,25 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
         sma_1d = post_tot.sum(axis=0)
         mass_1d = post_tot.sum(axis=1)
 
-        ax[0].plot(range(grid_num), sma_1d)
+        ax[0].plot(range(grid_num), np.cumsum(sma_1d))
         plt.sca(ax[0])
         plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
         plt.yticks(size=tick_size)
-        plt.title('Semi-major axis posterior', size=title_size)
+        plt.title('Semi-major axis CDF', size=title_size)
         plt.xlabel('Companion semi-major axis (AU)', size = label_size)
-        ax[0].hlines(twosig_levels[0], 0, grid_num-1, colors='k', linestyles='solid')
-        ax[0].vlines(twosig_inds[0][0], 0, 3*twosig_levels[0], colors='r', linestyles='dashed')
-        ax[0].vlines(twosig_inds[0][1], 0, 3*twosig_levels[0], colors='r', linestyles='dashed')
+        #ax[0].hlines(twosig_levels[0], 0, grid_num-1, colors='k', linestyles='solid') # Irrelevant now with CDF
+        ax[0].vlines(twosig_inds[0][0], 0, 1, colors='r', linestyles='dashed')
+        ax[0].vlines(twosig_inds[0][1], 0, 1, colors='r', linestyles='dashed')
 
-        ax[1].plot(range(grid_num), mass_1d)
+        ax[1].plot(range(grid_num), np.cumsum(mass_1d))
         plt.sca(ax[1])
         plt.xticks(tick_positions_m, tick_labels_m, size=tick_size)
         plt.yticks(size=tick_size)
         plt.xlabel(r'Companion mass ($M_{Jup}$)', size = label_size)
-        plt.title('Mass posterior', size=title_size)
-        ax[1].hlines(twosig_levels[1], 0, grid_num-1, colors='k', linestyles='solid')
-        ax[1].vlines(twosig_inds[1][0], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
-        ax[1].vlines(twosig_inds[1][1], 0, 3*twosig_levels[1], colors='r', linestyles='dashed')
+        plt.title('Mass CDF', size=title_size)
+        #ax[1].hlines(twosig_levels[1], 0, grid_num-1, colors='k', linestyles='solid')
+        ax[1].vlines(twosig_inds[1][0], 0, 1, colors='r', linestyles='dashed')
+        ax[1].vlines(twosig_inds[1][1], 0, 1, colors='r', linestyles='dashed')
         
         save_dir_1D = 'results/1D_posts/' # 2D images of all stars in one folder, 1D images in another
         if not os.path.isdir(save_dir_1D):
