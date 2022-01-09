@@ -179,6 +179,23 @@ if __name__ == "__main__":
     run(*sp.params_191939_old, num_points=1e7, grid_num=100, plot=True, read_file=None)
     # run(*sp.params_hd24916, num_points=1e6, grid_num=100, save=False, plot=True)
     
+    # prob_list = [0.025, 0.2, 0.45, 0.3, 0.025]
+    #
+    # sig_list = [1]
+    #
+    # ans = hlp.CDF_contours(prob_list, sig_list)
+    # print(ans)
+    
+    # index_space = (0,4)
+    # value_space = (1,32)
+    # print(hlp.index2value(0, index_space, value_space))
+    # print(hlp.index2value(1, index_space, value_space))
+    # print(hlp.index2value(2, index_space, value_space))
+    # print(hlp.index2value(3, index_space, value_space))
+    # print(hlp.index2value(4, index_space, value_space))
+    # print(hlp.index2value(5, index_space, value_space))
+    
+    
     
     
 

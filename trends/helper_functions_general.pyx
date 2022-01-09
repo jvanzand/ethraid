@@ -101,7 +101,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     a_inds = np.digitize(a_list, bins = a_bins)
     m_inds = np.digitize(m_list, bins = m_bins)
 
-    return a_list, m_list, per_list, e_list, i_list, om_list, M_anom_0_list, a_inds, m_inds
+    return a_list, m_list, per_list, e_list, i_list,\
+           om_list, M_anom_0_list, a_inds, m_inds
 
 
 def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
@@ -312,11 +313,11 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
 #
 #    return t_contours
 
-def CDF_contours(prob_list, sig_list):
+def CDF_indices(prob_list, sig_list):
     
     # First make a list of indices in prob_list. This list is one element longer than prob_list (see below).
     ind = np.linspace(0, len(prob_list), len(prob_list)+1)
-    
+
     # The input prob_list is the PDF. Use cumsum to calculate the CDF.
     CDF = np.cumsum(prob_list)
     # Insert 0 at the beginning of the cumulative sum (now the length matched ind). Matching this up with ind, we are saying that before the 0th index, we have 0 prob. Before the 1st index (and after adding the 0th), we have the prob corresponding to the 1th probability sum, and so on. Depending on where the index is actually placed (I believe it's in the center of each grid block), this could incur a ~pixel-level error.
@@ -340,8 +341,6 @@ def CDF_contours(prob_list, sig_list):
         
         nsig_inds.append(bounds_indices)
     
-    #prob_fine = np.linspace(0, 1, int(interp_num))
-    #ind_fine = f(prob_fine)
     return nsig_inds
     
     
@@ -410,12 +409,12 @@ def bounds_1D(prob_array, value_spaces, sig, interp_num = 1e4):
         ########################################################################################
         
         
-        inds_sig = CDF_contours(array_1D, [sig])[0]
+        inds_sig = CDF_indices(array_1D, [sig])[0]
         
         ### # value_bounds is a tuple of actual values, not indices.
         ### # Reverse the order of value_spaces because if we collapse along m, we are interested in the a bounds
         ### value_bounds = index2value(inds_sig, (0, interp_num-1), value_spaces[::-1][i])
-        value_bounds = index2value(inds_sig, (0, grid_num-1), value_spaces[::-1][i])
+        value_bounds = index2value(inds_sig, (0, grid_num), value_spaces[::-1][i])
     
         #lvls_sig_list.append(lvl_sig)
         #inds_sig_list.append(inds_sig * grid_num/interp_num)
@@ -433,17 +432,17 @@ def value2index(value, index_space, value_space):
     and value_space are expected as tuples of the form
     (min_value, max_value).
     """
-
+    # The log base doesn't matter (it cancels) as long as it's consistent.
     min_index, max_index = index_space[0],  index_space[1]
     min_value, max_value = value_space[0], value_space[1]
 
     index_range = max_index - min_index
-    log_value_range = np.log10(max_value) - np.log10(min_value)
+    log_value_range = np.log(max_value) - np.log(min_value)
 
     value_arr = np.array(value)
 
-    index = (np.log10(value_arr)-np.log10(min_value))\
-                                    *(index_range/log_value_range) + min_index
+    index = (np.log(value_arr)-np.log(min_value))\
+            *(index_range/log_value_range) + min_index
 
     return index
 
@@ -456,18 +455,20 @@ def index2value(index, index_space, value_space):
     value_space are expected as tuples of the form (min_value, max_value).
     index is in the range of index_space.
     """
+    # The log base doesn't matter (it cancels) as long as it's consistent.
+    # Here I'm using base e, so it needs to be the base as well.
     index = np.array(index)
 
     min_index, max_index = index_space[0],  index_space[1]
     min_value, max_value = value_space[0], value_space[1]
 
     index_range = max_index - min_index
-    log_value_range = np.log10(max_value) - np.log10(min_value)
+    log_value_range = np.log(max_value) - np.log(min_value)
 
     # Convert from a linear space of indices to a linear space of log(values).
-    log_value = (index-min_index)*(log_value_range/index_range) + np.log10(min_value)
+    log_value = (index-min_index)*(log_value_range/index_range) + np.log(min_value)
 
-    value = np.around(10**(log_value), 2) # Round to 2 decimal places
+    value = np.around(math_e**(log_value), 2) # Round to 2 decimal places
 
     return value
 
