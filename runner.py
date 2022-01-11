@@ -101,6 +101,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         a_lim = (0.8*min_a, 1e2)
         m_lim = (0.8*min_m, 1e2)
         print(a_lim[0], min_a)
+        print(m_lim[0], min_m)
 
         num_points = int(num_points)
         np.set_printoptions(threshold=np.inf)
@@ -176,8 +177,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_191939_old, num_points=1e7, grid_num=100, plot=True, read_file=None)
-    # run(*sp.params_hd24916, num_points=1e6, grid_num=100, save=False, plot=True)
+    run(*sp.params_191939_old, num_points=1e8, grid_num=100, plot=True, read_file=None)
+    # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
     # prob_list = [0.025, 0.2, 0.45, 0.3, 0.025]
     #

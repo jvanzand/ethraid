@@ -74,7 +74,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
 
     # These semimajor axes are distances between the planet and the barycenter of the system. The star is on its own orbit, which we will get later.
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
-    print(m_min, m_max)
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
 
     # Match up a_list and m_list and get the period for each pair (in days).
@@ -277,41 +276,6 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
 
     return t_contours
 
-#def contour_levels_1D(prob_list, sig_list, t_num = 1e3):
-#    """
-#    Same as contour_levels, but adapted for 1D arrays. 
-#    Hopefully I can condense these into 1 in the future.
-#    
-#    sig_list looks like [1,3] to mean 1σ and 3σ intervals.
-#    """
-#
-#
-#    # An array of probabilites from 0 to prob_max in rate_array
-#    t = np.linspace(0, prob_list.max(), int(t_num))
-#    
-#    # The first comparison creates a 2D array of T/F. Each column represents a value in prob_list: if that value is larger than the first value in t[:,None], then put T in that column. Move down, and compare the same value of prob_list to the next value in t[:,None]. Therefor each ROW tells you which probabilities in prob_list are larger than a fixed value in t[:,None], so by summing along the ROWS (axis=1), you get the 'integral' of all probabilities that are greater than that t.
-#    # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t
-#    # THE IDEA is to be able to take a (normalized) probability array, pick some value and say "Suppose summed the probabilities of all entries greater than or equal to this. What would they sum to?" That's what t_list ==> integral gives you. The more useful question is the reverse: "If I want only those probabilities which sum to some total, what probability value should I start at?" That's what interpolate does below.
-#    integral = ((prob_list >= t[:, None])*prob_list).sum(axis=(1))
-#
-#    # Now create a function that takes integral as the x (not the y) and then returns the corresponding prob value from the t array. Interpolating between integral values allows me to choose any enclosed total prob. value (ie, integral value) and get the corresponding prob. value to use as my contour.
-#    f = sp.interpolate.interp1d(integral, t)
-#
-#    contour_list = []
-#    prob_list = [0.68, 0.95, 0.997]
-#
-#    for i in sig_list:
-#        contour_list.append(prob_list[i-1])
-#
-#    # The plt.contourf function requires at least 2 levels. So if we want just one level, include a tiny contour that encompasses a small fraction of the total probability. In this case, the contour we want will be at the 0th index.
-#    if len(sig_list) == 1:
-#        contour_list.append(contour_list[0]-1e-4)
-#
-#    # Make sure the list of integrals is in descending order (eg, 99.7%, 95%, 68%). This will make the list of probabilities be in ascending order (eg, 0.05, 0.01, 0.007). These correspond to descending sigma levels (3, 2, 1).
-#    t_contours = f(np.array(sorted(contour_list, reverse=True)))
-#
-#
-#    return t_contours
 
 def CDF_indices(prob_list, sig_list):
     
@@ -345,7 +309,7 @@ def CDF_indices(prob_list, sig_list):
     
     
 
-def bounds_1D(prob_array, value_spaces, sig, interp_num = 1e4):
+def bounds_1D(prob_array, value_spaces, sig):
     """
     Given a 2D probability array, this function collapses the array along each 
     axis to find the desired confidence interval.
@@ -355,23 +319,11 @@ def bounds_1D(prob_array, value_spaces, sig, interp_num = 1e4):
         value_spaces (list of 2 2-tuples): Mass and semi-major axis limits, in the form 
                                          [(min_value_m, max_value_m), (min_value_a, max_value_a)]
         sig (int): Standard deviation limits to compute. If sig==1, compute the 68% ~ 1σ limits.
-        interp_num (int): Number of points to interpolate between the probabilities in the array.
-                          Should be greater than the side length of prob_array, otherwise you won't
-                          get a better estimate of the probability function.
     
-    Returns:
-        lvls_sig_list (list of 2 floats): Probability values at which the a and m 1D "contours" 
-                                          (in 1D distributions, contours are just points) should 
-                                          be drawn for the provided sig value. Given in the form
-                                          [a_prob, m_prob]. For example, if a_prob = 0.029,
-                                          then a horizontal line at height 0.029 overlaid on
-                                          the 1D a posterior will intersect the posterior at
-                                          the min and max allowed a for the given sig value.
-                                          
-        inds_sig_list (list of 2 lists): The indices on the horizontal axis where the vertical line
-                                         described above intersects the 1D poterios. Represents the
-                                         estimated 1D bounds at the sigma level provided, in the form
-                                         [[a_ind_min, a_ind_max], [m_ind_min, m_ind_max]]
+    Returns:                                       
+        inds_sig_list (list of 2 lists): The indices on the horizontal axis where the CDF of 
+                                        the collapsed prob_array reaches the upper/lower limit
+                                        determined by sig.
                                          
         bounds_list (list of 2 lists): a/m values corresponding to the indices above.
     """
@@ -383,41 +335,14 @@ def bounds_1D(prob_array, value_spaces, sig, interp_num = 1e4):
     for i in range(2):
 
         array_1D = prob_array.sum(axis=i)
-        grid_num = len(array_1D)
-
-        ################# This could be replaced by the CDF method
-        ### This gives only the 2-sigma contour level, so that we get the 2-sigma limits at the end
-        ##lvl_sig = contour_levels_1D(array_1D, [sig])[0]
-        ##
-        ### Interpolate between the points to get a finer spacing of points. This allows for more precise parameter estimation.
-        ##func = sp.interpolate.interp1d(range(grid_num), array_1D)
-        ##
-        ### Array over the same interval, but spaced more finely (as long as interp_num > grid_num, which it should be)
-        ##fine_array = np.linspace(0, grid_num-1, int(interp_num))
-        ##
-        ### This is analogous to the original array_1D, but finer
-        ##interp_vals = func(fine_array)
-        ##
-        ###import matplotlib.pyplot as plt
-        ##
-        ###plt.plot(range(len(fine_array)), interp_vals)
-        ###plt.show()
-        ##
-        ##
-        ### This is a shaky step. I'm just looking for places where the function value is really close to the probability corresponding to 2-sigma. But this will fall apart for multimodal distributions, and maybe in other cases too. I use the 'take' method to pick out the first and last indices.
-        ##inds_sig = np.where(abs(interp_vals - lvl_sig) < 1e-2*lvl_sig)[0].take((0,-1))
-        ########################################################################################
-        
+        grid_num = len(array_1D)    
         
         inds_sig = CDF_indices(array_1D, [sig])[0]
         
         ### # value_bounds is a tuple of actual values, not indices.
         ### # Reverse the order of value_spaces because if we collapse along m, we are interested in the a bounds
-        ### value_bounds = index2value(inds_sig, (0, interp_num-1), value_spaces[::-1][i])
         value_bounds = index2value(inds_sig, (0, grid_num), value_spaces[::-1][i])
     
-        #lvls_sig_list.append(lvl_sig)
-        #inds_sig_list.append(inds_sig * grid_num/interp_num)
         inds_sig_list.append(inds_sig)
     
         bounds_list.append(value_bounds)

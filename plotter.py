@@ -154,11 +154,9 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     plt.close()
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
-    # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
-    # twosig_inds contains the indices where the above horizontal line crosses the posterior. In case it crosses more than twice, it contains the first and last instances.
+    # twosig_inds contains the indices where the CDF reaches the upper and lower values associated with the 95% confidence interval.
     bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2, interp_num = 1e4)
-    
-    print('HERE THEY ARE', twosig_inds)
+
     if marginalized:
         
         title_size = 30
