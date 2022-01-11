@@ -155,7 +155,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices where the CDF reaches the upper and lower values associated with the 95% confidence interval.
-    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2, interp_num = 1e4)
+    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
 
     if marginalized:
         
