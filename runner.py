@@ -97,14 +97,22 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # a_lim = (0.8*min_a, 5e1)
         # m_lim = (0.8*min_m, 1e2)
     
+        a_upper = 1e2
+        m_upper = 1e3
+        
+        # We want the gray bars to be about 1/15 the extent of the colored part of the figure
+        a_dividing_factor = (a_upper/min_a)**(1/15)
+        m_dividing_factor = (m_upper/min_m)**(1/15)
+        
         # General
-        a_lim = (0.8*min_a, 1e2)
-        m_lim = (0.8*min_m, 1e3)
+        a_lim = (min_a/a_dividing_factor, 1e2)
+        m_lim = (min_m/m_dividing_factor, 1e3)
+
         print(a_lim[0], min_a)
         print(m_lim[0], min_m)
 
         num_points = int(num_points)
-        np.set_printoptions(threshold=np.inf)
+        # np.set_printoptions(threshold=np.inf)
     
         
         a_list, m_list, per_list, e_list, i_list,\
@@ -180,7 +188,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_synth, num_points=1e7, grid_num=100, plot=True, read_file=None)
+    run(*sp.params_synth, num_points=1e6, grid_num=100, plot=True, read_file=None)
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
     
