@@ -57,7 +57,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     # plt.text((7/16)*grid_num, (1/4)*grid_num, 'Astrometry',
     #           size=region_label_size)
 
-    plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Masses disallowed by RVs', 
+    plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Ruled out by RVs', 
               size=restricted_region_label_size)
     plt.text((1/3)*(min_index_a-1), (1/8)*grid_num, 'Ruled out by minimum period', 
               size=restricted_region_label_size, rotation=90)
