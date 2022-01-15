@@ -20,7 +20,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     ######## Padding arrays #########
     
     grid_pad = int(np.round(grid_num/20))
-    dividing_factor = grid_num/grid_pad # About 20
+    dividing_factor = grid_num/grid_pad # About 20, if grid_num=100
 
     min_plot_a = min_a/dividing_factor
     min_plot_m = min_m/dividing_factor
@@ -47,9 +47,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
     m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
 
-    # min_index_m = hlp.value2index(min_m, (0, grid_num-1), m_lim)
-    # min_index_a = hlp.value2index(min_a, (0, grid_num-1), a_lim)
-
+    # We want the rectangles to be grid_num+grid_pad-1 long, and grid_pad wide
     mass_rect = ptch.Rectangle((0, 0), grid_num+grid_pad-1, grid_pad,
                                        color='gray', alpha=1.0)
     a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num+grid_pad-1,
@@ -62,11 +60,6 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     label_size = 50
     region_label_size = 50
     restricted_region_label_size = 35
-
-    # plt.text((16/32)*grid_num, (7/8)*grid_num, 'RV',
-    #           size=region_label_size, rotation=50)
-    # plt.text((7/16)*grid_num, (1/4)*grid_num, 'Astrometry',
-    #           size=region_label_size)
 
     plt.text((5/16)*grid_num, (1/4)*(grid_pad/2), 'Ruled out by RVs', 
               size=restricted_region_label_size)

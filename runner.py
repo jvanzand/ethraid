@@ -89,7 +89,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
 
-        # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
+        # Sampling limits for a and m.
         # # 191939
         # # min_a = 0.5
         # # min_m = 0.5
@@ -98,10 +98,6 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
     
         max_a = 1e2
         max_m = 1e3
-        
-        # # General
-        # a_lim = (min_a/a_dividing_factor, a_upper)
-        # m_lim = (min_m/m_dividing_factor, m_upper)
         
         # General
         a_lim = (min_a, max_a)
@@ -120,14 +116,6 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         start_time = time.time()
         ##
 
-        # # Create an array with 1s in allowed regions and 0s in disallowed regions
-        # min_index_m = int(np.ceil(hlp.value2index(min_m, (0, grid_num-1), m_lim)))
-        # min_index_a= int(np.ceil(hlp.value2index(min_a, (0, grid_num-1), a_lim)))
-
-        # prior_array = np.ones((grid_num, grid_num))
-        # prior_array[0:min_index_m, :] = 0
-        # prior_array[:, 0:min_index_a] = 0
-
         # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
         no_astro = False
         try:
@@ -141,8 +129,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
             post_astro = np.array(hlp.prob_array(astro_list, a_inds, m_inds, grid_num))
             post_astro = post_astro/post_astro.sum()
 
-        except Exception as e:
-            print(e)
+        except Exception as err:
+            print(err)
             astro_list = np.ones(num_points)
             post_astro = np.ones((grid_num, grid_num))
             no_astro = True
@@ -183,23 +171,10 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
     
     
     
-    # grid_pad = int(np.round(grid_num/20))
-    #
-    # dividing_factor = grid_num/grid_pad # About 20
-    #
-    # min_plot_a = min_a/dividing_factor
-    # min_plot_m = min_m/dividing_factor
-    #
-    # post_astro = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
-    # print(a_lim[0], min_plot_a)
-    # print(m_lim[0], min_plot_m)
-    
-    
-    
 
 if __name__ == "__main__":
     
-    run(*sp.params_12572, num_points=1e8, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_12572, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
