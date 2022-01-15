@@ -7,19 +7,31 @@ import matplotlib.patches as ptch
 import helper_functions_general as hlp
 
 
-def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim, 
-                min_vals, period_lines = False, marginalized=True):
+def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
+               period_lines = False, marginalized=True):
     
     tick_num = 6
     tick_size = 30
     
-    min_a, min_m = min_vals
+    min_a, min_m = a_lim[0], m_lim[0]
     
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
     
+    ######## Padding arrays #########
+    
+    grid_pad = int(np.round(grid_num/20))
+    dividing_factor = grid_num/grid_pad # About 20
+
+    min_plot_a = min_a/dividing_factor
+    min_plot_m = min_m/dividing_factor
+    
+    post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
+    post_astro_pad = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
+    post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
+    
     try:
-        t_contours_astro = hlp.contour_levels(post_astro, [1,2])
-        post_astro_cont = ax.contourf(post_astro, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
+        t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! MAybe change this to post_astro_pad
+        post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
     
     except:
         pass
@@ -27,21 +39,20 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     t_contours_rv = hlp.contour_levels(post_rv, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
 
-    post_rv_cont = ax.contourf(post_rv, t_contours_rv, 
+    post_rv_cont = ax.contourf(post_rv_pad, t_contours_rv, 
                                cmap='Greens', extend='max', alpha=0.5)
-    post_tot_cont = ax.contourf(post_tot, t_contours_tot,
+    post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                        cmap='Reds', extend='max', alpha=0.75)
 
     a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
     m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
 
-    min_index_m = hlp.value2index(min_m, (0, grid_num-1), m_lim)
-    min_index_a = hlp.value2index(min_a, (0, grid_num-1), a_lim)
+    # min_index_m = hlp.value2index(min_m, (0, grid_num-1), m_lim)
+    # min_index_a = hlp.value2index(min_a, (0, grid_num-1), a_lim)
 
-
-    mass_rect = ptch.Rectangle((0, 0), grid_num-1, min_index_m, 
+    mass_rect = ptch.Rectangle((0, 0), grid_num+grid_pad-1, grid_pad,
                                        color='gray', alpha=1.0)
-    a_rect = ptch.Rectangle((0, 0), min_index_a, grid_num-1, 
+    a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num+grid_pad-1,
                                        color='gray', alpha=1.0)
 
     ax.add_patch(mass_rect)
@@ -57,9 +68,9 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     # plt.text((7/16)*grid_num, (1/4)*grid_num, 'Astrometry',
     #           size=region_label_size)
 
-    plt.text((1/6)*grid_num, (1/3)*(min_index_m-1), 'Ruled out by RVs', 
+    plt.text((5/16)*grid_num, (1/4)*(grid_pad/2), 'Ruled out by RVs', 
               size=restricted_region_label_size)
-    plt.text((1/3)*(min_index_a-1), (1/8)*grid_num, 'Ruled out by minimum period', 
+    plt.text((1/4)*(grid_pad/2), (1/8)*grid_num, 'Ruled out by minimum period', 
               size=restricted_region_label_size, rotation=90)
 
 

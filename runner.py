@@ -31,7 +31,7 @@ M_earth = 5.972167867791379e+27
 def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
         rv_baseline, rv_epoch, delta_mu, delta_mu_err,
         num_points=1e6, grid_num=100, save=True, plot=True, 
-        read_file=None):
+        read_file_path=None):
         
     """
     Primary function to run trend code.
@@ -53,10 +53,9 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
                         Hipparcos and Gaia epochs.
         delta_mu_err: Error on delta_mu
     """
-        
 
     # If no data to read in, calculate new arrays
-    if read_file is None:
+    if read_file_path is None:
         
         ##### Determination of minimum mass constraint. Kind of a headache but could be useful.
         ##### Replacing for now with blanket m_min = 1 Earth mass
@@ -87,8 +86,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # min_m = (gammadot*100/(24*3600))*((min_per*24*3600)/6.283185)**2*(m_star*M_sun)/(min_a*14959787070000.0) / M_jup
         ###################################
 
-        print('Min m is: ', min_m)
-        print('Min a is: ', min_a)
+        print('Min sampling m is: ', min_m)
+        print('Min sampling a is: ', min_a)
 
         # Sampling limits for a and m. Note that if the min_a or min_m parameters fall outside these bounds, the plot will look weird. I can modify later to throw an error, but it's mostly visual.
         # # 191939
@@ -97,19 +96,16 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # a_lim = (0.8*min_a, 5e1)
         # m_lim = (0.8*min_m, 1e2)
     
-        a_upper = 1e2
-        m_upper = 1e3
+        max_a = 1e2
+        max_m = 1e3
         
-        # We want the gray bars to be about 1/15 the extent of the colored part of the figure
-        a_dividing_factor = (a_upper/min_a)**(1/15)
-        m_dividing_factor = (m_upper/min_m)**(1/15)
+        # # General
+        # a_lim = (min_a/a_dividing_factor, a_upper)
+        # m_lim = (min_m/m_dividing_factor, m_upper)
         
         # General
-        a_lim = (min_a/a_dividing_factor, 1e2)
-        m_lim = (min_m/m_dividing_factor, 1e3)
-
-        print(a_lim[0], min_a)
-        print(m_lim[0], min_m)
+        a_lim = (min_a, max_a)
+        m_lim = (min_m, max_m)
 
         num_points = int(num_points)
         # np.set_printoptions(threshold=np.inf)
@@ -124,13 +120,13 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         start_time = time.time()
         ##
 
-        # Create an array with 1s in allowed regions and 0s in disallowed regions
-        min_index_m = int(np.ceil(hlp.value2index(min_m, (0, grid_num-1), m_lim)))
-        min_index_a = int(np.ceil(hlp.value2index(min_a, (0, grid_num-1), a_lim)))
+        # # Create an array with 1s in allowed regions and 0s in disallowed regions
+        # min_index_m = int(np.ceil(hlp.value2index(min_m, (0, grid_num-1), m_lim)))
+        # min_index_a= int(np.ceil(hlp.value2index(min_a, (0, grid_num-1), a_lim)))
 
-        prior_array = np.ones((grid_num, grid_num))
-        prior_array[0:min_index_m, :] = 0
-        prior_array[:, 0:min_index_a] = 0
+        # prior_array = np.ones((grid_num, grid_num))
+        # prior_array[0:min_index_m, :] = 0
+        # prior_array[:, 0:min_index_a] = 0
 
         # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
         no_astro = False
@@ -142,7 +138,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
                                               om_list, M_anom_0_list, per_list,
                                               m_star, d_star, delta_mu, delta_mu_err)                     
                                  
-            post_astro = hlp.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
+            post_astro = np.array(hlp.prob_array(astro_list, a_inds, m_inds, grid_num))
             post_astro = post_astro/post_astro.sum()
 
         except Exception as e:
@@ -158,10 +154,10 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
                                 per_list, m_star, rv_epoch,
                                 gammadot, gammadot_err, gammaddot, gammaddot_err)
                                 
-        post_rv = hlp.prob_array(rv_list, a_inds, m_inds, grid_num) * prior_array
+        post_rv = np.array(hlp.prob_array(rv_list, a_inds, m_inds, grid_num))
         post_rv = post_rv/post_rv.sum()
         
-        post_tot = hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds) * prior_array
+        post_tot = np.array(hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds))
         post_tot = post_tot/post_tot.sum()
 
         ##
@@ -176,25 +172,35 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
     
     # Otherwise, load in existing data:
     else:
-        post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m = ls.load(read_file, grid_num)
+        post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m = ls.load(read_file_path, grid_num)
         
         
     if plot==True:
         plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, 
-                a_lim, m_lim, (min_a, min_m), period_lines = False)
+                a_lim, m_lim, period_lines = False)
     
     return
     
     
     
-    
+    # grid_pad = int(np.round(grid_num/20))
+    #
+    # dividing_factor = grid_num/grid_pad # About 20
+    #
+    # min_plot_a = min_a/dividing_factor
+    # min_plot_m = min_m/dividing_factor
+    #
+    # post_astro = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
+    # print(a_lim[0], min_plot_a)
+    # print(m_lim[0], min_plot_m)
     
     
     
 
 if __name__ == "__main__":
     
-    run(*sp.params_12572, num_points=1e6, grid_num=100, plot=True, read_file=None)
+    run(*sp.params_12572, num_points=1e8, grid_num=100, plot=True, read_file_path=None)
+    #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
     

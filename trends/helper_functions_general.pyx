@@ -147,8 +147,6 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
 
         tot_prob_array[m_i, a_i] += prob
     
-    tot_prob_array = np.array(tot_prob_array)
-    
     return tot_prob_array
 
 
@@ -181,8 +179,6 @@ def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_
         m_i = m_inds[i]
 
         prob_array[m_i, a_i] += prob_list[i]
-    
-    prob_array = np.array(prob_array)
     
     return prob_array
 

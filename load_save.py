@@ -5,22 +5,20 @@ import h5py
 import helper_functions_general as hlp
 
 
-def load(read_file, grid_num):
+def load(read_file_path, grid_num):
     
     
-    post_file_path = read_file+'.h5'
+    print('Reading posterior in from '+read_file_path)
     
-    print('Reading posterior in from '+post_file_path)
-    
-    post_file = h5py.File(post_file_path, 'r')
+    post_file = h5py.File(read_file_path, 'r')
 
     rv_list = np.array(post_file.get('rv_list')) # Probabilities associated with RV models
     astro_list = np.array(post_file.get('astro_list')) # Probabilities of astro models
     no_astro = np.array(post_file.get('no_astro')) # Bool indicating presence of astro data
     a_list = np.array(post_file.get('a_list')) # Semi-major axis values
     m_list = np.array(post_file.get('m_list')) # Companion mass values
-    a_lim = np.array(post_file.get('a_lim'))
-    m_lim = np.array(post_file.get('m_lim'))
+    a_lim = np.array(post_file.get('a_lim')) # Limits over which a is sampled
+    m_lim = np.array(post_file.get('m_lim')) # Limits over which m is sampled
     min_a, min_m = np.array(post_file.get('min_vals'))
     
     # Calculate indices using provided grid_num
@@ -30,29 +28,22 @@ def load(read_file, grid_num):
     a_inds = np.digitize(a_list, bins = a_bins)
     m_inds = np.digitize(m_list, bins = m_bins)
     
-    min_index_m = int(np.ceil(hlp.value2index(min_m, (0, grid_num-1), m_lim)))
-    min_index_a = int(np.ceil(hlp.value2index(min_a, (0, grid_num-1), a_lim)))
-    
-    
-    prior_array = np.ones((grid_num, grid_num))
-    prior_array[0:min_index_m, :] = 0
-    prior_array[:, 0:min_index_a] = 0
-    
     ##########################################
     if no_astro:
         num_points = len(rv_list)
         astro_list = np.ones(num_points)
         post_astro = np.ones((grid_num, grid_num))
+        post_astro = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
         print('No astrometry data provided. Bounds will be based on RVs only.')
         
     else:                                       
-        post_astro = hlp.prob_array(astro_list, a_inds, m_inds, grid_num) * prior_array
+        post_astro = np.array(hlp.prob_array(astro_list, a_inds, m_inds, grid_num))
         post_astro = post_astro/post_astro.sum()
     
-    post_rv = hlp.prob_array(rv_list, a_inds, m_inds, grid_num) * prior_array
+    post_rv = np.array(hlp.prob_array(rv_list, a_inds, m_inds, grid_num))
     post_rv = post_rv/post_rv.sum()
 
-    post_tot = hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds) * prior_array
+    post_tot = np.array(hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds))
     post_tot = post_tot/post_tot.sum()
     
     return post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m
@@ -64,7 +55,6 @@ def save(star_name, rv_list, astro_list, no_astro, a_list, m_list,
     if not os.path.exists('results'):
         os.makedirs('results')
         
-    # save_dir = 'results/'+star_name+'/' # Each star gets its own folder
     save_dir = 'results/post_arrays/' # Arrays for all stars go in one folder
         
     if not os.path.exists(save_dir):
