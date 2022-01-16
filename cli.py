@@ -53,4 +53,4 @@ if __name__=="__main__":
         args.gddot, args.gddot_err, args.baseline, 
         args.rv_epoch, args.delta_mu, args.delta_mu_err, 
         num_points=args.num_points, grid_num=args.grid_num, 
-        save=args.save, plot=args.plot, read_file=args.read)
+        save=args.save, plot=args.plot, read_file_path=args.read)
