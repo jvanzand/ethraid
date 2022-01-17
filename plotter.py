@@ -20,14 +20,13 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     
     ######## Padding arrays #########
     
-    grid_pad = int(np.round(grid_num/15))
-    dividing_factor = grid_num/grid_pad # About 20, if grid_num=100
-
-    # a_min_plot = a_min/dividing_factor
-    # m_min_plot = m_min/dividing_factor
+    grid_pad = int(np.round(grid_num/15)) # grid_pad is the number of index blocks by which the grid is padded
     
-    a_min_plot = a_min/(a_max-a_min)**(1/dividing_factor)
-    m_min_plot = m_min/(m_max-m_min)**(1/dividing_factor)
+    frac_exp = grid_pad/grid_num # This is the fraction by which the grid is extended. Since it's log scale, this is an exponent
+    
+    
+    a_min_plot = a_min/(a_max/a_min)**(frac_exp)
+    m_min_plot = m_min/(m_max/m_min)**(frac_exp)
     
     
     post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
@@ -41,8 +40,6 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     
     except:
         pass
-    # grid_num_2d is the side length of the 2D plotting array
-    grid_num_2d = grid_num+grid_pad
     
     t_contours_rv = hlp.contour_levels(post_rv, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
@@ -52,7 +49,10 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                        cmap='Reds', extend='max', alpha=0.75)
 
-
+    
+    # grid_num_2d is the side length of the 2D plotting array
+    grid_num_2d = grid_num+grid_pad
+    
     # We want the rectangles to be grid_num_2d long, and grid_pad wide
     mass_rect = ptch.Rectangle((0, 0), grid_num_2d-1, grid_pad,
                                        color='gray', alpha=1.0)
@@ -89,7 +89,8 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
     tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_a))
     tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_m))
-
+    
+    
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
     a_lim_plot = (a_min_plot, a_max)
     m_lim_plot = (m_min_plot, m_max)
