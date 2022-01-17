@@ -13,21 +13,27 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     tick_num = 6
     tick_size = 30
     
-    min_a, min_m = a_lim[0], m_lim[0]
+    a_min, m_min = a_lim[0], m_lim[0]
+    a_max, m_max = a_lim[1], m_lim[1]
     
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
     
     ######## Padding arrays #########
     
-    grid_pad = int(np.round(grid_num/20))
+    grid_pad = int(np.round(grid_num/15))
     dividing_factor = grid_num/grid_pad # About 20, if grid_num=100
 
-    min_plot_a = min_a/dividing_factor
-    min_plot_m = min_m/dividing_factor
+    # a_min_plot = a_min/dividing_factor
+    # m_min_plot = m_min/dividing_factor
+    
+    a_min_plot = a_min/(a_max-a_min)**(1/dividing_factor)
+    m_min_plot = m_min/(m_max-m_min)**(1/dividing_factor)
+    
     
     post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
     post_astro_pad = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
     post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
+    
     
     try:
         t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! MAybe change this to post_astro_pad
@@ -35,6 +41,8 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     
     except:
         pass
+    # grid_num_2d is the side length of the 2D plotting array
+    grid_num_2d = grid_num+grid_pad
     
     t_contours_rv = hlp.contour_levels(post_rv, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
@@ -44,13 +52,11 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                        cmap='Reds', extend='max', alpha=0.75)
 
-    a_list = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
-    m_list = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
 
-    # We want the rectangles to be grid_num+grid_pad-1 long, and grid_pad wide
-    mass_rect = ptch.Rectangle((0, 0), grid_num+grid_pad-1, grid_pad,
+    # We want the rectangles to be grid_num_2d long, and grid_pad wide
+    mass_rect = ptch.Rectangle((0, 0), grid_num_2d-1, grid_pad,
                                        color='gray', alpha=1.0)
-    a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num+grid_pad-1,
+    a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num_2d-1,
                                        color='gray', alpha=1.0)
 
     ax.add_patch(mass_rect)
@@ -61,9 +67,9 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     region_label_size = 50
     restricted_region_label_size = 35
 
-    plt.text((5/16)*grid_num, (1/4)*(grid_pad/2), 'Ruled out by RVs', 
+    plt.text((5/16)*grid_num_2d, (1/4)*(grid_pad/2), 'Ruled out by RVs', 
               size=restricted_region_label_size)
-    plt.text((1/4)*(grid_pad/2), (1/8)*grid_num, 'Ruled out by minimum period', 
+    plt.text((1/4)*(grid_pad/2), (1/8)*grid_num_2d, 'Ruled out by minimum period', 
               size=restricted_region_label_size, rotation=90)
 
 
@@ -85,8 +91,11 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_m))
 
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
-    tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num-1), a_lim)
-    tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num-1), m_lim)
+    a_lim_plot = (a_min_plot, a_max)
+    m_lim_plot = (m_min_plot, m_max)
+    
+    tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num_2d-1), a_lim_plot)
+    tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num_2d-1), m_lim_plot)
     
     plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
     plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
@@ -122,14 +131,14 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
         gaia_baseline_days = gaia_times[1] - gaia_times[0]
 
         # Log-spaced masses in Jupiter masses
-        const_per_m_list = np.logspace(np.log10(min_m), np.log10(m_lim[1]), 50)
-        const_per_m_inds = hlp.value2index(const_per_m_list, (0, grid_num-1), m_lim)
+        const_per_m_list = np.logspace(np.log10(m_min), np.log10(m_lim[1]), 50)
+        const_per_m_inds = hlp.value2index(const_per_m_list, (0, grid_num_2d-1), m_lim_plot)
 
         # Lines of constant period for p = baseline_days/n
         for f in range(5):
 
             const_per_a_list = hlp.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
-            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num_2d-1), a_lim_plot)
 
             
             values_in_bounds = np.where((a_lim[0] < const_per_a_list)&(const_per_a_list < a_lim[1]))
@@ -142,9 +151,9 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
         for f in range(5):
 
             const_per_a_list = hlp.period_lines(const_per_m_list, gaia_baseline_days/(f+1), m_star)
-            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num-1), a_lim)
+            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num_2d-1), a_lim_plot)
 
-            values_in_bounds = np.where(const_per_a_list >= min_a)
+            values_in_bounds = np.where(const_per_a_list >= a_min)
 
             plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--r', alpha=0.5)
 

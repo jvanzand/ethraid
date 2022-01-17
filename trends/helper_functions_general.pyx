@@ -405,18 +405,15 @@ def period_lines(m, per, m_star):
     Arguments:
             m (list of floats): companion masses (M_J)
             per (float): companion orbital period (days)
-            m_star (float): stellar mass (M_sun)
+            m_star (float): stellar mass (M_J)
 
     Returns:
             a (list of floats): Semi-major axis values (au)
     """
-    m_grams = m*M_jup
-    per_sec = per*24*3600
-    m_star_grams = m_star*M_sun
 
-    a_cm = ((per_sec/two_pi)**2*G*(m_grams+m_star_grams))**(0.3333333333)
+    a = ((per/two_pi)**2*G*(m+m_star))**0.3333333333333
 
 
-    return a_cm / au
+    return a
     
     
