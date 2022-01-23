@@ -163,7 +163,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     # save_dir_2D = 'results/'+star_name+'/' # Each star gets its own folder
     save_dir_2D = 'results/2D_posts/' # 2D images of all stars in one folder, 1D images in another
     if not os.path.isdir(save_dir_2D):
-        os.makedirs(save_dir_2D)
+        os.makedirs(save_dir_2D, exist_ok = True)
     fig.savefig(save_dir_2D + star_name + '.png')
     plt.close()
     
