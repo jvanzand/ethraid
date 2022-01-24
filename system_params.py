@@ -15,32 +15,16 @@ params_12572 = ('12572', 949.1484713, 13587931.9002, -0.0575, 0.0053, -4e-6, 1e-
                 697.8749, 2459218.7643, 0.0748781, 0.0451)
 ###########################################################
 
-# CLS system in automation. Testing locally to debug.
-params_hd24916 = ('HD24916_local', 757.9, 3252875.04, -0.0038566, 0.000666, 0, 1e10,
-                    8110.823, 2454421.49, 0.4271376, 0.052581)
-
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
-
-# HIP97166 params. rv_baseline and max_rv are estimated for ease.
-params_HIP97166 = (0.91*Ms2Mj, 68*pc_in_au, 0.013, 0.03, -3e-6, 3.2e-5,
-                    440, 2458683.353840575, 0.036354497, 0.037699807)
+# CLS star with known companion.
+params_hd182488= ('HD182488', 0.96*Ms2Mj, 3.196e6, -0.005390, 0.000345, -9.5e-7, 9e-8, 
+                7951.02, 2454980e6, 1.0397, 0.0261)
                 
-# HD6106, the highest-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated. Trend/curv taken from manual radvel run.          
-params_hd6101 = (0.79*Ms2Mj, 21.5*pc_in_au, 0.25858, 0.022, -4.64671e-05, 4.8e-05,
-                1626, 2457654.089, 19.411242, 0.240018)
-                
-# HD91204, a high-trend CLS target with 3sig astro and RV. No curv given. Epoch estimated.           
-params_hd91204 = (1.15*Ms2Mj, 51.8*pc_in_au, -144.69, 0.914247, 0, 0.1,
-                6485.728, 2455232.024, 3.136, 0.0464)
-                
-# HD238894, Paul Dalba's target with no HIP ID. Can only be constrained using RVs.
-# gammas taken from Table 3 in paper. good agreement with preferred radvel       
-params_hd238894 = (1.16*Ms2Mj, 117.6*pc_in_au, -0.1205, 0.0043, 2.14e-4, 3.9e-5,
-                570, 2459177.6, None, None)
-
-
+# CLS star with known companion.
+params_hd201091= ('HD201091', 0.64*Ms2Mj, 7.182422e5, -0.007369, 0.000355, -3.22e-7, 5.4e-8, 
+                11886.71, 2452901e6, 4.763910, 0.240117)
 
 
 ################ Validation Systems #################
