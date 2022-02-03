@@ -174,7 +174,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_hd201091, num_points=1e8, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_hd182488, num_points=1e7, grid_num=70, plot=True, read_file_path='results/post_arrays/hd182488.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     

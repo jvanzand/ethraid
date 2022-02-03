@@ -18,11 +18,11 @@ params_12572 = ('12572', 949.1484713, 13587931.9002, -0.0575, 0.0053, -4e-6, 1e-
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
-# CLS star with known companion.
+# CLS star with known companion from Lea's table 5.
 params_hd182488= ('HD182488', 0.96*Ms2Mj, 3.196e6, -0.005390, 0.000345, -9.5e-7, 9e-8, 
                 7951.02, 2454980e6, 1.0397, 0.0261)
                 
-# CLS star with known companion.
+# CLS star with known companion from Lea's table 5.
 params_hd201091= ('HD201091', 0.64*Ms2Mj, 7.182422e5, -0.007369, 0.000355, -3.22e-7, 5.4e-8, 
                 11886.71, 2452901e6, 4.763910, 0.240117)
 

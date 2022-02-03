@@ -40,8 +40,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
         i_list, om_list, M_anom_0_list (numpy arrays, len = num_points):
                                         Lists of randomly sampled semi-major axis, mass,
                                         eccentricity, inclination, argument of
-                                        periastron, and initial mean anomaly. per_list is
-                                        not randomly sampled.
+                                        periastron, and initial mean anomaly. We do not
+                                        sample directly in period.
         a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
                                         (a, m, per, e, i, om, M_anom_0) model 
                                         will be placed, based on the model's 
@@ -81,8 +81,10 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     per_list = P_list(a_list, m_list, m_star) # Use this line when we are sampling a_tot, not a_planet
     
     # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014).
-    e_list = spst.beta(0.867, 3.03).rvs(num_points)
+    e_list = spst.beta(0.95, 1.3).rvs(num_points)
     e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
+    
+    #e_list = ecc_dist(a_list, m_list, num_points)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
@@ -226,6 +228,59 @@ cpdef P(double a, double m_planet, double m_star):
     per = two_pi * a**(1.5) * (G*(m_planet+m_star))**(-0.5)
     
     return per
+
+#@profile
+def ecc_dist(double [:] a_list, double [:] m_list, int num_points):
+    """
+    Sample a random eccentricity whose distribution is based on a and m.
+    Bowler(2020) advocates two distributions for the following populations:
+    - giant planets (2-15 MJ) at 5-100 AU
+    - BDs (15-75 ) at 5-100 AU
+    I am extending these in 2 ways: each goes out past 100 AU, and the BD
+    distribution goes past 75 MJ.
+    For planets below 2 MJ, Kipping is used regardless of separation.
+    
+    a (float, au): semi-major axis
+    m (float, M_Jup): companion mass
+    """
+    cdef int i
+    cdef double a, m, alpha, beta, e
+    cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64)
+
+    
+    kipping = spst.beta(0.867, 3.03)
+    bowler_pl = spst.beta(30, 200)
+    bowler_bd = spst.beta(2.30, 1.65)
+    
+    print('NO SEG FAULT YET')
+    
+    for i in range(num_points):
+    
+        a = a_list[i]
+        m = m_list[i]
+    
+        if m <= 2 or a <= 5:
+        # Kipping(2013)
+            e = kipping.rvs()
+    
+        elif 2 < m <= 15:
+        # Bowler(2020) for planets 5-100 AU
+            e = bowler_pl.rvs()
+    
+        elif 15 < m:
+        # Bowler(2020) for BDs 5-100 AU
+            e = bowler_bd.rvs()
+    
+    
+        if e > 0.99:
+            e = 0.99
+        e_list[i] = e
+    print('MADE IT TO THE END')
+    
+    return e_list
+    
+    
+    
 
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
