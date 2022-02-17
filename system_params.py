@@ -3,7 +3,7 @@ M_jup = 1.8981245973360504e+30
 pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 Ms2Mj = M_sun/M_jup
 
-# params_star = (star_name, m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
+# params_star = (star_name, m_star, distance(AU), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), rv_epoch, delta_mu, delta_mu_err)
 
 ############## Syetems for papers #########################
@@ -20,12 +20,15 @@ params_191939_old = ('191939_old', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e
 
 # CLS star with known companion.
 params_hd182488= ('HD182488', 0.96*Ms2Mj, 3.196e6, -0.005390, 0.000345, -9.5e-7, 9e-8, 
-                7951.02, 2454980e6, 1.0397, 0.0261)
+                7951.02, 2454980, 1.0397, 0.0261)
                 
 # CLS star with known companion.
 params_hd201091= ('HD201091', 0.64*Ms2Mj, 7.182422e5, -0.007369, 0.000355, -3.22e-7, 5.4e-8, 
-                11886.71, 2452901e6, 4.763910, 0.240117)
-
+                11886.71, 2452901, 4.763910, 0.240117)
+                
+# CLS star with known companion.
+params_t001438= ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4, 
+                433, 2459330, 0, 'a')
 
 ################ Validation Systems #################
          
