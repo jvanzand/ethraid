@@ -80,11 +80,11 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     # Calculate this now to avoid having to do it twice for RVs and astrometry.
     per_list = P_list(a_list, m_list, m_star) # Use this line when we are sampling a_tot, not a_planet
     
-    # Eccentricities drawn from a beta distribution. I am using (a,b) = (0.867, 3.03) according to Winn & Fabrycky (2014).
-    e_list = spst.beta(0.95, 1.3).rvs(num_points)
-    e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
+    # Eccentricities drawn from a beta distribution. In this branch I'm trying e distributions from Bowler 2020 to better represent the planet masses/separations I'm sampling.
+    #e_list = spst.beta(0.95, 1.3).rvs(num_points)
+    #e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
     
-    #e_list = ecc_dist(a_list, m_list, num_points)
+    e_list = ecc_dist(a_list, m_list, num_points)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
@@ -243,17 +243,25 @@ def ecc_dist(double [:] a_list, double [:] m_list, int num_points):
     a (float, au): semi-major axis
     m (float, M_Jup): companion mass
     """
-    cdef int i
+    cdef int i, j, k, l
     cdef double a, m, alpha, beta, e
-    cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64)
+    
+    cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64),\
+                                    kipping_list = np.ndarray(shape=(int(0.1*num_points)), dtype=np.float64),\
+                                    bowler_pl_list = np.ndarray(shape=(int(0.3*num_points)), dtype=np.float64),\
+                                    bowler_bd_list = np.ndarray(shape=(int(0.7*num_points)), dtype=np.float64)
+    
 
     
-    kipping = spst.beta(0.867, 3.03)
-    bowler_pl = spst.beta(30, 200)
-    bowler_bd = spst.beta(2.30, 1.65)
+    kipping_list = spst.beta(0.867, 3.03).rvs(size=int(0.1*num_points))
+    bowler_pl_list = spst.beta(30, 200).rvs(size=int(0.3*num_points))
+    bowler_bd_list = spst.beta(2.30, 1.65).rvs(size=int(0.7*num_points))
     
     print('NO SEG FAULT YET')
     
+    j = 0
+    k = 0
+    l = 0
     for i in range(num_points):
     
         a = a_list[i]
@@ -261,17 +269,22 @@ def ecc_dist(double [:] a_list, double [:] m_list, int num_points):
     
         if m <= 2 or a <= 5:
         # Kipping(2013)
-            e = kipping.rvs()
+            #e = kipping.rvs()
+            e = kipping_list[j]
+            j += 1
     
         elif 2 < m <= 15:
         # Bowler(2020) for planets 5-100 AU
-            e = bowler_pl.rvs()
+            #e = bowler_pl.rvs()
+            e = bowler_pl_list[k]
+            k += 1
     
         elif 15 < m:
         # Bowler(2020) for BDs 5-100 AU
-            e = bowler_bd.rvs()
-    
-    
+            #e = bowler_bd.rvs()
+            e = bowler_bd_list[l]
+            l += 1
+        
         if e > 0.99:
             e = 0.99
         e_list[i] = e

@@ -119,29 +119,41 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     #
     # ax.secondary_xaxis('top', functions=(au2sep, sep2au))
     
-    # ### Scatter Star ####
-    # M_sun = 1.988409870698051e+33
-    # M_jup = 1.8981245973360504e+30
-    # pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-    # Ms2Mj = M_sun/M_jup
-    #
+    ### Scatter Star ####
+    M_sun = 1.988409870698051e+33
+    M_jup = 1.8981245973360504e+30
+    pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
+    Ms2Mj = M_sun/M_jup
+
     # # HD182488
     # mp_val = 0.04*Ms2Mj
     # mp_err_val = 0.02*Ms2Mj
     # sep_val = 20.97
     # sep_err_val = 3.07
-    #
+
     # # HD201091
     # mp_val = 0.59*Ms2Mj
     # mp_err_val = 0.02*Ms2Mj
     # sep_val = 82.71
     # sep_err_val = 2.91
-    #
-    #
-    # mp_ind  = hlp.value2index(mp_val, (0, grid_num_2d-1), m_lim_plot)
-    # sep_ind = hlp.value2index(sep_val, (0, grid_num_2d-1), a_lim_plot)
-    #
-    # plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=5000)
+    
+    # # HD131156
+    # mp_val = 0.65*Ms2Mj
+    # mp_err_val = 0.02*Ms2Mj
+    # sep_val = 35
+    # sep_err_val = 2.91
+    
+    # HD40397
+    mp_val = 0.27*Ms2Mj
+    mp_err_val = 0.02*Ms2Mj
+    sep_val = 60.84
+    sep_err_val = 2.91
+
+
+    mp_ind  = hlp.value2index(mp_val, (0, grid_num_2d-1), m_lim_plot)
+    sep_ind = hlp.value2index(sep_val, (0, grid_num_2d-1), a_lim_plot)
+
+    plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000)
     
     
     if period_lines:
