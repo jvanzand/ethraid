@@ -97,7 +97,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # m_lim = (0.8*min_m, 1e2)
     
         max_a = 1e2
-        max_m = 1e3
+        max_m = 2e3
         
         # General
         a_lim = (min_a, max_a)
@@ -174,7 +174,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_hd40397, num_points=1e8, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_hd40397, num_points=1e6, grid_num=50, plot=True, read_file_path=None)
+    #'results/post_arrays/HD40397.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     

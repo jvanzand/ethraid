@@ -18,11 +18,11 @@ params_12572 = ('12572', 949.1484713, 13587931.9002, -0.0575, 0.0053, -4e-6, 1e-
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
 
-# CLS star with known companion.
+# CLS star with known companion from Lea's table 5.
 params_hd182488= ('HD182488', 0.96*Ms2Mj, 3.196e6, -0.005390, 0.000345, -9.5e-7, 9e-8, 
                 7951.02, 2454980, 1.0397, 0.0261)
                 
-# CLS star with known companion.
+# CLS star with known companion from Lea's table 5.
 params_hd201091= ('HD201091', 0.64*Ms2Mj, 7.182422e5, -0.007369, 0.000355, -3.22e-7, 5.4e-8, 
                 11886.71, 2452901, 4.763910, 0.240117)
                 
@@ -31,13 +31,17 @@ params_t001438= ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4
                 433, 2459330, 0, 'a')
 
 # CLS star with known companion from Lea's table 5.
+params_hd131156= ('HD131156', 935.993904, 1381916.161366, 0.065991, 0.001904, 0, 1e8, 
+                11998.216066, 2452956.829933, 19.315683, 0.175772)
+
+# CLS star with known companion from Lea's table 5.
 params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 1e8, 
                 8042.117923, 2454859.828823, 2.058092, 0.03366)
 
 ################ Validation Systems #################
          
 # GL758, an example star in Tim Brandt's Orvara code. Using this to compare results.
-params_gl758 = (0.95*Ms2Mj, 15.5*pc_in_au, -0.00633, 0.00025, -8.19e-7, 0.67e-7,
+params_gl758 = ('GL758', 0.95*Ms2Mj, 15.5*pc_in_au, -0.00633, 0.00025, 0, 1e8, #-8.19e-7, 0.67e-7,
                 8413.010, 2454995.123, 1.0397, 0.0261)
                 
 # HIP67246, a confirmed giant published by Sarah Blunt. I truncated the timeseries to get gdot/gddot as a test.

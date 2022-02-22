@@ -3,8 +3,8 @@ from Cython.Build import cythonize
 from distutils.extension import Extension
 import numpy as np
 
-# import line_profiler
-# profile = line_profiler.LineProfiler()
+import line_profiler
+profile = line_profiler.LineProfiler()
 
 ####################
 # # Extra stuff to profile code using kernprof -l -v file.py after it is compiled

@@ -44,7 +44,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     t_contours_rv = hlp.contour_levels(post_rv, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
 
-    post_rv_cont = ax.contourf(post_rv_pad, t_contours_rv, 
+    post_rv_cont = ax.contourf(post_rv_pad, t_contours_rv,
                                cmap='Greens', extend='max', alpha=0.5)
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                        cmap='Reds', extend='max', alpha=0.75)
@@ -119,7 +119,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     #
     # ax.secondary_xaxis('top', functions=(au2sep, sep2au))
     
-    #### Scatter Star ####
+    ### Scatter Star ####
     M_sun = 1.988409870698051e+33
     M_jup = 1.8981245973360504e+30
     pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
@@ -131,6 +131,19 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     # sep_val = 20.97
     # sep_err_val = 3.07
 
+    # # HD201091
+    # mp_val = 0.59*Ms2Mj
+    # mp_err_val = 0.02*Ms2Mj
+    # sep_val = 82.71
+    # sep_err_val = 2.91
+    
+    # # HD131156
+    # mp_val = 0.65*Ms2Mj
+    # mp_err_val = 0.02*Ms2Mj
+    # sep_val = 35
+    # sep_err_val = 2.91
+    
+    # HD40397
     mp_val = 0.27*Ms2Mj
     mp_err_val = 0.02*Ms2Mj
     sep_val = 60.84
@@ -140,8 +153,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     mp_ind  = hlp.value2index(mp_val, (0, grid_num_2d-1), m_lim_plot)
     sep_ind = hlp.value2index(sep_val, (0, grid_num_2d-1), a_lim_plot)
 
-    plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=500)
-
+    plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000)
     
     if period_lines:
         ######## Adding lines of constant period ##########
@@ -205,10 +217,13 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
         fig, ax = plt.subplots(1,2, figsize=(12,8))
         sma_1d = post_tot.sum(axis=0)
         mass_1d = post_tot.sum(axis=1)
+        
+        tick_positions_a1D = hlp.value2index(tick_labels_a, (0, grid_num-1), a_lim)
+        tick_positions_m1D = hlp.value2index(tick_labels_m, (0, grid_num-1), m_lim)
 
         ax[0].plot(range(grid_num+1), np.insert(np.cumsum(sma_1d), 0, 0))
         plt.sca(ax[0])
-        plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
+        plt.xticks(tick_positions_a1D, tick_labels_a, size=tick_size)
         plt.yticks(size=tick_size)
         plt.title('Semi-major axis CDF', size=title_size)
         plt.xlabel('Companion semi-major axis (AU)', size = label_size)
@@ -219,7 +234,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
 
         ax[1].plot(range(grid_num+1), np.insert(np.cumsum(mass_1d), 0, 0))
         plt.sca(ax[1])
-        plt.xticks(tick_positions_m, tick_labels_m, size=tick_size)
+        plt.xticks(tick_positions_m1D, tick_labels_m, size=tick_size)
         plt.yticks(size=tick_size)
         plt.xlabel(r'Companion mass ($M_{Jup}$)', size = label_size)
         plt.title('Mass CDF', size=title_size)
