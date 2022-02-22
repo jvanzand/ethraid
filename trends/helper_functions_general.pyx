@@ -258,7 +258,6 @@ def ecc_dist(double [:] a_list, double [:] m_list, int num_points):
     bowler_bd_list = spst.beta(2.30, 1.65).rvs(size=int(0.7*num_points))
     
     print('NO SEG FAULT YET')
-    
     j = 0
     k = 0
     l = 0
