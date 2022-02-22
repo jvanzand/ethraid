@@ -243,25 +243,23 @@ def ecc_dist(double [:] a_list, double [:] m_list, int num_points):
     a (float, au): semi-major axis
     m (float, M_Jup): companion mass
     """
-    cdef int i, j, k, l
+    cdef int i, j
     cdef double a, m, alpha, beta, e
     
     cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64),\
-                                    kipping_list = np.ndarray(shape=(int(0.1*num_points)), dtype=np.float64),\
-                                    bowler_pl_list = np.ndarray(shape=(int(0.3*num_points)), dtype=np.float64),\
-                                    bowler_bd_list = np.ndarray(shape=(int(0.7*num_points)), dtype=np.float64)
+                                    kipping_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    bowler_pl_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    bowler_bd_list = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
 
     
-    kipping_list = spst.beta(0.867, 3.03).rvs(size=int(0.1*num_points))
-    bowler_pl_list = spst.beta(30, 200).rvs(size=int(0.3*num_points))
-    bowler_bd_list = spst.beta(2.30, 1.65).rvs(size=int(0.7*num_points))
+    kipping_list = spst.beta(0.867, 3.03).rvs(size=int(num_points))
+    bowler_pl_list = spst.beta(30, 200).rvs(size=int(num_points))
+    bowler_bd_list = spst.beta(2.30, 1.65).rvs(size=int(num_points))
     
     print('NO SEG FAULT YET')
     
     j = 0
-    k = 0
-    l = 0
     for i in range(num_points):
     
         a = a_list[i]
@@ -271,19 +269,18 @@ def ecc_dist(double [:] a_list, double [:] m_list, int num_points):
         # Kipping(2013)
             #e = kipping.rvs()
             e = kipping_list[j]
-            j += 1
     
         elif 2 < m <= 15:
         # Bowler(2020) for planets 5-100 AU
             #e = bowler_pl.rvs()
-            e = bowler_pl_list[k]
-            k += 1
+            e = bowler_pl_list[j]
     
         elif 15 < m:
         # Bowler(2020) for BDs 5-100 AU
             #e = bowler_bd.rvs()
-            e = bowler_bd_list[l]
-            l += 1
+            e = bowler_bd_list[j]
+        
+        j +=1
         
         if e > 0.99:
             e = 0.99
