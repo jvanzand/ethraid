@@ -30,6 +30,10 @@ params_hd201091= ('HD201091', 0.64*Ms2Mj, 7.182422e5, -0.007369, 0.000355, -3.22
 params_t001438= ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4, 
                 433, 2459330, 0, 'a')
 
+# CLS star with known companion from Lea's table 5.
+params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 1e8, 
+                8042.117923, 2454859.828823, 2.058092, 0.03366)
+
 ################ Validation Systems #################
          
 # GL758, an example star in Tim Brandt's Orvara code. Using this to compare results.
