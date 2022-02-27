@@ -8,7 +8,7 @@ import helper_functions_general as hlp
 
 
 def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
-               period_lines = False, marginalized=True):
+               scatter_sma=None, scatter_m=None, period_lines=False, marginalized=True):
     
     tick_num = 6
     tick_size = 30
@@ -22,7 +22,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     
     grid_pad = int(np.round(grid_num/15)) # grid_pad is the number of index blocks by which the grid is padded
     
-    frac_exp = grid_pad/grid_num # This is the fraction by which the grid is extended. Since it's log scale, this is an exponent
+    frac_exp = grid_pad/grid_num # This is the fraction by which the grid is extended to include the ruled out regions. Since it's log scale, this is an exponent.
     
     
     a_min_plot = a_min/(a_max/a_min)**(frac_exp)
@@ -35,7 +35,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     
     
     try:
-        t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! MAybe change this to post_astro_pad
+        t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! Maybe change this to post_astro_pad
         post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
     
     except:
@@ -119,41 +119,26 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     #
     # ax.secondary_xaxis('top', functions=(au2sep, sep2au))
     
-    ### Scatter Star ####
-    M_sun = 1.988409870698051e+33
-    M_jup = 1.8981245973360504e+30
-    pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-    Ms2Mj = M_sun/M_jup
-
-    # # HD182488
-    # mp_val = 0.04*Ms2Mj
-    # mp_err_val = 0.02*Ms2Mj
-    # sep_val = 20.97
-    # sep_err_val = 3.07
-
-    # # HD201091
-    # mp_val = 0.59*Ms2Mj
-    # mp_err_val = 0.02*Ms2Mj
-    # sep_val = 82.71
-    # sep_err_val = 2.91
     
-    # # HD131156
-    # mp_val = 0.65*Ms2Mj
-    # mp_err_val = 0.02*Ms2Mj
-    # sep_val = 35
-    # sep_err_val = 2.91
-    
-    # # HD40397
-    # mp_val = 0.27*Ms2Mj
-    # mp_err_val = 0.02*Ms2Mj
-    # sep_val = 60.84
-    # sep_err_val = 2.91
-    #
-    #
-    # mp_ind  = hlp.value2index(mp_val, (0, grid_num_2d-1), m_lim_plot)
-    # sep_ind = hlp.value2index(sep_val, (0, grid_num_2d-1), a_lim_plot)
-    #
-    # plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000)
+    if scatter_sma is not None:
+        
+        # ### Scatter Star ####
+        # M_sun = 1.988409870698051e+33
+        # M_jup = 1.8981245973360504e+30
+        # pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
+        # Ms2Mj = M_sun/M_jup
+        
+        # Second companion for HD186408
+        # sep_ind2 = hlp.value2index(68.74, (0, grid_num_2d-1), a_lim_plot)
+        # mp_ind2  = hlp.value2index(0.17*Ms2Mj, (0, grid_num_2d-1), m_lim_plot)
+        #
+        # plt.scatter(sep_ind2, mp_ind2, marker='*', c='yellow', edgecolors='black', s=2000)
+
+        
+        sep_ind = hlp.value2index(scatter_sma, (0, grid_num_2d-1), a_lim_plot)
+        mp_ind  = hlp.value2index(scatter_m, (0, grid_num_2d-1), m_lim_plot)
+
+        plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000)
     
     if period_lines:
         ######## Adding lines of constant period ##########

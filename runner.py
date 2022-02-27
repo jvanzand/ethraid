@@ -29,7 +29,7 @@ M_earth = 5.972167867791379e+27
 # params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), rv_range, rv_epoch, delta_mu, delta_mu_err)
 def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
-        rv_baseline, rv_epoch, delta_mu, delta_mu_err,
+        rv_baseline, rv_epoch, delta_mu, delta_mu_err, scatter_sma=None, scatter_m=None,
         num_points=1e6, grid_num=100, save=True, plot=True, 
         read_file_path=None):
         
@@ -96,7 +96,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # a_lim = (0.8*min_a, 5e1)
         # m_lim = (0.8*min_m, 1e2)
     
-        max_a = 1e2
+        max_a = 1e3
         max_m = 2e3
         
         # General
@@ -165,7 +165,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         
     if plot==True:
         plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, 
-                a_lim, m_lim, period_lines = False)
+                a_lim, m_lim, scatter_sma, scatter_m, period_lines = False)
     
     return
     
@@ -174,7 +174,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_191939_old, num_points=1e7, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_hd201091, num_points=1e8, grid_num=100, plot=True, read_file_path=None)
     #'results/post_arrays/191939_old.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)

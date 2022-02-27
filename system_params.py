@@ -4,7 +4,7 @@ pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 Ms2Mj = M_sun/M_jup
 
 # params_star = (star_name, m_star, distance(AU), gdot, gdot_err, gddot, gddot_err, 
-#               rv_baseline(days), rv_epoch, delta_mu, delta_mu_err)
+#               rv_baseline(days), rv_epoch, delta_mu, delta_mu_err, scatter_sma, scatter_m)
 
 ############## Syetems for papers #########################
 params_191939 = ('191939', 0.807*Ms2Mj, 58.3*pc_in_au, 0.1116, 0.0037, -3.44e-5, 5.1e-6, 
@@ -12,31 +12,40 @@ params_191939 = ('191939', 0.807*Ms2Mj, 58.3*pc_in_au, 0.1116, 0.0037, -3.44e-5,
 
 # Potential interesting DG paper.
 params_12572 = ('12572', 949.1484713, 13587931.9002, -0.0575, 0.0053, -4e-6, 1e-5,
-                697.8749, 2459218.7643, 0.0748781, 0.0451)
+                697.8749, 2459218.7643, 0.0748781, 0.0451, 198, 0.085*Ms2Mj)
 ###########################################################
 
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
+             
+# Joey's target. Baseline and epoch taken from time series on Slack. It's a Hip target, but not in HGCA.
+# Astrometry calculated manually from astro values in Table 3 of https://arxiv.org/pdf/1906.02058.pdf
+params_hd206893 = ('HD206893', 1.32*Ms2Mj, 40.77*pc_in_au, -70/365.25, 31/365.25, 0, 1e8,
+                    565.43, 2457949.229, 0.50, 0.10)
 
 # CLS star with known companion from Lea's table 5.
 params_hd182488= ('HD182488', 0.96*Ms2Mj, 3.196e6, -0.005390, 0.000345, -9.5e-7, 9e-8, 
-                7951.02, 2454980, 1.0397, 0.0261)
+                7951.02, 2454980, 1.0397, 0.0261, 20.97, 0.04*Ms2Mj,)
                 
 # CLS star with known companion from Lea's table 5.
 params_hd201091= ('HD201091', 0.64*Ms2Mj, 7.182422e5, -0.007369, 0.000355, -3.22e-7, 5.4e-8, 
-                11886.71, 2452901, 4.763910, 0.240117)
+                11886.71, 2452901, 4.763910, 0.240117, 82.71, 0.59*Ms2Mj)
                 
-# CLS star with known companion.
+# DG star
 params_t001438= ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4, 
                 433, 2459330, 0, 'a')
 
+# CLS star with known companion.
+params_hd186408= ('HD186408', 1065.317938, 4459779.594497, -0.004586, 0.000198, 0, 1e8, 
+                12009.069844, 2452962.453122, 0.190556, 0.040519, 840.84, 0.99*Ms2Mj)
+
 # CLS star with known companion from Lea's table 5.
 params_hd131156= ('HD131156', 935.993904, 1381916.161366, 0.065991, 0.001904, 0, 1e8, 
-                11998.216066, 2452956.829933, 19.315683, 0.175772)
+                11998.216066, 2452956.829933, 19.315683, 0.175772, 35, 0.65*Ms2Mj)
 
 # CLS star with known companion from Lea's table 5.
 params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 1e8, 
-                8042.117923, 2454859.828823, 2.058092, 0.03366)
+                8042.117923, 2454859.828823, 2.058092, 0.03366, 60.84, 0.27*Ms2Mj)
 
 ################ Validation Systems #################
          

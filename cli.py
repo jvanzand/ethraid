@@ -32,13 +32,17 @@ parser.add_argument('-rvep', '--rv_epoch', type=float, metavar='\b', required=Tr
 parser.add_argument('-dmu', '--delta_mu', type=float, metavar='\b', required=False,
                     help='Change in astrometric proper motion in milli-arcseconds/yr')
 parser.add_argument('-dmue', '--delta_mu_err', type=float, metavar='', required=False,
-                    help='Error on dmu')
+                    help='Error on dmu')        
+parser.add_argument('-sa', '--scatter_sma', type=float, metavar='\b', required=False,
+                    help='Semi-major axis (AU) of a known companion to plot')
+parser.add_argument('-sm', '--scatter_m', type=float, metavar='\b', required=False,
+                    help='Mass (M_J) of a known companion to plot')                   
 parser.add_argument('-n', '--num_points', type=int, metavar='\b', required=False,
                     help='Number of orbit models to run')
 parser.add_argument('-gn', '--grid_num', type=int, metavar='\b', required=False,
                     help='Dimension of binned probability array')
 
-# # The 'save' and 'plot' args are special. Rather than having an assigned type, the "action='store_true'" argument assumes 1) boolean type and 2) default = False. It also allows there to be no argument after the flag.
+# # The 'save' and 'plot' args are special. Rather than having an assigned type, the "action='store_true'" argument assumes 1) boolean type and 2) default = False if the flag is not given. It also allows there to be no argument after the flag (in which case the value is set to True).
 parser.add_argument('-s', '--save', action='store_true', required=False,
                     help='Whether to save posterior files')
 parser.add_argument('-p', '--plot', action='store_true', required=False,
@@ -51,6 +55,7 @@ args = parser.parse_args()
 if __name__=="__main__":
     run(args.star_name, args.m_star, args.d_star, args.gdot, args.gdot_err, 
         args.gddot, args.gddot_err, args.baseline, 
-        args.rv_epoch, args.delta_mu, args.delta_mu_err, 
+        args.rv_epoch, args.delta_mu, args.delta_mu_err,
+        scatter_sma=args.scatter_sma, scatter_m=args.scatter_m,
         num_points=args.num_points, grid_num=args.grid_num, 
         save=args.save, plot=args.plot, read_file_path=args.read)
