@@ -10,8 +10,8 @@ import helper_functions_general as hlp
 def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
                scatter_sma=None, scatter_m=None, period_lines=False, marginalized=True):
     
-    tick_num = 6
-    tick_size = 30
+    tick_num = 8
+    tick_size = 40
     
     a_min, m_min = a_lim[0], m_lim[0]
     a_max, m_max = a_lim[1], m_lim[1]
@@ -66,7 +66,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     ############### In-plot Labels #####################
     label_size = 50
     region_label_size = 50
-    restricted_region_label_size = 35
+    restricted_region_label_size = 40
 
     plt.text((5/16)*grid_num_2d, (1/4)*(grid_pad/2), 'Ruled out by RVs', 
               size=restricted_region_label_size)
@@ -74,8 +74,8 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
               size=restricted_region_label_size, rotation=90)
 
 
-    ax.set_xlabel('Semi-major Axis (au)', size=label_size)
-    ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
+    # ax.set_xlabel('Semi-major Axis (au)', size=label_size)
+    # ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
     ###################################################
     ############ Axis ticks and labels ################
     
@@ -84,8 +84,9 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
 
     # Chop out any labels outside the a or m bounds
-    tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])]
-    tick_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])]
+    tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
+    tick_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])][:tick_num]
+
 
     # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
     tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_a))

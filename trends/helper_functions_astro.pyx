@@ -27,7 +27,7 @@ G = 2.824760877012879e-07 # (c.G.cgs*(1/c.au.cgs)**3 * (c.M_jup.cgs) * (24*3600)
 #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
 hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] 
 #https://www.cosmos.esa.int/web/gaia/earlydr3
-gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] 
+gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd]
 
 baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
 
@@ -164,6 +164,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         vec[2] = 0
 
         # vec is overwritten and replaced by the rotated version. The rotated version points from barycenter to the star, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth.
+        # Overwriting vec saves a lot of time vs. defining a new object
         mat_mul(rot_mtrx, vec, vec)
 
         # Angular position of the star relative to barycenter in milli-arcseconds.

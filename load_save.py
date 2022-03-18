@@ -33,6 +33,8 @@ def load(read_file_path, grid_num):
         num_points = len(rv_list)
         astro_list = np.ones(num_points)
         post_astro = np.ones((grid_num, grid_num))
+        
+        grid_pad = int(np.round(grid_num/15))
         post_astro = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
         print('No astrometry data provided. Bounds will be based on RVs only.')
         

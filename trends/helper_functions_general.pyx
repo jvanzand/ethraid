@@ -80,12 +80,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     # Calculate this now to avoid having to do it twice for RVs and astrometry.
     per_list = P_list(a_list, m_list, m_star) # Use this line when we are sampling a_tot, not a_planet
     
-    # Eccentricities drawn from a beta distribution. In this branch I'm trying e distributions from Bowler 2020 to better represent the planet masses/separations I'm sampling.
+    # Eccentricities drawn from a beta distribution.
     #e_list = np.zeros(num_points)
-    #e_list = spst.beta(0.95, 1.3).rvs(num_points) # Beta distribution for planets+BDs together from Bowler+2020
-    #e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
+    e_list = spst.beta(0.867, 3.03).rvs(num_points) # Beta distribution for planets+BDs together from Bowler+2020
+    e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
     
-    e_list = ecc_dist(a_list, m_list, num_points)
+    #e_list = ecc_dist(a_list, m_list, num_points)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)

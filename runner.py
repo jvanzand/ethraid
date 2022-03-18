@@ -73,7 +73,7 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
         ####################################################################################
         
-        min_per = rv_baseline
+        min_per = rv_baseline*0.7
         # min_m = M_earth/M_jup
         min_m = 1
         m_star_Ms = m_star * M_jup/M_sun
@@ -96,8 +96,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # a_lim = (0.8*min_a, 5e1)
         # m_lim = (0.8*min_m, 1e2)
     
-        max_a = 1e3
-        max_m = 2e3
+        max_a = 4e2
+        max_m = 5e2
         
         # General
         a_lim = (min_a, max_a)
@@ -174,8 +174,8 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_hd201091, num_points=1e8, grid_num=100, plot=True, read_file_path=None)
-    #'results/post_arrays/191939_old.h5')
+    run(*sp.params_12572, num_points=1e8, grid_num=100, plot=True, read_file_path=None)
+    #'results/post_arrays/12572.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
