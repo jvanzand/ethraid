@@ -82,10 +82,10 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     
     # Eccentricities drawn from a beta distribution.
     #e_list = np.zeros(num_points)
-    e_list = spst.beta(0.867, 3.03).rvs(num_points) # Beta distribution for planets+BDs together from Bowler+2020
-    e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
+    #e_list = spst.beta(0.867, 3.03).rvs(num_points) # Beta distribution for planets+BDs together from Bowler+2020
+    #e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
     
-    #e_list = ecc_dist(a_list, m_list, num_points)
+    e_list = ecc_dist(per_list, num_points)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
@@ -231,55 +231,40 @@ cpdef P(double a, double m_planet, double m_star):
     return per
 
 #@profile
-def ecc_dist(double [:] a_list, double [:] m_list, int num_points):
+def ecc_dist(double [:] per_list, int num_points):
     """
     Sample a random eccentricity whose distribution is based on a and m.
-    Bowler(2020) advocates two distributions for the following populations:
-    - giant planets (2-15 MJ) at 5-100 AU
-    - BDs (15-75 ) at 5-100 AU
-    I am extending these in 2 ways: each goes out past 100 AU, and the BD
-    distribution goes past 75 MJ.
-    For planets below 2 MJ, Kipping is used regardless of separation.
+    Kipping(2013) advocates two distributions for P below and above 382.3 days.
     
-    a (float, au): semi-major axis
-    m (float, M_Jup): companion mass
+    It might make more sense to use a third (Bowler) distribution 
+    for much longer periods (bc Kipping only used 400 exoplanet 
+    eccentricities back in 2013, and no BDs).
+
+    per_list (list of floats, days): List of companion periods
     """
-    cdef int i, j
-    cdef double a, m, alpha, beta, e
+    cdef int i
+    cdef double per, e
     
     cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64),\
-                                    kipping_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    bowler_pl_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    bowler_bd_list = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+                                    kipping_short = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    kipping_long = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
+          
+    # Note that I make lists that are too long, so I only use part of each. I don't think this can be avoided while using pre-determined list lengths.                                
+    kipping_short = spst.beta(0.697, 3.27).rvs(size=int(num_points))
+    kipping_long = spst.beta(1.12, 3.09).rvs(size=int(num_points))
 
     
-    kipping_list = spst.beta(0.867, 3.03).rvs(size=int(num_points))
-    bowler_pl_list = spst.beta(30, 200).rvs(size=int(num_points))
-    bowler_bd_list = spst.beta(2.30, 1.65).rvs(size=int(num_points))
-
-    j = 0
     for i in range(num_points):
     
-        a = a_list[i]
-        m = m_list[i]
-    
-        if m <= 2 or a <= 5:
-        # Kipping(2013)
-            #e = kipping.rvs()
-            e = kipping_list[j]
-    
-        elif 2 < m <= 15:
-        # Bowler(2020) for planets 5-100 AU
-            #e = bowler_pl.rvs()
-            e = bowler_pl_list[j]
-    
-        elif 15 < m:
-        # Bowler(2020) for BDs 5-100 AU
-            #e = bowler_bd.rvs()
-            e = bowler_bd_list[j]
+        per = per_list[i]
         
-        j +=1
+        if per <= 382.3:
+            e = kipping_short[i]
+            
+        elif per >= 382.3:
+            e = kipping_long[i]
+
         
         if e > 0.99:
             e = 0.99
