@@ -5,10 +5,11 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 
 import helper_functions_general as hlp
+import helper_functions_plotting as hlp_plot
 
 
 def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
-               scatter_sma=None, scatter_m=None, period_lines=False, marginalized=True):
+               scatter_tuple=None, period_lines=False, marginalized=True):
     
     tick_num = 8
     tick_size = 40
@@ -74,8 +75,8 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
               size=restricted_region_label_size, rotation=90)
 
 
-    # ax.set_xlabel('Semi-major Axis (au)', size=label_size)
-    # ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
+    ax.set_xlabel('Semi-major Axis (au)', size=label_size)
+    ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
     ###################################################
     ############ Axis ticks and labels ################
     
@@ -103,82 +104,30 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
     plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
     
-    ### Experimental: adding top x-axis to show separations
-    # def au2sep(au):
-    #     """
-    #     Given system distance in pc, converts separation in au into separation in arcsec
-    #     """
-    #     asec = au/10
-    #     return asec
-    #
-    # def sep2au(asec):
-    #     """
-    #     Given system distance in pc, converts separation in arcsec into separation in au
-    #     """
-    #     au = asec*10
-    #     return au
-    #
-    # ax.secondary_xaxis('top', functions=(au2sep, sep2au))
     
     
-    if scatter_sma is not None:
+    if scatter_tuple is not None:
         
-        # ### Scatter Star ####
-        # M_sun = 1.988409870698051e+33
-        # M_jup = 1.8981245973360504e+30
-        # pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-        # Ms2Mj = M_sun/M_jup
-        
-        # Second companion for HD186408
-        # sep_ind2 = hlp.value2index(68.74, (0, grid_num_2d-1), a_lim_plot)
-        # mp_ind2  = hlp.value2index(0.17*Ms2Mj, (0, grid_num_2d-1), m_lim_plot)
-        #
-        # plt.scatter(sep_ind2, mp_ind2, marker='*', c='yellow', edgecolors='black', s=2000)
-
-        
-        sep_ind = hlp.value2index(scatter_sma, (0, grid_num_2d-1), a_lim_plot)
-        mp_ind  = hlp.value2index(scatter_m, (0, grid_num_2d-1), m_lim_plot)
+        sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_tuple, grid_num_2d, a_lim_plot, m_lim_plot)
 
         plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000)
     
     if period_lines:
-        ######## Adding lines of constant period ##########
-        hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd]       
-        #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
-
-        gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd] 
-        #https://www.cosmos.esa.int/web/gaia/earlydr3
-
-        # Time between the midpoints of the two missions
-        baseline_days = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)
-        gaia_baseline_days = gaia_times[1] - gaia_times[0]
-
-        # Log-spaced masses in Jupiter masses
-        const_per_m_list = np.logspace(np.log10(m_min), np.log10(m_lim[1]), 50)
-        const_per_m_inds = hlp.value2index(const_per_m_list, (0, grid_num_2d-1), m_lim_plot)
-
-        # Lines of constant period for p = baseline_days/n
-        for f in range(5):
-
-            const_per_a_list = hlp.period_lines(const_per_m_list, baseline_days/(f+1), m_star)
-            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num_2d-1), a_lim_plot)
-
+        
+        for n in range(5):
+            const_per_a_inds, const_per_m_inds, fmt =\
+                                    hlp_plot.period_lines(m_star, a_lim, m_lim, 
+                                                          a_lim_plot, m_lim_plot, 
+                                                          grid_num_2d, n, how='tot')
+            plt.plot(const_per_a_inds, const_per_m_inds, fmt, alpha=0.5)
             
-            values_in_bounds = np.where((a_lim[0] < const_per_a_list)&(const_per_a_list < a_lim[1]))
             
-
-            plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--k', alpha=0.5)
-            #plt.plot(const_per_a_inds, const_per_m_inds, '--k', alpha=0.5)
-
-        # Lines of constant period for p = gaia_baseline_days/n
-        for f in range(5):
-
-            const_per_a_list = hlp.period_lines(const_per_m_list, gaia_baseline_days/(f+1), m_star)
-            const_per_a_inds = hlp.value2index(const_per_a_list, (0, grid_num_2d-1), a_lim_plot)
-
-            values_in_bounds = np.where(const_per_a_list >= a_min)
-
-            plt.plot(const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], '--r', alpha=0.5)
+            const_per_a_inds, const_per_m_inds, fmt =\
+                                    hlp_plot.period_lines(m_star, a_lim, m_lim, 
+                                                          a_lim_plot, m_lim_plot, 
+                                                          grid_num_2d, n, how='gaia')                             
+            plt.plot(const_per_a_inds, const_per_m_inds, fmt, alpha=0.5)
+            
 
 
     fig.tight_layout()
@@ -195,46 +144,9 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
 
     if marginalized:
         
-        title_size = 30
-        label_size = 25
-        tick_num = 6
-        tick_size = 25
-        
-        fig, ax = plt.subplots(1,2, figsize=(12,8))
-        sma_1d = post_tot.sum(axis=0)
-        mass_1d = post_tot.sum(axis=1)
-        
-        tick_positions_a1D = hlp.value2index(tick_labels_a, (0, grid_num-1), a_lim)
-        tick_positions_m1D = hlp.value2index(tick_labels_m, (0, grid_num-1), m_lim)
+        hlp_plot.marginalized_1d(star_name, post_tot, grid_num, twosig_inds, 
+                                 a_lim, m_lim, tick_labels_a, tick_labels_m)
 
-        ax[0].plot(range(grid_num+1), np.insert(np.cumsum(sma_1d), 0, 0))
-        plt.sca(ax[0])
-        plt.xticks(tick_positions_a1D, tick_labels_a, size=tick_size)
-        plt.yticks(size=tick_size)
-        plt.title('Semi-major axis CDF', size=title_size)
-        plt.xlabel('Companion semi-major axis (AU)', size = label_size)
-
-        ax[0].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
-        ax[0].vlines(twosig_inds[0][0], 0, 1, colors='r', linestyles='dashed')
-        ax[0].vlines(twosig_inds[0][1], 0, 1, colors='r', linestyles='dashed')
-
-        ax[1].plot(range(grid_num+1), np.insert(np.cumsum(mass_1d), 0, 0))
-        plt.sca(ax[1])
-        plt.xticks(tick_positions_m1D, tick_labels_m, size=tick_size)
-        plt.yticks(size=tick_size)
-        plt.xlabel(r'Companion mass ($M_{Jup}$)', size = label_size)
-        plt.title('Mass CDF', size=title_size)
-
-        ax[1].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
-        ax[1].vlines(twosig_inds[1][0], 0, 1, colors='r', linestyles='dashed')
-        ax[1].vlines(twosig_inds[1][1], 0, 1, colors='r', linestyles='dashed')
-        
-        save_dir_1D = 'results/1D_posts/' # 2D images of all stars in one folder, 1D images in another
-        if not os.path.isdir(save_dir_1D):
-            os.makedirs(save_dir_1D)
-        
-        fig.tight_layout()
-        fig.savefig(save_dir_1D + star_name + '_1d.png')
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
