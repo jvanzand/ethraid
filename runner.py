@@ -35,7 +35,7 @@ M_earth = 5.972167867791379e+27
 def run(star_name, m_star, d_star, 
         gammadot, gammadot_err, gammaddot, gammaddot_err, rv_baseline, rv_epoch, 
         delta_mu, delta_mu_err,
-        vmag=None, imag_wavelength=None, contrast_curve=None, 
+        vmag=None, imag_wavelength=None, contrast_str=None, 
         scatter_tuple=None, num_points=1e6, grid_num=100, save=True, plot=True, read_file_path=None):
         
     """
@@ -126,7 +126,7 @@ def run(star_name, m_star, d_star,
                                 
         post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
         
-        post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, contrast_curve, a_lim, m_lim, grid_num)
+        post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_num)
         
         post_tot = hlp.post_tot(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
         
@@ -147,7 +147,7 @@ def run(star_name, m_star, d_star,
         
     if plot==True:
         plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid_num, 
-                a_lim, m_lim, scatter_tuple=None, period_lines = False)
+                a_lim, m_lim, scatter_tuple=scatter_tuple, period_lines = False)
     
     return
     
@@ -156,14 +156,14 @@ def run(star_name, m_star, d_star,
 
 if __name__ == "__main__":
     
-    import pandas as pd
-    contrast_curve = pd.read_csv('data/191939_832_sensitivity.dat',
-                                  skiprows=29,
-                                  delimiter=' ',
-                                  header=None)
-    new_header = ['ang_sep', 'delta_mag']
-    contrast_curve.columns = new_header
-    contrast_curve.to_csv('data/191939_832_clean.csv', index=False)
+    # import pandas as pd
+    # contrast_curve = pd.read_csv('data/EDG_raw_curves/191939_832_sensitivity.dat',
+    #                               skiprows=29,
+    #                               delimiter=' ',
+    #                               header=None)
+    # new_header = ['ang_sep', 'delta_mag']
+    # contrast_curve.columns = new_header
+    # contrast_curve.to_csv('data/EDG_clean_curves/191939_832_clean.csv', index=False)
     
     run(*sp.params_191939_old, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
     # 'results/post_arrays/T001174.h5')

@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 
 import helper_functions_general as hlp
@@ -12,7 +11,7 @@ bands= pd.read_csv('data/bands.csv')
 pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 
 
-def imag_array(d_star, vmag, imag_wavelength, contrast_curve, a_lim, m_lim, grid_num):
+def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_num):
     """
     Convert a contrast curve in (angular_separation, Δmag) space
     into (separation, mass) space. This requires finding a
@@ -24,9 +23,8 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_curve, a_lim, m_lim, grid
         d_star (float, pc): Distance to the host star
         vmag (float, mag): Apparent V-band magnitude of host star
         imag_wavelength (float, μm): Wavelength of imaging data in contrast_curve
-        contrast_curve (dataframe or dict, 
-                        columns of 'ang_sep' (arcseconds) and 'delta_mag' (mag)): 
-                        Ordered pairs of angular separation and Δmag.
+        contrast_curve (str): Path to contrast curve with columns of 
+                              'ang_sep' (arcseconds) and 'delta_mag' (mag)
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max).
         m_lim (tuple of floats, M_jup): Mass limits, (m_min, m_max).
@@ -37,12 +35,16 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_curve, a_lim, m_lim, grid
                         array from imaging data. In this model,
                         imaging probabilities are either 1 or 0.
     """
-    if vmag is None or imag_wavelength is None or contrast_curve is None:
+    if vmag is None or imag_wavelength is None or contrast_str is None:
         return np.ones((grid_num, grid_num))
     
     # Get band of observations and host star abs mag in that band
     band_name, host_abs_Xmag = abs_Xmag(d_star, vmag, imag_wavelength)
     
+    contrast_curve = pd.read_csv(contrast_str)
+    
+    if not set(['ang_sep', 'delta_mag']).issubset(contrast_curve.columns):
+        raise Exception("The dataframe must contain columns 'ang_sep' and 'delta_mag'")
     # Objective is sep (AU) vs. mass (M_jup)
     ############## 1: Get sep. Make sure to convert d_star from au to pc
     seps = contrast_curve['ang_sep']*(d_star/pc_in_au)
@@ -50,8 +52,6 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_curve, a_lim, m_lim, grid
     
     ############## 2: Convert absolute mag to mass
     Xband_abs_mags = contrast_curve['delta_mag']+host_abs_Xmag
-    
-    print('191939_XMAG', host_abs_Xmag)
     
     # Start with Mamajek. We could cut super bright targets from the interpolation, but no need
     interp_df_mamajek = mamajek_table[['M_jup', band_name]]
@@ -82,6 +82,10 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_curve, a_lim, m_lim, grid
     a_m_interp_fn = interp1d(a_m_contrast['sep'], a_m_contrast['M_jup'], 
                              bounds_error=False, fill_value=last_m)
     
+    # import matplotlib.pyplot as plt
+    # a_list = np.linspace(8, 100, 40)
+    # plt.plot(a_list, a_m_interp_fn(a_list))
+    # plt.show()
                              
     imag_array = np.ones((grid_num, grid_num))
     
@@ -172,6 +176,7 @@ def mag_to_mass(mags, masses, abs_Xmag_list):
 
 # if __name__ == "__main__":
 
+# import matplotlib.pyplot as plt
 # ####################################
 # contrast_curve = pd.read_csv('data/TOI1174_832_sensitivity.dat',
 #                               skiprows=29,

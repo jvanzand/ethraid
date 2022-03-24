@@ -1,5 +1,3 @@
-import pandas as pd
-
 M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
@@ -7,7 +5,7 @@ Ms2Mj = M_sun/M_jup
 
 # params_star = (star_name, m_star, distance(AU), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), rv_epoch, delta_mu, delta_mu_err, 
-#               vmag=None, imag_wavelength=None, contrast_curve=None, scatter_tuple=None)
+#               vmag=None, imag_wavelength=None, contrast_str=None, scatter_tuple=None)
 
 
 ############## Syetems for papers #########################
@@ -21,7 +19,7 @@ params_12572 = ('12572', 0.91*Ms2Mj, 65.9*pc_in_au, -0.0549, 0.0049, -1.18e-5, 8
 
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214,
-                8.97, 0.832, pd.read_csv('data/191939_832_clean.csv'))
+                8.97, 0.832, 'data/EDG_clean_curves/191939_832_clean.csv')
              
 # Joey's target. Baseline and epoch taken from time series on Slack. It's a Hip target, but not in HGCA.
 # Astrometry calculated manually from astro values in Table 3 of https://arxiv.org/pdf/1906.02058.pdf
@@ -54,7 +52,7 @@ params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 
 
 params_t001174= ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
                 748, 2459209, -1, 0,
-                10.96, 0.832, pd.read_csv('data/TOI1174_832_clean.csv'))
+                10.96, 0.832, 'data/EDG_clean_curves/TOI1174_832_clean.csv')
 
 # # Test for 0 trend
 # params_TEST = ('TEST', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5,

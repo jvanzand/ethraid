@@ -114,7 +114,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid
         
         sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_tuple, grid_num_2d, a_lim_plot, m_lim_plot)
 
-        plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000)
+        plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=4)
     
     if period_lines:
         
