@@ -15,6 +15,7 @@ def load(read_file_path, grid_num):
     rv_list = np.array(post_file.get('rv_list')) # Probabilities associated with RV models
     astro_list = np.array(post_file.get('astro_list')) # Probabilities of astro models
     no_astro = np.array(post_file.get('no_astro')) # Bool indicating presence of astro data
+    post_imag = np.array(post_file.get('post_imag')) # 2D array of probabilities from imaging
     a_list = np.array(post_file.get('a_list')) # Semi-major axis values
     m_list = np.array(post_file.get('m_list')) # Companion mass values
     a_lim = np.array(post_file.get('a_lim')) # Limits over which a is sampled
@@ -32,27 +33,27 @@ def load(read_file_path, grid_num):
     if no_astro:
         num_points = len(rv_list)
         astro_list = np.ones(num_points)
-        post_astro = np.ones((grid_num, grid_num))
+        post_astro = np.zeros((grid_num, grid_num))
         
         grid_pad = int(np.round(grid_num/15))
         post_astro = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
         print('No astrometry data provided. Bounds will be based on RVs only.')
         
     else:                                       
-        post_astro = np.array(hlp.prob_array(astro_list, a_inds, m_inds, grid_num))
-        post_astro = post_astro/post_astro.sum()
+        post_astro = hlp.post_single(astro_list, a_inds, m_inds, grid_num)
+        # post_astro = post_astro/post_astro.sum()
     
-    post_rv = np.array(hlp.prob_array(rv_list, a_inds, m_inds, grid_num))
-    post_rv = post_rv/post_rv.sum()
+    post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
+    # post_rv = post_rv/post_rv.sum()
 
-    post_tot = np.array(hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds))
-    post_tot = post_tot/post_tot.sum()
+    post_tot = hlp.post_tot(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
+    # post_tot = post_tot/post_tot.sum()
     
-    return post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m
+    return post_tot, post_rv, post_astro, post_imag, a_lim, m_lim, min_a, min_m
 
 
-def save(star_name, rv_list, astro_list, no_astro, a_list, m_list,
-         a_lim, m_lim, min_a, min_m):
+def save(star_name, rv_list, astro_list, no_astro, post_imag,
+         a_list, m_list, a_lim, m_lim, min_a, min_m):
     
     if not os.path.exists('results'):
         os.makedirs('results')
@@ -71,6 +72,7 @@ def save(star_name, rv_list, astro_list, no_astro, a_list, m_list,
     post_file.create_dataset('rv_list', data=rv_list)
     post_file.create_dataset('astro_list', data=astro_list)
     post_file.create_dataset('no_astro', data=no_astro)
+    post_file.create_dataset('post_imag', data=post_imag)
     
     post_file.create_dataset('a_list', data=a_list)
     post_file.create_dataset('m_list', data=m_list)

@@ -7,7 +7,6 @@ import matplotlib.patches as ptch
 import helper_functions_general as hlp
 
 
-
 def scatter_companion(scatter_tuple, grid_num_2d, a_lim_plot, m_lim_plot):
 
     sep_ind = hlp.value2index(sma, (0, grid_num_2d-1), a_lim_plot)

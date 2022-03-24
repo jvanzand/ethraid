@@ -8,7 +8,7 @@ import helper_functions_general as hlp
 import helper_functions_plotting as hlp_plot
 
 
-def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim, m_lim,
+def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
                scatter_tuple=None, period_lines=False, marginalized=True):
     
     tick_num = 8
@@ -29,26 +29,30 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, a_lim
     a_min_plot = a_min/(a_max/a_min)**(frac_exp)
     m_min_plot = m_min/(m_max/m_min)**(frac_exp)
     
-    
+    post_imag_pad = np.pad(post_imag, [(grid_pad, 0), (grid_pad, 0)])
     post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
     post_astro_pad = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
     post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
-    
-    
+
     try:
         t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! Maybe change this to post_astro_pad
-        post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro, cmap='Blues', extend='max', alpha=0.5)
+        post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro, 
+                                      cmap='Blues', extend='max', alpha=0.5, zorder=1)
     
     except:
+        print('Error encountered in astrometry plot. Moving on.')
         pass
     
+    t_contours_imag = hlp.contour_levels(post_imag, [1,2])
     t_contours_rv = hlp.contour_levels(post_rv, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
-
+    
+    post_imag_cont = ax.contourf(post_imag_pad, t_contours_imag,
+                               cmap='gray', extend='max', alpha=1.0, zorder=0)
     post_rv_cont = ax.contourf(post_rv_pad, t_contours_rv,
-                               cmap='Greens', extend='max', alpha=0.5)
+                               cmap='Greens', extend='max', alpha=0.5, zorder=2)
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
-                       cmap='Reds', extend='max', alpha=0.75)
+                               cmap='Reds', extend='max', alpha=0.75, zorder=3)
                        
 
     

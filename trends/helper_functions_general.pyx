@@ -107,15 +107,15 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
            om_list, M_anom_0_list, a_inds, m_inds
 
 
-def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
-            long [:] a_inds, long [:] m_inds):
+def post_tot(double [:] rv_post_list, double [:] astro_post_list, 
+             double [:,:] post_imag, int grid_num,
+             long [:] a_inds, long [:] m_inds):
             
     """
     Start with 2 1D lists and multiply them element-wise, THEN form 
     the result into a 2D array. This function is for the total posterior;
     the individual RV and astrometry posteriors are handled by the 
-    prob_array() function below. Don't normalize yet because we still
-    need to multiply all arrays by the prior array to enforce bounds.
+    prob_array() function below.
     
     Arguments:
         rv_post_list (np array of floats, len=num_points): List of model likelihoods
@@ -136,7 +136,7 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
     """
 
     cdef int size, i, a_i, m_i
-    cdef double [:,:] tot_prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
+    cdef double [:,:] rv_ast_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
     cdef double prob
 
     size = rv_post_list.size
@@ -148,12 +148,22 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list, int grid_num,
 
         prob = rv_post_list[i]*astro_post_list[i]
 
-        tot_prob_array[m_i, a_i] += prob
+        rv_ast_array[m_i, a_i] += prob
     
-    return tot_prob_array
+    # Not cdef because then I can't change it from memview to np array
+    tot_prob_array = np.zeros((grid_num, grid_num))
+    
+    for i in range(grid_num):
+        for j in range(grid_num):
+            tot_prob_array[i,j] = rv_ast_array[i,j]*post_imag[i,j]
+    
+    
+    tot_prob_array = np.array(tot_prob_array)
+
+    return tot_prob_array/tot_prob_array.sum()
 
 
-def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_num):
+def post_single(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_num):
     """
     Form a list of probabilities into a 2D array.
     
@@ -182,8 +192,10 @@ def prob_array(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_
         m_i = m_inds[i]
 
         prob_array[m_i, a_i] += prob_list[i]
+        
+    np_prob_array = np.array(prob_array)/np.array(prob_array).sum()
     
-    return prob_array
+    return np_prob_array
 
 
 def P_list(double [:] a_list, double [:] m_list, double m_star):
@@ -297,7 +309,7 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
 
     # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t
 
-    integral = ((prob_array >= t[:, None, None])*prob_array).sum(axis=(1,2))
+    integral = ((prob_array > t[:, None, None])*prob_array).sum(axis=(1,2))
 
     # Now create a function that takes integral as the x (not the y) and then returns the corresponding prob value from the t array. Interpolating between integral values allows me to choose any enclosed total prob. value (ie, integral value) and get the corresponding prob. value to use as my contour.
     f = sp.interpolate.interp1d(integral, t)

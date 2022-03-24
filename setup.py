@@ -25,16 +25,16 @@ profile = line_profiler.LineProfiler()
 extensions = [
     Extension("c_kepler._kepler",
              ['c_kepler/_kepler.pyx'],
-             include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+              include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
     Extension("trends.helper_functions_general",
              ['trends/helper_functions_general.pyx'],
-             include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+              include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
     Extension("trends.helper_functions_rv",
              ['trends/helper_functions_rv.pyx'],
-             include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+              include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
     Extension("trends.helper_functions_astro",
              ['trends/helper_functions_astro.pyx'],
-             include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
+              include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
     
 ]
 

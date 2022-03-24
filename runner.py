@@ -16,9 +16,7 @@ import system_params as sp
 import helper_functions_general as hlp
 import helper_functions_rv as hlp_rv
 import helper_functions_astro as hlp_astro
-
-# import helper_functions_imaging as hlp_imag
-# fdsf
+import helper_functions_imaging as hlp_imag
 
 import load_save as ls
 #########################
@@ -29,12 +27,16 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 M_earth = 5.972167867791379e+27
 
-# params_star = (m_star, distance(cm), gdot, gdot_err, gddot, gddot_err, 
-#               rv_baseline(days), rv_range, rv_epoch, delta_mu, delta_mu_err)
-def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_err,
-        rv_baseline, rv_epoch, delta_mu, delta_mu_err, scatter_tuple=None,
-        num_points=1e6, grid_num=100, save=True, plot=True, 
-        read_file_path=None):
+# General (necessary)
+# RV
+# Astrometry
+# Imaging
+# General (optional)
+def run(star_name, m_star, d_star, 
+        gammadot, gammadot_err, gammaddot, gammaddot_err, rv_baseline, rv_epoch, 
+        delta_mu, delta_mu_err,
+        vmag=None, imag_wavelength=None, contrast_curve=None, 
+        scatter_tuple=None, num_points=1e6, grid_num=100, save=True, plot=True, read_file_path=None):
         
     """
     Primary function to run trend code.
@@ -55,26 +57,18 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
                         in astrometric proper motion between 
                         Hipparcos and Gaia epochs.
         delta_mu_err: Error on delta_mu
+        vmag (mag): Apparent V-band magnitude of host star
+        imag_wavelength (μm): Wavelength of imaging observations
+        contrast_curve (dataframe or dict, 
+                        columns of 'ang_sep' (arcseconds) and 'delta_mag' (mag)): 
+                        Ordered pairs of angular separation and Δmag.
+    
+    Returns:
+        None
     """
 
     # If no data to read in, calculate new arrays
     if read_file_path is None:
-        
-        ##### Determination of minimum mass constraint. Kind of a headache but could be useful.
-        ##### Replacing for now with blanket m_min = 1 Earth mass
-        # # RV 0 point is arbitrary, so the min. K amp. is half of the 'peak to trough' of the RVs.
-        # # min_K = rv_range/2 # This is prone to errors because it relies on the individual end points.
-        #
-        # m_star_Ms = m_star * M_jup/M_sun
-        # min_per = rv_baseline
-        # # This still has the issue that the end of the timeseries might not be the most extreme point, namely if there is enough curvature to reach a maximum and then come back down (or up). Fortunately, this just means I would be sampling masses that were too small, rather than cutting any out. Still could use some refinement.
-        # min_K = abs(0.5*(gammadot*rv_baseline + 0.5*gammaddot*rv_baseline**2))
-        #
-        #
-        # # The argument for min_m is this: suppose period is min_per, which is where m can be smallest. What is the smallest that m can be? It can be so small that the current max RV is the highest the RV will ever be. Then m is so small that 1) it attains the lowest possible K and 2) it does so as close in as possible (any farther out would mean a larger planet). NOTE: this happens at e=0, which is NOT concordant with minimum m. See below for idea on how to fix this.
-        # # One way to make this more general would be to choose an eccentricity that is ~2σ from the most likely value. Roughly speaking, we could then say we were only cutting out 2σ discrepant models for min_m.
-        # min_m = rv.utils.Msini(min_K, min_per, m_star_Ms, e=0, Msini_units='jupiter')
-        ####################################################################################
         
         min_per = rv_baseline*0.7
         # min_m = M_earth/M_jup
@@ -83,22 +77,9 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
         min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
 
-        ###################################
-        # # Experimental: revised min_m using gdot. The idea is to find the smallest mass that could produce the observed gdot at the known minimum period. This is not completely right because it uses min_K to get min_m, min_m to get min_a, and then min_a to get a new value for min_m.
-        #
-        # min_m = (gammadot*100/(24*3600))*((min_per*24*3600)/6.283185)**2*(m_star*M_sun)/(min_a*14959787070000.0) / M_jup
-        ###################################
-
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
 
-        # Sampling limits for a and m.
-        # # 191939
-        # # min_a = 0.5
-        # # min_m = 0.5
-        # a_lim = (0.8*min_a, 5e1)
-        # m_lim = (0.8*min_m, 1e2)
-    
         max_a = 4e2
         max_m = 5e2
         
@@ -124,18 +105,16 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
         try:
             # Use a negative dmu value to run without astrometry
             if delta_mu < 0:
-                raise ValueError('delta_mu is less than 0.')
+                raise ValueError()
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
                                               m_star, d_star, delta_mu, delta_mu_err)                     
                                  
-            post_astro = np.array(hlp.prob_array(astro_list, a_inds, m_inds, grid_num))
-            post_astro = post_astro/post_astro.sum()
+            post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
 
         except Exception as err:
-            print(err)
             astro_list = np.ones(num_points)
-            post_astro = np.ones((grid_num, grid_num))
+            post_astro = np.zeros((grid_num, grid_num))
             no_astro = True
             print('No astrometry data provided. Bounds will be based on RVs only.')
     
@@ -145,12 +124,12 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
                                 per_list, m_star, rv_epoch,
                                 gammadot, gammadot_err, gammaddot, gammaddot_err)
                                 
-        post_rv = np.array(hlp.prob_array(rv_list, a_inds, m_inds, grid_num))
-        post_rv = post_rv/post_rv.sum()
+        post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
         
-        post_tot = np.array(hlp.post_tot(rv_list, astro_list, grid_num, a_inds, m_inds))
-        post_tot = post_tot/post_tot.sum()
-
+        post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, contrast_curve, a_lim, m_lim, grid_num)
+        
+        post_tot = hlp.post_tot(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
+        
         ##
         end_time = time.time()
         ##
@@ -158,16 +137,16 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
     
         if save==True:
-            ls.save(star_name, rv_list, astro_list, no_astro, a_list, m_list,
+            ls.save(star_name, rv_list, astro_list, no_astro, post_imag, a_list, m_list,
                     a_lim, m_lim, min_a, min_m)
     
     # Otherwise, load in existing data:
     else:
-        post_tot, post_rv, post_astro, a_lim, m_lim, min_a, min_m = ls.load(read_file_path, grid_num)
+        post_tot, post_rv, post_astro, post_imag, a_lim, m_lim, min_a, min_m = ls.load(read_file_path, grid_num)
         
         
     if plot==True:
-        plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, grid_num, 
+        plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid_num, 
                 a_lim, m_lim, scatter_tuple=None, period_lines = False)
     
     return
@@ -177,8 +156,17 @@ def run(star_name, m_star, d_star, gammadot, gammadot_err, gammaddot, gammaddot_
 
 if __name__ == "__main__":
     
-    run(*sp.params_t001174, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
-    #'results/post_arrays/12572.h5')
+    import pandas as pd
+    contrast_curve = pd.read_csv('data/191939_832_sensitivity.dat',
+                                  skiprows=29,
+                                  delimiter=' ',
+                                  header=None)
+    new_header = ['ang_sep', 'delta_mag']
+    contrast_curve.columns = new_header
+    contrast_curve.to_csv('data/191939_832_clean.csv', index=False)
+    
+    run(*sp.params_191939_old, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
+    # 'results/post_arrays/T001174.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
