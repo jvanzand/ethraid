@@ -1,7 +1,12 @@
 /analysis
 /build
 /cython_practice
-/data
+
+/data/*
+!/data/mamajek.csv
+!/data/baraffe_table_4.csv
+!/data/bands.csv
+!/data/EDG_clean_curves
 
 # exclude contents of results/ but keep the folder
 results/*
