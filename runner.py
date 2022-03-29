@@ -167,7 +167,7 @@ if __name__ == "__main__":
     # contrast_curve.columns = new_header
     # contrast_curve.to_csv('data/EDG_clean_curves/191939_832_clean.csv', index=False)
     
-    run(*sp.params_156141, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
     # 'results/post_arrays/T001174.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
