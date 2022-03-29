@@ -44,7 +44,7 @@ parser.add_argument('-cs', '--contrast_str', type=str, metavar='', required=Fals
                     help='Path to dataframe containing contrast curve')
                     
 parser.add_argument('-st', '--scatter_tuple', type=float, metavar='\b', required=False, nargs='+',
-                    help='(Semi-major axis (AU), and mass (M_J)) of a known companion to plot')               
+                    help='Semi-major axis (AU) and mass (M_J) of a known companion to plot. Separate values by a space only.')               
 parser.add_argument('-n', '--num_points', type=int, metavar='\b', required=False,
                     help='Number of orbit models to run')
 parser.add_argument('-gn', '--grid_num', type=int, metavar='\b', required=False,

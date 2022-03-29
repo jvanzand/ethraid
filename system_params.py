@@ -8,18 +8,45 @@ Ms2Mj = M_sun/M_jup
 #               vmag=None, imag_wavelength=None, contrast_str=None, scatter_tuple=None)
 
 
-############## Syetems for papers #########################
+############## Systems for papers #########################
 params_191939 = ('191939', 0.807*Ms2Mj, 58.3*pc_in_au, 0.1116, 0.0037, -3.44e-5, 5.1e-6, 
                 778.855, 2459192.641, 0.12767382507786398, 0.034199052901953214)
 
-# Potential interesting DG paper.
-params_12572 = ('12572', 0.91*Ms2Mj, 65.9*pc_in_au, -0.0549, 0.0049, -1.18e-5, 8.9e-6,
-                980, 2459281, 0.0748781, 0.0451)#, 198, 0.085*Ms2Mj)
-###########################################################
-
+# From 191939 paper (~mid-2021)
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214,
                 8.97, 0.832, 'data/EDG_clean_curves/191939_832_clean.csv')
+
+
+# EDG trend systems        
+params_t001174= ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
+                748, 2459209, -1, 0,
+                10.96, 0.832, 'data/EDG_clean_curves/TOI1174_832_speckle.csv')
+params_t001279 = ('T001279', 0.85*Ms2Mj, 107.4*pc_in_au, -0.0094, 0.003, 0, 1e8,
+                817, 2459210, -1, -1, 
+                10.71, 0.832, 'data/EDG_clean_curves/TOI1279_832_speckle.csv')
+params_191939 = ('191939', 0.807*Ms2Mj, 58.3*pc_in_au, 0.1116, 0.0037, -3.44e-5, 5.1e-6, 
+                860, 2459296.641, 0.1277, 0.0342, 
+                8.97, 2.2, 'data/EDG_clean_curves/191939_2200_AO.csv')
+params_t001422 = ('T001422', 0.99*Ms2Mj, 155.8*pc_in_au, 0.0128, 0.0036, 0, 1e8, 
+                829, 2459233, -1, -1, 
+                10.62, 2.2, 'data/EDG_clean_curves/TOI1422_2200_AO.csv')
+params_t001443 = ('T001443', 0.74*Ms2Mj, 86*pc_in_au, 0.0244, 0.0087, 0, 1e8, 
+                571, 2459300, -1, -1, 
+                10.67, 2.2, 'data/EDG_clean_curves/TOI1443_2200_AO.csv')
+params_219134 = ('219134', 0.79*Ms2Mj, 6.53*pc_in_au, -0.00072, 0.00015, 0, 1e8, # Probably has astro data, need to get it
+                6349, 2455371, -1, -1, 
+                5.56, 0.832, 'data/EDG_clean_curves/219134_832_speckle.csv')
+params_12572 = ('12572', 0.91*Ms2Mj, 65.9*pc_in_au, -0.0549, 0.0049, -1.18e-5, 8.9e-6,
+                783, 2459281, 0.0748781, 0.0451, 
+                9.2, 0.832, 'data/EDG_clean_curves/12572_832_speckle.csv')
+params_156141 = ('156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0623, 0.006, -2e-5, 1e-5,
+                658, 2459355, -1, -1, 
+                8.86, 0.832, 'data/EDG_clean_curves/156141_832_speckle.csv')
+                
+        
+
+###########################################################
              
 # Joey's target. Baseline and epoch taken from time series on Slack. It's a Hip target, but not in HGCA.
 # Astrometry calculated manually from astro values in Table 3 of https://arxiv.org/pdf/1906.02058.pdf
@@ -50,9 +77,6 @@ params_hd131156= ('HD131156', 935.993904, 1381916.161366, 0.065991, 0.001904, 0,
 params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 1e8, 
                 8042.117923, 2454859.828823, 2.058092, 0.03366, 60.84, 0.27*Ms2Mj)
 
-params_t001174= ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
-                748, 2459209, -1, 0,
-                10.96, 0.832, 'data/EDG_clean_curves/TOI1174_832_clean.csv')
 
 # # Test for 0 trend
 # params_TEST = ('TEST', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5,

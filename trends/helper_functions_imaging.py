@@ -5,9 +5,9 @@ from scipy.interpolate import interp1d
 import helper_functions_general as hlp
 
 
-mamajek_table = pd.read_csv('data/mamajek.csv')
+mamajek_table = pd.read_csv('data/mamajek.csv').rename(columns={'K_s':'K'})
 baraffe_table = pd.read_csv('data/baraffe_table_4.csv')
-bands= pd.read_csv('data/bands.csv')
+bands= pd.read_csv('data/bands.csv').replace('K_s', 'K')
 pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 
 
@@ -86,6 +86,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     # a_list = np.linspace(8, 100, 40)
     # plt.plot(a_list, a_m_interp_fn(a_list))
     # plt.show()
+    # fdf
                              
     imag_array = np.ones((grid_num, grid_num))
     
@@ -134,7 +135,7 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
     
     if band_name not in mamajek_table.columns:
         raise Exception('There is no data for the imaging band in the Mamajek table.\
-                         Find imaging data in the V, R, I, J, H, or K_s bands')
+                         Find imaging data in the V, R, I, J, H, or K bands')
     else:
         # Linearly interpolate between Mamajek entries to estimate Vmag ==> Xmag conversion
     
@@ -171,7 +172,7 @@ def mag_to_mass(mags, masses, abs_Xmag_list):
     mass_list = f(abs_Xmag_list)
     
     return mass_list
-
+    
 
 
 # if __name__ == "__main__":

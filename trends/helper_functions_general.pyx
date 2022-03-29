@@ -153,6 +153,7 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list,
     # Not cdef because then I can't change it from memview to np array
     tot_prob_array = np.zeros((grid_num, grid_num))
     
+    # post_imag is not a list like RVs and astrometry above. It is input to this function as a 2D array. This is because it's a lot easier to calculate for a given orbital model, and would take way longer if we calculated a whole list.
     for i in range(grid_num):
         for j in range(grid_num):
             tot_prob_array[i,j] = rv_ast_array[i,j]*post_imag[i,j]

@@ -99,7 +99,11 @@ def run(star_name, m_star, d_star,
         ##
         start_time = time.time()
         ##
-
+        
+        ## Start with the imaging posterior. This rules out any companions massive enough to be visible in imaging data.
+        post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_num)
+        
+        ## Now the astrometry posterior.
         # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
         no_astro = False
         try:
@@ -119,14 +123,12 @@ def run(star_name, m_star, d_star,
             print('No astrometry data provided. Bounds will be based on RVs only.')
     
 
-
+        ## Last we calculate the RV posterior
         rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
                                 per_list, m_star, rv_epoch,
                                 gammadot, gammadot_err, gammaddot, gammaddot_err)
                                 
         post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
-        
-        post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_num)
         
         post_tot = hlp.post_tot(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
         
@@ -165,7 +167,7 @@ if __name__ == "__main__":
     # contrast_curve.columns = new_header
     # contrast_curve.to_csv('data/EDG_clean_curves/191939_832_clean.csv', index=False)
     
-    run(*sp.params_191939_old, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_156141, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
     # 'results/post_arrays/T001174.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
