@@ -36,7 +36,7 @@ def run(star_name, m_star, d_star,
         gammadot, gammadot_err, gammaddot, gammaddot_err, rv_baseline, rv_epoch, 
         delta_mu, delta_mu_err,
         vmag=None, imag_wavelength=None, contrast_str=None, 
-        scatter_tuple=None, num_points=1e6, grid_num=100, save=True, plot=True, read_file_path=None):
+        scatter_plot=None, num_points=1e6, grid_num=100, save=True, plot=True, read_file_path=None):
         
     """
     Primary function to run trend code.
@@ -149,7 +149,7 @@ def run(star_name, m_star, d_star,
         
     if plot==True:
         plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid_num, 
-                a_lim, m_lim, scatter_tuple=scatter_tuple, period_lines = False)
+                a_lim, m_lim, scatter_plot=scatter_plot, period_lines = False)
     
     return
     

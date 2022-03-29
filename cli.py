@@ -43,7 +43,7 @@ parser.add_argument('-imwav', '--imag_wavelength', type=float, metavar='', requi
 parser.add_argument('-cs', '--contrast_str', type=str, metavar='', required=False,
                     help='Path to dataframe containing contrast curve')
                     
-parser.add_argument('-st', '--scatter_tuple', type=float, metavar='\b', required=False, nargs='+',
+parser.add_argument('-sp', '--scatter_plot', type=float, metavar='\b', required=False, nargs='+',
                     help='Semi-major axis (AU) and mass (M_J) of a known companion to plot. Separate values by a space only.')               
 parser.add_argument('-n', '--num_points', type=int, metavar='\b', required=False,
                     help='Number of orbit models to run')
@@ -66,6 +66,6 @@ if __name__=="__main__":
         args.gddot, args.gddot_err, args.baseline, 
         args.rv_epoch, args.delta_mu, args.delta_mu_err,
         vmag=args.vmag, imag_wavelength=args.imag_wavelength, contrast_str=args.contrast_str,
-        scatter_tuple=args.scatter_tuple,
+        scatter_plot=args.scatter_plot,
         num_points=args.num_points, grid_num=args.grid_num, 
         save=args.save, plot=args.plot, read_file_path=args.read)
