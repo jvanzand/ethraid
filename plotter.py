@@ -11,7 +11,7 @@ import helper_functions_plotting as hlp_plot
 def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
                scatter_plot=None, period_lines=False, marginalized=True):
     
-    tick_num = 8
+    tick_num = 6
     tick_size = 40
     
     a_min, m_min = a_lim[0], m_lim[0]
@@ -86,7 +86,11 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid
     
     # List of round numbers to use as labels for both a and m
     #tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
-    tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
+    min_exp = -4
+    max_exp = 13
+    n = max_exp-min_exp+1
+    # tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
+    tick_labels = np.logspace(min_exp, max_exp, n, base=4)
 
     # Chop out any labels outside the a or m bounds
     tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]

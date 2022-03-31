@@ -42,6 +42,9 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
         
     cdef np.ndarray[double, ndim=1] lik_list = np.ndarray(shape=(num_points,), dtype=np.float64)
     
+    if delta_mu < 0:
+       raise Exception()
+    
     print('Running astrometry models')
     for j in tqdm(range(num_points)):
        

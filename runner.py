@@ -27,14 +27,9 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 M_earth = 5.972167867791379e+27
 
-# General (necessary)
-# RV
-# Astrometry
-# Imaging
-# General (optional)
 def run(star_name, m_star, d_star, 
         gammadot, gammadot_err, gammaddot, gammaddot_err, rv_baseline, rv_epoch, 
-        delta_mu, delta_mu_err,
+        delta_mu=None, delta_mu_err=None,
         vmag=None, imag_wavelength=None, contrast_str=None, 
         scatter_plot=None, num_points=1e6, grid_num=100, save=True, plot=True, read_file_path=None):
         
@@ -66,6 +61,7 @@ def run(star_name, m_star, d_star,
     Returns:
         None
     """
+    
 
     # If no data to read in, calculate new arrays
     if read_file_path is None:
@@ -80,8 +76,8 @@ def run(star_name, m_star, d_star,
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
 
-        max_a = 4e2
-        max_m = 5e2
+        max_a = 5e2
+        max_m = 1e3
         
         # General
         a_lim = (min_a, max_a)
@@ -105,21 +101,17 @@ def run(star_name, m_star, d_star,
         
         ## Now the astrometry posterior.
         # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
-        no_astro = False
         try:
-            # Use a negative dmu value to run without astrometry
-            if delta_mu < 0:
-                raise ValueError()
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
                                               m_star, d_star, delta_mu, delta_mu_err)                     
                                  
             post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
 
+
         except Exception as err:
             astro_list = np.ones(num_points)
             post_astro = np.zeros((grid_num, grid_num))
-            no_astro = True
             print('No astrometry data provided. Bounds will be based on RVs only.')
     
 
@@ -137,8 +129,9 @@ def run(star_name, m_star, d_star,
         ##
         print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
 
-    
         if save==True:
+            no_astro = True if delta_mu is None or delta_mu_err is None else False
+                
             ls.save(star_name, rv_list, astro_list, no_astro, post_imag, a_list, m_list,
                     a_lim, m_lim, min_a, min_m)
     
@@ -158,16 +151,7 @@ def run(star_name, m_star, d_star,
 
 if __name__ == "__main__":
     
-    # import pandas as pd
-    # contrast_curve = pd.read_csv('data/EDG_raw_curves/191939_832_sensitivity.dat',
-    #                               skiprows=29,
-    #                               delimiter=' ',
-    #                               header=None)
-    # new_header = ['ang_sep', 'delta_mag']
-    # contrast_curve.columns = new_header
-    # contrast_curve.to_csv('data/EDG_clean_curves/191939_832_clean.csv', index=False)
-    
-    run(*sp.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_isabel, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
     # 'results/post_arrays/T001174.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
