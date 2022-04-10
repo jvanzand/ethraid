@@ -7,8 +7,7 @@ import matplotlib.patches as ptch
 import helper_functions_general as hlp
 import helper_functions_plotting as hlp_plot
 
-
-def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
+def joint_plot(star_name, m_star, d_star, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
                scatter_plot=None, period_lines=False, marginalized=True):
     
     tick_num = 6
@@ -36,7 +35,7 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid
 
     try:
         t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! Maybe change this to post_astro_pad
-        post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro, 
+        post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
                                       cmap='Blues', extend='max', alpha=0.5, zorder=1)
     
     except:
@@ -73,13 +72,13 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid
     region_label_size = 50
     restricted_region_label_size = 40
 
-    plt.text((5/16)*grid_num_2d, (1/4)*(grid_pad/2), 'Ruled out by RVs', 
+    plt.text((5/16)*grid_num_2d, (1/8)*(grid_pad/2), 'Ruled out by RVs', 
               size=restricted_region_label_size)
-    plt.text((1/4)*(grid_pad/2), (1/8)*grid_num_2d, 'Ruled out by minimum period', 
+    plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_2d, 'Ruled out by minimum period', 
               size=restricted_region_label_size, rotation=90)
 
 
-    ax.set_xlabel('Semi-major Axis (au)', size=label_size)
+    ax.set_xlabel('Semi-major axis (au)', size=label_size)
     ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
     ###################################################
     ############ Axis ticks and labels ################
@@ -93,13 +92,13 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid
     tick_labels = np.logspace(min_exp, max_exp, n, base=4)
 
     # Chop out any labels outside the a or m bounds
-    tick_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
-    tick_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])][:tick_num]
+    raw_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
+    raw_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])][:tick_num]
 
 
     # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
-    tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_a))
-    tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), tick_labels_m))
+    tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_a))
+    tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_m))
     
     
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
@@ -109,8 +108,23 @@ def joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid
     tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num_2d-1), a_lim_plot)
     tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num_2d-1), m_lim_plot)
     
-    plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
-    plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
+    ### At some point I thought I needed strings for tick labels. Not sure why.
+    # plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
+    # plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
+    plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
+    plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)
+    
+    
+    ######## Done with x and y axes. Now to add the top x axis, which is separation in arcseconds
+    raw_labels_sep = hlp_plot.tick_function_a(tick_labels_a, d_star)
+    tick_labels_sep = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_sep))
+    
+    ax2 = ax.twiny()
+    plt.sca(ax2)
+    plt.xlim(0, grid_num+grid_pad-1)
+    plt.xticks(tick_positions_a, tick_labels_sep, size=tick_size*0.75)
+    plt.xlabel('Angular separation (arcsec)', size=label_size*0.75)
+    
     
     
     

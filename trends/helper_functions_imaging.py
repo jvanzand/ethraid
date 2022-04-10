@@ -4,10 +4,11 @@ from scipy.interpolate import interp1d
 
 import helper_functions_general as hlp
 
-
-mamajek_table = pd.read_csv('data/mamajek.csv').rename(columns={'K_s':'K'})
+# Estimate that Ks(2.15μm) ~ K (2.2μm) and W1(3.37μm) ~ L'(3.77μm) bc Baraffe uses K and L'
+mamajek_rename = {'Ks':'K', 'W1':'L_prime'}
+mamajek_table = pd.read_csv('data/mamajek.csv').rename(columns=mamajek_rename)
 baraffe_table = pd.read_csv('data/baraffe_table_4.csv')
-bands= pd.read_csv('data/bands.csv').replace('K_s', 'K')
+bands= pd.read_csv('data/bands.csv')
 pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 
 
@@ -31,9 +32,11 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
         grid_num (int): Dimensions of (a,m) grid.
     
     returns:
-        np_imag_array (2D array, dim=grid_numXgrid_num): Probability
-                        array from imaging data. In this model,
-                        imaging probabilities are either 1 or 0.
+        np_imag_array (2D array, dim=grid_numXgrid_num): Normalized probability
+                                        array from imaging data. In this model,
+                                        imaging probabilities are either 0 or
+                                        "1" (actually 1 / the sum of the 
+                                        array before normalization).
     """
     if vmag is None or imag_wavelength is None or contrast_str is None:
         return np.ones((grid_num, grid_num))
@@ -46,13 +49,15 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     if not set(['ang_sep', 'delta_mag']).issubset(contrast_curve.columns):
         raise Exception("The dataframe must contain columns 'ang_sep' and 'delta_mag'")
     # Objective is sep (AU) vs. mass (M_jup)
-    ############## 1: Get sep. Make sure to convert d_star from au to pc
+    ############## 1: Get separation. Make sure to convert d_star from au to pc
     seps = contrast_curve['ang_sep']*(d_star/pc_in_au)
     ##############
     
-    ############## 2: Convert absolute mag to mass
+    ############## 2: Get companion absolute mag at each Δmag
+    # The absolute magnitudes of the companion are the delta_mag values plus the host star abs mag
     Xband_abs_mags = contrast_curve['delta_mag']+host_abs_Xmag
     
+    ############## 3: Create interp_df, a function between companion absolute magnitude and companion mass
     # Start with Mamajek. We could cut super bright targets from the interpolation, but no need
     interp_df_mamajek = mamajek_table[['M_jup', band_name]]
     
@@ -66,25 +71,29 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     # Concatenate the two dfs above
     interp_df = pd.concat([interp_df_mamajek, interp_df_baraffe]).sort_values(by=band_name)
     
-    
+    ############## 4: Use interpolation function to get companion masses
     companion_masses = mag_to_mass(interp_df[band_name], interp_df['M_jup'], Xband_abs_mags)
     ##############
     
     # Discrete correspondence between separation and mass. We get a continuous correspondence below
     a_m_contrast = pd.DataFrame({'M_jup':companion_masses, 'sep':seps}).reset_index(drop=True)
     
-    # We might want to go out to sma values beyond what's given in the contrast curve.
+    # We might want to plot sma values greater than what's given in the contrast curve.
     # In that case, conservatively estimate that the curve becomes flat after the last sma value
     # (It would actually continue to drop to lower masses, but increasingly slowly, so this is a good approximation)
+    # Similarly, what if we plot sma values BELOW the lowest contrast value?
+    # Again, conservatively estimate the contrast becomes -inf, meaning that imaging rules out NO companions at those separations
     last_a_ind = a_m_contrast[a_m_contrast['sep'] == a_m_contrast['sep'].max()].index # Find largest a
     last_m = a_m_contrast.iloc[last_a_ind]['M_jup'] # Find m corresponding to largest a
     
     a_m_interp_fn = interp1d(a_m_contrast['sep'], a_m_contrast['M_jup'], 
-                             bounds_error=False, fill_value=last_m)
+                             bounds_error=False, fill_value=(np.inf,last_m))
     
     # import matplotlib.pyplot as plt
     # a_list = np.linspace(8, 100, 40)
     # plt.plot(a_list, a_m_interp_fn(a_list))
+    # plt.xlabel('Separation (AU)', size=20)
+    # plt.ylabel(r'Mass ($M_{Jup}$)', size=20)
     # plt.show()
     # fdf
                              
@@ -135,7 +144,7 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
     
     if band_name not in mamajek_table.columns:
         raise Exception('There is no data for the imaging band in the Mamajek table.\
-                         Find imaging data in the V, R, I, J, H, or K bands')
+                         Find imaging data in the V, R, I, J, H, K bands')
     else:
         # Linearly interpolate between Mamajek entries to estimate Vmag ==> Xmag conversion
     

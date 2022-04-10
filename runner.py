@@ -127,7 +127,7 @@ def run(star_name, m_star, d_star,
         ##
         end_time = time.time()
         ##
-        print('{:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time-start_time))
+        print('{:.0e} points ran for {} in {:.2f} seconds.'.format(num_points, star_name, end_time-start_time))
 
         if save==True:
             no_astro = True if delta_mu is None or delta_mu_err is None else False
@@ -141,7 +141,7 @@ def run(star_name, m_star, d_star,
         
         
     if plot==True:
-        plotter.joint_plot(star_name, m_star, post_tot, post_rv, post_astro, post_imag, grid_num, 
+        plotter.joint_plot(star_name, m_star, d_star, post_tot, post_rv, post_astro, post_imag, grid_num, 
                 a_lim, m_lim, scatter_plot=scatter_plot, period_lines = False)
     
     return
@@ -151,7 +151,7 @@ def run(star_name, m_star, d_star,
 
 if __name__ == "__main__":
     
-    run(*sp.params_isabel, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
+    run(*sp.params_t001174_vtx, num_points=1e7, grid_num=100, plot=True, read_file_path=None)
     # 'results/post_arrays/T001174.h5')
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)

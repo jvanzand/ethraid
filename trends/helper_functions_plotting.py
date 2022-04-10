@@ -98,7 +98,21 @@ def marginalized_1d(star_name, post_tot, grid_num, twosig_inds, a_lim, m_lim, ti
     
     fig.tight_layout()
     fig.savefig(save_dir_1D + star_name + '_1d.png')
-        
+    
+    return
+
+
+def tick_function_a(sep, d_star):
+    """
+    Converts separation in AU into
+    separation in arcsec
+    """
+    pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
+    
+    d_star_pc = np.array(d_star)/np.array(pc_in_au)
+    
+
+    return sep/d_star_pc  
         
         
         

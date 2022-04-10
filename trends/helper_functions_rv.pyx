@@ -36,7 +36,9 @@ def rv_list(double [:] a_list, double [:] m_list, double [:] e_list,
                
     cdef np.ndarray[double, ndim=1] lik_list = np.ndarray(shape=(num_points,),
                                                             dtype=np.float64)
-    
+    if gdot_err==0 or gddot_err==0:
+        raise Exception('Errors cannot be 0')
+        
     print('Running RV models')
     for j in tqdm(range(num_points)):
        
