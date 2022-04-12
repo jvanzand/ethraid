@@ -82,10 +82,11 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     # In that case, conservatively estimate that the curve becomes flat after the last sma value
     # (It would actually continue to drop to lower masses, but increasingly slowly, so this is a good approximation)
     # Similarly, what if we plot sma values BELOW the lowest contrast value?
-    # Again, conservatively estimate the contrast becomes -inf, meaning that imaging rules out NO companions at those separations
+    # Again, conservatively estimate the contrast becomes -inf, meaning that imaging rules out NO companions at those separations.
     last_a_ind = a_m_contrast[a_m_contrast['sep'] == a_m_contrast['sep'].max()].index # Find largest a
     last_m = a_m_contrast.iloc[last_a_ind]['M_jup'] # Find m corresponding to largest a
     
+    # Mass values below bounds are +inf (bc -inf contrast), while those above bounds are last m value within bounds.
     a_m_interp_fn = interp1d(a_m_contrast['sep'], a_m_contrast['M_jup'], 
                              bounds_error=False, fill_value=(np.inf,last_m))
     

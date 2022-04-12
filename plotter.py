@@ -7,7 +7,7 @@ import matplotlib.patches as ptch
 import helper_functions_general as hlp
 import helper_functions_plotting as hlp_plot
 
-def joint_plot(star_name, m_star, d_star, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
+def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
                scatter_plot=None, period_lines=False, marginalized=True):
     
     tick_num = 6
@@ -28,6 +28,16 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv, post_astro, post_im
     a_min_plot = a_min/(a_max/a_min)**(frac_exp)
     m_min_plot = m_min/(m_max/m_min)**(frac_exp)
     
+    
+    ######################
+    import helper_functions_imaging as hlp_imag
+    post_imag2 = hlp_imag.imag_array(d_star, vmag, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv', a_lim, m_lim, 100)
+    post_imag2_pad = np.pad(post_imag2, [(grid_pad, 0), (grid_pad, 0)])
+    t_contours_imag2 = hlp.contour_levels(post_imag2, [1,2])
+    post_imag_cont2 = ax.contourf(post_imag2_pad, t_contours_imag2,
+                               cmap='gray', extend='max', alpha=0.7, zorder=1)
+    ######################
+    
     post_imag_pad = np.pad(post_imag, [(grid_pad, 0), (grid_pad, 0)])
     post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
     post_astro_pad = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
@@ -36,7 +46,7 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv, post_astro, post_im
     try:
         t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! Maybe change this to post_astro_pad
         post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
-                                      cmap='Blues', extend='max', alpha=0.5, zorder=1)
+                                      cmap='Blues', extend='max', alpha=0.5, zorder=10)
     
     except:
         print('Error encountered in astrometry plot. Moving on.')
@@ -47,12 +57,11 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv, post_astro, post_im
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
     
     post_imag_cont = ax.contourf(post_imag_pad, t_contours_imag,
-                               cmap='gray', extend='max', alpha=1.0, zorder=0)
+                               cmap='gray', extend='max', alpha=0.9, zorder=0)
     post_rv_cont = ax.contourf(post_rv_pad, t_contours_rv,
-                               cmap='Greens', extend='max', alpha=0.5, zorder=2)
+                               cmap='Greens', extend='max', alpha=0.5, zorder=20)
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
-                               cmap='Reds', extend='max', alpha=0.75, zorder=3)
-                       
+                               cmap='Reds', extend='max', alpha=0.75, zorder=30)
 
     
     # grid_num_2d is the side length of the 2D plotting array
