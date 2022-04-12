@@ -19,7 +19,7 @@ params_191939_old = ('191939_old', 0.807*Ms2Mj, 53.8*pc_in_au, 0.114, 0.006, -6e
 
 
 # EDG trend systems        
-params_t001174= ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
+params_t001174 = ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
                 748, 2459209, -1, 0,
                 10.96, 0.832, 'data/EDG_clean_curves/T001174_832_speckle.csv')
 params_t001279 = ('T001279', 0.85*Ms2Mj, 107.4*pc_in_au, -0.0094, 0.003, 0, 1e8,
@@ -31,11 +31,11 @@ params_191939 = ('191939', 0.84*Ms2Mj, 53.8*pc_in_au, 0.1116, 0.0037, -3.44e-5, 
 params_t001422 = ('T001422', 1031.990824, 32143494.817747, 0.0128, 0.0035, 0, 1e8,
                 828.887762, 2459217.272573, -1, -1,
                 10.62, 2.2, 'data/EDG_clean_curves/T001422_2200_AO.csv')
-params_t001438= ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4, 
+params_t001438 = ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4, 
                 433, 2459330, 0, 'a')
 params_t001443 = ('T001443', 0.74*Ms2Mj, 86*pc_in_au, 0.0244, 0.0087, 0, 1e8, 
                 571, 2459300, -1, -1, 
-                10.67, 2.2, 'data/EDG_clean_curves/T001443_2200_AO.csv', [26.8,118.2])
+                10.67, 2.2, 'data/EDG_clean_curves/T001443_2200_AO.csv')
 params_219134 = ('219134', 0.79*Ms2Mj, 6.53*pc_in_au, -0.00072, 0.00015, 0, 1e8,
                 6349, 2455371, 0.14629, 0.06070, 
                 5.56, 0.832, 'data/EDG_clean_curves/219134_832_speckle.csv')
@@ -48,9 +48,9 @@ params_156141 = ('156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0623, 0.006, -2e-5, 1e-5,
 
 ###########################################################
 # T001174 but with idealized constraints from the Vortex coronagraph
-params_t001174_vtx= ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
+params_t001174_vtx = ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
                 748, 2459209, -1, 0,
-                10.96, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv')
+                10.96, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv', [10,10])
              
 # Joey's target. Baseline and epoch taken from time series on Slack. It's a Hip target, but not in HGCA.
 # Astrometry calculated manually from astro values in Table 3 of https://arxiv.org/pdf/1906.02058.pdf

@@ -5,7 +5,7 @@ from scipy.interpolate import interp1d
 import helper_functions_general as hlp
 
 # Estimate that Ks(2.15μm) ~ K (2.2μm) and W1(3.37μm) ~ L'(3.77μm) bc Baraffe uses K and L'
-mamajek_rename = {'Ks':'K', 'W1':'L_prime'}
+mamajek_rename = {'K_s':'K', 'W1':'L_prime'}
 mamajek_table = pd.read_csv('data/mamajek.csv').rename(columns=mamajek_rename)
 baraffe_table = pd.read_csv('data/baraffe_table_4.csv')
 bands= pd.read_csv('data/bands.csv')
@@ -142,10 +142,10 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
     
     # Find the central band that is closest to the imaging wavelength
     band_name = bands.iloc[np.argmin(abs(bands['wavelength']-imaging_wavelength))]['band']
-    
+
     if band_name not in mamajek_table.columns:
-        raise Exception('There is no data for the imaging band in the Mamajek table.\
-                         Find imaging data in the V, R, I, J, H, K bands')
+        raise Exception("There is no data for the imaging band in the Mamajek table.\
+                         Find imaging data in the V, R, I, J, H, K, L' bands")
     else:
         # Linearly interpolate between Mamajek entries to estimate Vmag ==> Xmag conversion
     
