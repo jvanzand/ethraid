@@ -72,7 +72,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     m_max = m_lim[1]
 
 
-    # These semimajor axes are distances between the planet and the barycenter of the system. The star is on its own orbit, which we will get later.
+    # These are the "full" semi-major axes of the orbit, ie the sma of the ellipse traced by the 1-body solution to the 2-body problem. a_planet+a_star
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
 

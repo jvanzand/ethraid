@@ -44,7 +44,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
 
     try:
-        t_contours_astro = hlp.contour_levels(post_astro, [1,2]) ## !! Maybe change this to post_astro_pad
+        t_contours_astro = hlp.contour_levels(post_astro, [1,2])
         post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
                                       cmap='Blues', extend='max', alpha=0.5, zorder=10)
     
