@@ -30,12 +30,12 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     
     
     ######################
-    import helper_functions_imaging as hlp_imag
-    post_imag2 = hlp_imag.imag_array(d_star, vmag, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv', a_lim, m_lim, 100)
-    post_imag2_pad = np.pad(post_imag2, [(grid_pad, 0), (grid_pad, 0)])
-    t_contours_imag2 = hlp.contour_levels(post_imag2, [1,2])
-    post_imag_cont2 = ax.contourf(post_imag2_pad, t_contours_imag2,
-                               cmap='gray', extend='max', alpha=0.7, zorder=1)
+    # import helper_functions_imaging as hlp_imag
+    # post_imag2 = hlp_imag.imag_array(d_star, vmag, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv', a_lim, m_lim, 100)
+    # post_imag2_pad = np.pad(post_imag2, [(grid_pad, 0), (grid_pad, 0)])
+    # t_contours_imag2 = hlp.contour_levels(post_imag2, [1,2])
+    # post_imag_cont2 = ax.contourf(post_imag2_pad, t_contours_imag2,
+    #                            cmap='gray', extend='max', alpha=0.7, zorder=1)
     ######################
     
     post_imag_pad = np.pad(post_imag, [(grid_pad, 0), (grid_pad, 0)])

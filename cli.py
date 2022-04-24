@@ -82,7 +82,6 @@ args = parser.parse_args()
 
 if __name__=="__main__":
     
-    print('TYPES', args.delta_mu, type(args.delta_mu))
     run(args.star_name, args.m_star, args.d_star, args.gdot, args.gdot_err, 
         args.gddot, args.gddot_err, args.baseline, 
         args.rv_epoch, args.delta_mu, args.delta_mu_err,

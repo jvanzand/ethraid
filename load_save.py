@@ -16,6 +16,7 @@ def load(read_file_path, grid_num):
     astro_list = np.array(post_file.get('astro_list')) # Probabilities of astro models
     no_astro = np.array(post_file.get('no_astro')) # Bool indicating presence of astro data
     post_imag = np.array(post_file.get('post_imag')) # 2D array of probabilities from imaging
+    post_imag=np.ones((grid_num, grid_num))
     a_list = np.array(post_file.get('a_list')) # Semi-major axis values
     m_list = np.array(post_file.get('m_list')) # Companion mass values
     a_lim = np.array(post_file.get('a_lim')) # Limits over which a is sampled

@@ -20,21 +20,21 @@ params_191939_old = ('191939_old', 0.807*Ms2Mj, 53.8*pc_in_au, 0.114, 0.006, -6e
 
 # EDG trend systems        
 params_t001174 = ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
-                748, 2459209, -1, 0,
+                748, 2459209, None, None,
                 10.96, 0.832, 'data/EDG_clean_curves/T001174_832_speckle.csv')
 params_t001279 = ('T001279', 0.85*Ms2Mj, 107.4*pc_in_au, -0.0094, 0.003, 0, 1e8,
-                817, 2459210, -1, -1, 
+                817, 2459210, None, None, 
                 10.71, 0.832, 'data/EDG_clean_curves/T001279_832_speckle.csv')
 params_191939 = ('191939', 0.84*Ms2Mj, 53.8*pc_in_au, 0.1116, 0.0037, -3.44e-5, 5.1e-6, 
                 860, 2459296.641, 0.1277, 0.0342, 
                 8.97, 2.2, 'data/EDG_clean_curves/191939_2200_AO.csv')
 params_t001422 = ('T001422', 1031.990824, 32143494.817747, 0.0128, 0.0035, 0, 1e8,
-                828.887762, 2459217.272573, -1, -1,
+                828.887762, 2459217.272573, None, None, 
                 10.62, 2.2, 'data/EDG_clean_curves/T001422_2200_AO.csv')
 params_t001438 = ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4, 
                 433, 2459330, 0, 'a')
 params_t001443 = ('T001443', 0.74*Ms2Mj, 86*pc_in_au, 0.0244, 0.0087, 0, 1e8, 
-                571, 2459300, -1, -1, 
+                571, 2459300, None, None, 
                 10.67, 2.2, 'data/EDG_clean_curves/T001443_2200_AO.csv')
 params_219134 = ('219134', 0.79*Ms2Mj, 6.53*pc_in_au, -0.00072, 0.00015, 0, 1e8,
                 6349, 2455371, 0.14629, 0.06070, 
@@ -43,14 +43,14 @@ params_12572 = ('12572', 0.91*Ms2Mj, 65.9*pc_in_au, -0.0549, 0.0049, -1.18e-5, 8
                 783, 2459281, 0.0748781, 0.0451,
                 9.2, 0.832, 'data/EDG_clean_curves/12572_832_speckle.csv')
 params_156141 = ('156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0623, 0.006, -2e-5, 1e-5,
-                658, 2459355, -1, -1, 
+                658, 2459355, None, None, 
                 8.86, 0.832, 'data/EDG_clean_curves/156141_832_speckle.csv')
 
 ###########################################################
 # T001174 but with idealized constraints from the Vortex coronagraph
-params_t001174_vtx = ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
-                748, 2459209, -1, 0,
-                10.96, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv', [10,10])
+params_t001174_vtx = ('T001174_vtx', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
+                    748, 2459209, None, None, 
+                    10.96, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv')
              
 # Joey's target. Baseline and epoch taken from time series on Slack. It's a Hip target, but not in HGCA.
 # Astrometry calculated manually from astro values in Table 3 of https://arxiv.org/pdf/1906.02058.pdf
@@ -79,17 +79,15 @@ params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 
                 8042.117923, 2454859.828823, 2.058092, 0.03366, 60.84, 0.27*Ms2Mj)
 
 
-# # Test for 0 trend
-# params_TEST = ('TEST', 0.807*Ms2Mj, 58.3*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5,
-#                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214)
+################ Isabel systems #################
+params_isabel1= ('Isabel1', 1*Ms2Mj, 10*pc_in_au, 1.18, 0.039, 0, 1e10, 
+                365, 2459162, None, None,
+                None, None, None,
+                [10, 0.4*Ms2Mj])
 
-################ Systems for Keck proposal ##############
-# No trend
-params_t001410= ('T001410', 0.77*Ms2Mj, 72.9*pc_in_au, -0.002, 0.0034, 0, 1e10, 
-                780, 2459162, 0, 'no_astro_sdf')
-                
-params_hd156141= ('HD156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0596, 0.0075, -1e-5, 1.5e-5, 
-                651, 2459345, 0, 'no_astro_sdf')
+params_isabel2= ('Isabel2', 1*Ms2Mj, 10*pc_in_au, 0, 1e8, 0.005, 0.001,
+                365, 2459162, None, None,
+                None, None, None)
 
 
 ################ Validation Systems #################

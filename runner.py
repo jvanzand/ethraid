@@ -67,8 +67,8 @@ def run(star_name, m_star, d_star,
     if read_file_path is None:
         
         min_per = rv_baseline*0.7
-        # min_m = M_earth/M_jup
         min_m = 1
+        # min_m = 0.001*M_sun/M_jup # min_m is 0.1 solar masses
         m_star_Ms = m_star * M_jup/M_sun
         # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
         min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
@@ -151,8 +151,8 @@ def run(star_name, m_star, d_star,
 
 if __name__ == "__main__":
     
-    run(*sp.params_t001174, num_points=1e6, grid_num=100, plot=True, read_file_path=None)
-    # 'results/post_arrays/T001174.h5')
+    run(*sp.params_isabel2, num_points=1e7, grid_num=100, plot=True, read_file_path=None, save=False)
+    #'results/post_arrays/T001174_vtx.h5'
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
