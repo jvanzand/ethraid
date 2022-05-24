@@ -80,14 +80,14 @@ params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 
 
 
 ################ Isabel systems #################
-params_isabel1= ('Isabel1', 1*Ms2Mj, 10*pc_in_au, 1.18, 0.039, 0, 1e10, 
-                365, 2459162, None, None,
-                None, None, None,
-                [10, 0.4*Ms2Mj])
+params_isabel1= ('Isabel1', 1*Ms2Mj, 10*pc_in_au, 60/365.25, 4.6/365.25, 0, 1e10, 
+                4015, 2459162, None, None,
+                None, None, None)
 
 params_isabel2= ('Isabel2', 1*Ms2Mj, 10*pc_in_au, 0, 1e8, 0.005, 0.001,
                 365, 2459162, None, None,
-                None, None, None)
+                None, None, None,
+                [20, 0.1*Ms2Mj])
 
 
 ################ Validation Systems #################

@@ -89,6 +89,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
 
     ax.set_xlabel('Semi-major axis (au)', size=label_size)
     ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
+    # ax.set_ylabel(r'$M_p$ ($M_{\odot}$)', size=label_size)
     ###################################################
     ############ Axis ticks and labels ################
     
@@ -117,9 +118,19 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num_2d-1), a_lim_plot)
     tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num_2d-1), m_lim_plot)
     
-    ### At some point I thought I needed strings for tick labels. Not sure why.
-    # plt.xticks(tick_positions_a, [str(i) for i in tick_labels_a], size=tick_size)
-    # plt.yticks(tick_positions_m, [str(i) for i in tick_labels_m], size=tick_size)
+    
+    # #############################
+    # M_sun = 1.988409870698051e+33
+    # M_jup = 1.8981245973360504e+30
+    #
+    # raw_labels_msun = np.array([0.01, 0.05, 0.25, 1.0])
+    # raw_labels_mjup = raw_labels_msun*M_sun/M_jup
+    #
+    # tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_msun))
+    # tick_positions_m = hlp.value2index(raw_labels_mjup, (0, grid_num_2d-1), m_lim_plot)
+
+    # #############################
+    
     plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
     plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)
     
@@ -127,7 +138,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     ######## Done with x and y axes. Now to add the top x axis, which is separation in arcseconds
     raw_labels_sep = hlp_plot.tick_function_a(tick_labels_a, d_star)
     tick_labels_sep = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_sep))
-    
+
     ax2 = ax.twiny()
     plt.sca(ax2)
     plt.xlim(0, grid_num+grid_pad-1)

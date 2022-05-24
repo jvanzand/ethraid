@@ -194,7 +194,9 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         mat_mul(rot_mtrx, vec, vec)
 
 
-        # mu_avg is a 2x2 array. The top row stays empty because we skip Hip. The bottom row is Gaia prop. motion
+        # mu_avg is a 2x2 array. The top row stays empty because we skip Hip. (The l==1 case is never executed
+        # because we skip it in the if statement above.)
+        # The bottom row is Gaia prop. motion.
         # The proper motion of the star due to the planet's orbit is in milli-arcseconds per year.
         # Since period is in days and a_star_units in au, velocities are in au/day.
         mu_avg[l][0] = vec[0]*aud_2_masyr
@@ -220,7 +222,9 @@ cdef pos_avg(double a, double n, double e, double E1, double E2,
     Calculate the average x/y positions of an object on an elliptical orbit, 
     where (0,0) is the focus.
 
-    a (au): semi-major axis
+    a (au): semi-major axis of the ellipse. Note that for an orbiting body,
+            a must be the semi-major axis of that body's orbital path,
+            not a_total of the full two-body orbit.
     n (1/days): 2pi/per
     t1, t2 (days): beginning and ending time to calculate average
 
@@ -253,7 +257,9 @@ cdef vel_avg(double a, double n, double e, double E1, double E2,
     Calculate the average x/y positions of an object on an elliptical orbit, 
     where (0,0) is the focus.
 
-    a (au): semi-major axis
+    a (au): semi-major axis of the ellipse. Note that for an orbiting body,
+            a must be the semi-major axis of that body's orbital path,
+            not a_total of the full two-body orbit.
     n (1/days): 2pi/per
     t1, t2 (days): beginning and ending time to calculate average
 

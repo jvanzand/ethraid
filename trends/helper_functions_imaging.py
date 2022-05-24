@@ -90,13 +90,13 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     a_m_interp_fn = interp1d(a_m_contrast['sep'], a_m_contrast['M_jup'], 
                              bounds_error=False, fill_value=(np.inf,last_m))
     
-    import matplotlib.pyplot as plt
-    a_list = np.linspace(8, 100, 40)
-    plt.plot(a_list, a_m_interp_fn(a_list))
-    plt.xlabel('Separation (AU)', size=20)
-    plt.ylabel(r'Mass ($M_{Jup}$)', size=20)
-    plt.show()
-    fdf
+    # import matplotlib.pyplot as plt
+    # a_list = np.linspace(8, 100, 40)
+    # plt.plot(a_list, a_m_interp_fn(a_list))
+    # plt.xlabel('Separation (AU)', size=20)
+    # plt.ylabel(r'Mass ($M_{Jup}$)', size=20)
+    # plt.show()
+    # fdf
                              
     imag_array = np.ones((grid_num, grid_num))
     
