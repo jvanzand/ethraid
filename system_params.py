@@ -5,17 +5,19 @@ Ms2Mj = M_sun/M_jup
 
 # params_star = (star_name, m_star, distance(AU), gdot, gdot_err, gddot, gddot_err, 
 #               rv_baseline(days), rv_epoch, delta_mu, delta_mu_err, 
-#               vmag=None, imag_wavelength=None, contrast_str=None, scatter_tuple=None)
+#               vmag=None, imag_wavelength=None, contrast_str=None, scatter_tuple=[sma, mass])
 
 
 ############## Systems for papers #########################
-# params_191939 = ('191939', 0.807*Ms2Mj, 53.8*pc_in_au, 0.1116, 0.0037, -3.44e-5, 5.1e-6,
-#                 778.855, 2459192.641, 0.12767382507786398, 0.034199052901953214)
 
-# From 191939 paper (~mid-2021)
-params_191939_old = ('191939_old', 0.807*Ms2Mj, 53.8*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5, 
+params_191939 = ('191939',  0.807*Ms2Mj, 53.8*pc_in_au, 0.1261, 0.0031, -5.92e-5, 3.4e-6, 
+                980, 2459330, 0.12767382507786398, 0.034199052901953214,
+                8.97, 0.832, 'data/EDG_clean_curves/191939_2200_AO.csv', [3.95, 3.2])
+
+# # From 191939 paper (~mid-2021)
+params_191939_old = ('191939_old', 0.807*Ms2Mj, 53.8*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5,
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214,
-                8.97, 0.832, 'data/EDG_clean_curves/191939_2200_AO.csv')
+                8.97,0.832, 'data/EDG_clean_curves/191939_2200_AO.csv')
 
 
 # EDG trend systems        
@@ -25,9 +27,6 @@ params_t001174 = ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7
 params_t001279 = ('T001279', 0.85*Ms2Mj, 107.4*pc_in_au, -0.0094, 0.003, 0, 1e8,
                 817, 2459210, None, None, 
                 10.71, 0.832, 'data/EDG_clean_curves/T001279_832_speckle.csv')
-params_191939 = ('191939', 0.84*Ms2Mj, 53.8*pc_in_au, 0.1116, 0.0037, -3.44e-5, 5.1e-6, 
-                860, 2459296.641, 0.1277, 0.0342, 
-                8.97, 2.2, 'data/EDG_clean_curves/191939_2200_AO.csv')
 params_t001422 = ('T001422', 1031.990824, 32143494.817747, 0.0128, 0.0035, 0, 1e8,
                 828.887762, 2459217.272573, None, None, 
                 10.62, 2.2, 'data/EDG_clean_curves/T001422_2200_AO.csv')

@@ -61,7 +61,7 @@ def log_lik_gamma(double a, double m, double e, double i, double om, double M_an
                   double per, double m_star, double rv_epoch,
                   double gdot, double gdot_err, double gddot, double gddot_err):
     """
-    Compute the log-likelihood of a state (set of a, Mp, e, i, om, and M_anom_0)
+    Compute the log-likelihood of a model (set of a, Mp, e, i, om, and M_anom_0)
     given the RV data (true gammas and their uncertainties).
     
     Returns:

@@ -307,13 +307,13 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
     # (prob_array >= t[:, None, None]) is a 3D array of shape (array_num, array_num, t_num). Each (array_num, array_num) layer is a 2D array of bool values indicating which values are greater than the value of the given t step.
     # Multiplying this 3D array of bools by prob_array replaces the bools with the array value if the bool is T and 0 if the bool is F.
     # Finally, sum along the array_num axes to get a single list of values, each with the total summed probability in its array.
-
     # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t
 
     integral = ((prob_array > t[:, None, None])*prob_array).sum(axis=(1,2))
 
     # Now create a function that takes integral as the x (not the y) and then returns the corresponding prob value from the t array. Interpolating between integral values allows me to choose any enclosed total prob. value (ie, integral value) and get the corresponding prob. value to use as my contour.
-    f = sp.interpolate.interp1d(integral, t)
+    # Use zero-order spline to address the interpolation issues that come with highly concentrated probability regions
+    f = sp.interpolate.interp1d(integral, t, kind='zero')
 
     contour_list = []
     prob_list = [0.68, 0.95, 0.997]
@@ -326,8 +326,26 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
         contour_list.append(contour_list[0]-1e-4)
         # contour_list.append(1e-3)
 
-    # Make sure list is in descending order
+    # Make sure contour_list is in descending order
     t_contours = f(np.array(sorted(contour_list, reverse=True)))
+    
+    #print('HERE', t_contours)
+    #import matplotlib.pyplot as plt
+    #probs = np.linspace(0.001, 0.999, 100)
+    #contours = f(probs)
+    #plt.plot(contours, probs, c='blue')
+    #plt.scatter(t, integral, s=1, c='red')
+    #plt.ylabel('Total probability encompassed')
+    #plt.xlabel('Probability at which to draw contours')
+    #print(len(t), len(integral))
+    #plt.show()
+    
+    # Make sure the probability contours do not have identical values. This generally only occurs for the imaging posterior, which is designed so that all pixels have either p=0 or p= some single value.
+    for i in range(len(t_contours)):
+      if i == 0:
+          continue
+      if t_contours[i] == t_contours[i-1]:
+          t_contours[i] = t_contours[i-1]*1.0001
 
     return t_contours
 

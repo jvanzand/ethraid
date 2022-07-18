@@ -51,7 +51,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     except:
         print('Error encountered in astrometry plot. Moving on.')
         pass
-    
+        
     t_contours_imag = hlp.contour_levels(post_imag, [1,2])
     t_contours_rv = hlp.contour_levels(post_rv, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
