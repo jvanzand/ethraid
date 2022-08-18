@@ -160,7 +160,7 @@ def run(star_name, m_star, d_star,
 
 if __name__ == "__main__":
     
-    run(*sp.params_191939, num_points=1e8, grid_num=100, plot=True, read_file_path=None, save=True)
+    run(*sp.params_12572, num_points=1e8, grid_num=100, plot=True, read_file_path=None, save=True)
     #'results/post_arrays/T001174_vtx.h5'
     #'results/post_arrays/12572.h5')
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)

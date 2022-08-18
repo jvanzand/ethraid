@@ -62,7 +62,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     interp_df_mamajek = mamajek_table[['M_jup', band_name]]
     
     # It may be that Mamajek covers the whole contrast curve and we don't need Baraffe, but maybe not.
-    # Find the dimmest mag in Mamajek and start selecting Baraffe mags after that. 
+    # Find the dimmest mag in Mamajek and start using Baraffe mags after that. 
     max_mag = interp_df_mamajek[band_name].max()
 
     # Just like we took super bright entries from Mamajek, take even the dimmest from Baraffe to be safe.
@@ -80,7 +80,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     
     # We might want to plot sma values greater than what's given in the contrast curve.
     # In that case, conservatively estimate that the curve becomes flat after the last sma value
-    # (It would actually continue to drop to lower masses, but increasingly slowly, so this is a good approximation)
+    # (It would actually continue to drop to lower masses, but increasingly slowly, so this is a fine approximation)
     # Similarly, what if we plot sma values BELOW the lowest contrast value?
     # Again, conservatively estimate the contrast becomes -inf, meaning that imaging rules out NO companions at those separations.
     last_a_ind = a_m_contrast[a_m_contrast['sep'] == a_m_contrast['sep'].max()].index # Find largest a
