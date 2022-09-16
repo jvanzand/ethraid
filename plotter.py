@@ -42,7 +42,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
     post_astro_pad = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
     post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
-
+    
     try:
         t_contours_astro = hlp.contour_levels(post_astro, [1,2])
         post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
@@ -51,18 +51,18 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     except:
         print('Error encountered in astrometry plot. Moving on.')
         pass
-        
+    
     t_contours_imag = hlp.contour_levels(post_imag, [1,2])
     t_contours_rv = hlp.contour_levels(post_rv, [1,2])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
     
-    post_imag_cont = ax.contourf(post_imag_pad, t_contours_imag,
-                               cmap='gray', extend='max', alpha=0.9, zorder=0)
+    # Un-filled contour for imaging to just show a line
+    post_imag_cont = ax.contour(post_imag_pad, t_contours_imag,
+                               cmap='gray', extend='max', alpha=0.4, zorder=0)
     post_rv_cont = ax.contourf(post_rv_pad, t_contours_rv,
                                cmap='Greens', extend='max', alpha=0.5, zorder=20)
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                                cmap='Reds', extend='max', alpha=0.75, zorder=30)
-
     
     # grid_num_2d is the side length of the 2D plotting array
     grid_num_2d = grid_num+grid_pad
@@ -94,7 +94,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     ############ Axis ticks and labels ################
     
     # List of round numbers to use as labels for both a and m
-    #tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
+    # tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
     min_exp = -4
     max_exp = 13
     n = max_exp-min_exp+1

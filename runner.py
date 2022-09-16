@@ -85,7 +85,7 @@ def run(star_name, m_star, d_star,
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
 
-        max_a = 5e1
+        max_a = 1e2
         max_m = 5e2
         
         # General
@@ -139,19 +139,23 @@ def run(star_name, m_star, d_star,
         print('{:.0e} points ran for {} in {:.2f} seconds.'.format(num_points, star_name, end_time-start_time))
 
         if save==True:
-            no_astro = True if delta_mu is None or delta_mu_err is None else False
+            no_astro = True if (delta_mu is None or delta_mu_err is None) else False
                 
-            ls.save(star_name, rv_list, astro_list, no_astro, post_imag, a_list, m_list,
+            ls.save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag, a_list, m_list,
                     a_lim, m_lim, min_a, min_m)
     
     # Otherwise, load in existing data:
     else:
-        post_tot, post_rv, post_astro, post_imag, a_lim, m_lim, min_a, min_m = ls.load(read_file_path, grid_num)
+        star_name, m_star, d_star,\
+        post_tot, post_rv, post_astro, post_imag,\
+        a_lim, m_lim, min_a, min_m = ls.load(read_file_path, grid_num)
         
         
     if plot==True:
-        plotter.joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, post_imag, grid_num, 
-                a_lim, m_lim, scatter_plot=scatter_plot, period_lines = False)
+        plotter.joint_plot(star_name, m_star, d_star, vmag, 
+                           post_tot, post_rv, post_astro, post_imag, 
+                           grid_num, a_lim, m_lim, scatter_plot=scatter_plot, 
+                           period_lines = False)
     
     return
     
@@ -160,9 +164,9 @@ def run(star_name, m_star, d_star,
 
 if __name__ == "__main__":
     
-    run(*sp.params_12572, num_points=1e8, grid_num=100, plot=True, read_file_path=None, save=True)
-    #'results/post_arrays/T001174_vtx.h5'
-    #'results/post_arrays/12572.h5')
+    run(*sp.params_t001669, num_points=1e7, grid_num=100, plot=True, read_file_path=None, save=True)
+    #'results/post_arrays/156141.h5'
+    #'results/post_arrays/12572.h5'
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
     

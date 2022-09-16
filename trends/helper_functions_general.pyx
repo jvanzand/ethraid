@@ -340,12 +340,12 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
     #print(len(t), len(integral))
     #plt.show()
     
-    # Make sure the probability contours do not have identical values. This generally only occurs for the imaging posterior, which is designed so that all pixels have either p=0 or p= some single value.
+    # Make sure the probability contours do not have identical values. This generally only occurs for the imaging posterior, which is designed so that all pixels have either p=0 or p=some single value.
     for i in range(len(t_contours)):
       if i == 0:
           continue
       if t_contours[i] == t_contours[i-1]:
-          t_contours[i] = t_contours[i-1]*1.0001
+          t_contours[i] = t_contours[i-1]*1.001
 
     return t_contours
 

@@ -41,9 +41,13 @@ params_219134 = ('219134', 0.79*Ms2Mj, 6.53*pc_in_au, -0.00072, 0.00015, 0, 1e8,
 params_12572 = ('12572', 0.91*Ms2Mj, 65.9*pc_in_au, -0.0608, 0.0042, 5e-8, 6e-6,
                 916, 2459320, 0.0748781, 0.0451,
                 9.2, 0.832, 'data/EDG_clean_curves/12572_832_speckle.csv')
-params_156141 = ('156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0623, 0.006, -2e-5, 1e-5,
+params_156141 = ('156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0738, 0.0046, -4.03e-5, 6.2e-6,
                 658, 2459355, None, None, 
                 8.86, 0.832, 'data/EDG_clean_curves/156141_832_speckle.csv')
+                
+params_t001669 = ('T001669', 1.13*Ms2Mj, 111.6*pc_in_au, -0.0272, 0.0063, 0, 1e10,
+                723, 2459410, None, None, 
+                10.22, 0.832, 'data/EDG_clean_curves/TOI1669_832_speckle.csv')
 
 ###########################################################
 # T001174 but with idealized constraints from the Vortex coronagraph
