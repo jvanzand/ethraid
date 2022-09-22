@@ -40,7 +40,7 @@ parser.add_argument('-gdde', '--gddot_err', type=float, metavar='\b',
                     help='Error on gamma_ddot')
                     
 # required=False for targets with no astrometry
-# nargs='?' so I can pass blank args for Cadence
+# nargs='?' so I can pass blank args for Cadence (because in a list of stars, some don't have dmu and some do; my .sh script has to provide a single command with which all stars are run)
 # default=None and const=None by default, no need to set
 parser.add_argument('-dmu', '--delta_mu', type=float, metavar='\b', 
                     required=False, nargs='?',
@@ -50,7 +50,7 @@ parser.add_argument('-dmue', '--delta_mu_err', type=float, metavar='',
                     help='Error on dmu')
 
 # required=False for targets without imaging
-# nargs='?' to let me pass the flag with no args
+# nargs='?' to let me pass the flag with no args for Cadence
 # default=None and const=None by default, no need to set
 parser.add_argument('-vmag', '--vmag', type=float, metavar='',
                     required=False, nargs='?',
