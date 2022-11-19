@@ -46,7 +46,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     try:
         t_contours_astro = hlp.contour_levels(post_astro, [1,2])
         post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
-                                      cmap='Blues', extend='max', alpha=0.5, zorder=10)
+                         cmap='Blues', extend='max', alpha=0.5, zorder=10)
     
     except:
         print('Error encountered in astrometry plot. Moving on.')

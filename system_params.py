@@ -17,10 +17,10 @@ params_191939 = ('191939',  0.807*Ms2Mj, 53.8*pc_in_au, 0.1261, 0.0031, -5.92e-5
 # # From 191939 paper (~mid-2021)
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 53.8*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5,
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214,
-                8.97,0.832, 'data/EDG_clean_curves/191939_2200_AO.csv', [3.825, 3.0])
+                8.97,0.832, 'data/EDG_clean_curves/191939_2200_AO.csv')
 
 
-# EDG trend systems        
+# EDG trend systems
 params_t001174 = ('T001174', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
                 748, 2459209, None, None,
                 10.96, 0.832, 'data/EDG_clean_curves/T001174_832_speckle.csv')
@@ -32,9 +32,9 @@ params_t001422 = ('T001422', 1031.990824, 32143494.817747, 0.0128, 0.0035, 0, 1e
                 10.62, 2.2, 'data/EDG_clean_curves/T001422_2200_AO.csv')
 params_t001438 = ('T001438', 0.86*Ms2Mj, 111*pc_in_au, 0.079, 0.017, 3e-5, 1.2e-4, 
                 433, 2459330, 0, 'a')
-params_t001443 = ('T001443', 0.74*Ms2Mj, 86*pc_in_au, 0.0244, 0.0087, 0, 1e8, 
-                571, 2459300, None, None, 
-                10.67, 2.2, 'data/EDG_clean_curves/T001443_2200_AO.csv')
+params_t001443 = ('T001443', 0.74*Ms2Mj, 86*pc_in_au, 0.0271, 0.0049, 0, 1e8, 
+                825, 2459445, None, None, 
+                10.67, 2.2, 'data/EDG_clean_curves/T001443_2200_AO.csv', [34.4, 0.23*Ms2Mj])
 params_219134 = ('219134', 0.79*Ms2Mj, 6.53*pc_in_au, -0.00072, 0.00015, 0, 1e8,
                 6349, 2455371, 0.14629, 0.06070, 
                 5.56, 0.832, 'data/EDG_clean_curves/219134_832_speckle.csv')
@@ -45,7 +45,7 @@ params_156141 = ('156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0738, 0.0046, -4.03e-5, 6.
                 658, 2459355, None, None, 
                 8.86, 0.832, 'data/EDG_clean_curves/156141_832_speckle.csv')
                 
-params_t001669 = ('T001669', 1.13*Ms2Mj, 111.6*pc_in_au, -0.0272, 0.0063, 0, 1e10,
+params_t001669 = ('T001669', 1.13*Ms2Mj, 111.6*pc_in_au, -0.0226, 0.006, 0, 1e10,
                 723, 2459410, None, None, 
                 10.22, 0.832, 'data/EDG_clean_curves/TOI1669_832_speckle.csv')
 
@@ -54,6 +54,11 @@ params_t001669 = ('T001669', 1.13*Ms2Mj, 111.6*pc_in_au, -0.0272, 0.0063, 0, 1e1
 params_t001174_vtx = ('T001174_vtx', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
                     748, 2459209, None, None, 
                     10.96, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv')
+                    
+# T001174 but artificially with the same Δμ as HD 191939         
+params_t001174_fake_astro = ('T001174_fake_astro', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5,
+                748, 2459209, 0.12767382507786398, 0.034199052901953214,
+                10.96, 0.832, 'data/EDG_clean_curves/T001174_832_speckle.csv')
              
 # Joey's target. Baseline and epoch taken from time series on Slack. It's a Hip target, but not in HGCA.
 # Astrometry calculated manually from astro values in Table 3 of https://arxiv.org/pdf/1906.02058.pdf
