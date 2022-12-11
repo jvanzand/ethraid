@@ -59,15 +59,9 @@ def load(read_file_path, grid_num):
 
 def save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag,
          a_list, m_list, a_lim, m_lim, min_a, min_m):
-    
-    if not os.path.exists('results'):
-        os.makedirs('results')
         
     save_dir = 'results/post_arrays/' # Arrays for all stars go in one folder
-        
-    if not os.path.exists(save_dir):
-        os.makedirs(save_dir)
-    
+    os.makedirs(save_dir, exist_ok=True)
     
     
     post_file_path = save_dir+star_name+'.h5'

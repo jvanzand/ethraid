@@ -20,19 +20,19 @@ profile = line_profiler.LineProfiler()
 
 ###########################################
 
-# First path is where to put build files (.c and .html).
-# Second is where to 1) find .pyx files and 2) store .so files.
+# First path is where to put compiled files (.so).
+# Second is where to find .pyx files
 extensions = [
     Extension("c_kepler._kepler",
              ['c_kepler/_kepler.pyx'],
               include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
-    Extension("trends.helper_functions_general",
+    Extension("trends.compiled.helper_functions_general",
              ['trends/helper_functions_general.pyx'],
               include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
-    Extension("trends.helper_functions_rv",
+    Extension("trends.compiled.helper_functions_rv",
              ['trends/helper_functions_rv.pyx'],
               include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
-    Extension("trends.helper_functions_astro",
+    Extension("trends.compiled.helper_functions_astro",
              ['trends/helper_functions_astro.pyx'],
               include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
     
@@ -40,7 +40,7 @@ extensions = [
 
 ##############################
 
-# Specify a build directory to store the .c and .html files separately. The .so files are what I need to call, so those get put in the same directory as their .pyx file. Improves readability.
+# Specify a build directory to store the .c and .html files separately. Improves readability.
 setup(
     ext_modules = cythonize(extensions, build_dir = 'trends/compiled', language_level='3', annotate=True)
 )

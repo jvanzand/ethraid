@@ -6,15 +6,15 @@ import radvel as rv
 import os
 import sys
 
-import plotter
-import system_params as sp
-import load_save as ls
+from trends import plotter
+from trends import system_params as sp
+from trends import load_save as ls
+from trends import helper_functions_imaging as hlp_imag
 
 #########################
-from trends import helper_functions_general as hlp
-from trends import helper_functions_rv as hlp_rv
-from trends import helper_functions_astro as hlp_astro
-from trends import helper_functions_imaging as hlp_imag
+from trends.compiled import helper_functions_general as hlp
+from trends.compiled import helper_functions_rv as hlp_rv
+from trends.compiled import helper_functions_astro as hlp_astro
 #########################
 
 
@@ -154,8 +154,6 @@ def run(star_name, m_star, d_star,
                            period_lines = False)
     
     return
-    
-    
     
 
 if __name__ == "__main__":
