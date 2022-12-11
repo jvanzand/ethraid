@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
-import trends.helper_functions_general as hlp
+import trends.compiled.helper_functions_general as hlp
 
 from pathlib import Path
 dir_path = str(Path(__file__).parents[1])
