@@ -6,7 +6,7 @@ from argparse import ArgumentParser
 from runner import run
 
 ###############
-import system_params as sp
+import trends.system_params as sp
 ###############
 
 parser = ArgumentParser(description="Perform trend analysis")
