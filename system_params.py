@@ -7,6 +7,8 @@ Ms2Mj = M_sun/M_jup
 #               rv_baseline(days), rv_epoch, delta_mu, delta_mu_err, 
 #               vmag=None, imag_wavelength=None, contrast_str=None, scatter_tuple=[sma, mass])
 
+params_8umi= ('8UMi', 2.26*Ms2Mj, 149.9*pc_in_au, 0.033, 0.018, 0, 1e8, 
+                439, 2459570, 0.07669, 0.03175)
 
 ############## Systems for papers #########################
 
@@ -87,15 +89,10 @@ params_hd40397= ('HD40397', 925.627738, 4785726.363004, -0.029115, 0.000287, 0, 
                 8042.117923, 2454859.828823, 2.058092, 0.03366, 60.84, 0.27*Ms2Mj)
 
 
-################ Isabel systems #################
-params_isabel1= ('Isabel1', 1*Ms2Mj, 10*pc_in_au, 60/365.25, 4.6/365.25, 0, 1e10, 
-                4015, 2459162, None, None,
-                None, None, None)
+################ Marc Hon system HIP73136 aka 8 UMi #################
 
-params_isabel2= ('Isabel2', 1*Ms2Mj, 10*pc_in_au, 0, 1e8, 0.005, 0.001,
-                365, 2459162, None, None,
-                None, None, None,
-                [20, 0.1*Ms2Mj])
+
+
 
 
 ################ Validation Systems #################

@@ -38,6 +38,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
                                         "1" (actually 1 / the sum of the 
                                         array before normalization).
     """
+    # If no imaging provided, just return an array of 1s
     if vmag is None or imag_wavelength is None or contrast_str is None:
         return np.ones((grid_num, grid_num))
     
@@ -48,6 +49,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     
     if not set(['ang_sep', 'delta_mag']).issubset(contrast_curve.columns):
         raise Exception("The dataframe must contain columns 'ang_sep' and 'delta_mag'")
+    
     # Objective is sep (AU) vs. mass (M_jup)
     ############## 1: Get separation. Make sure to convert d_star from au to pc
     seps = contrast_curve['ang_sep']*(d_star/pc_in_au)
@@ -80,7 +82,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     
     # We might want to plot sma values greater than what's given in the contrast curve.
     # In that case, conservatively estimate that the curve becomes flat after the last sma value
-    # (It would actually continue to drop to lower masses, but increasingly slowly, so this is a fine approximation)
+    # (It would actually continue to drop to lower masses at larger separations, but increasingly slowly, so this is a fine approximation)
     # Similarly, what if we plot sma values BELOW the lowest contrast value?
     # Again, conservatively estimate the contrast becomes -inf, meaning that imaging rules out NO companions at those separations.
     last_a_ind = a_m_contrast[a_m_contrast['sep'] == a_m_contrast['sep'].max()].index # Find largest a
@@ -138,17 +140,16 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
                                     the band_name band
     """
     
-    host_abs_vmag = vmag - 5*np.log10(d_star/pc_in_au/10) # absolute v-band magnitude. First convert au to pc
+    host_abs_vmag = vmag - 5*np.log10(d_star/pc_in_au/10) # absolute V-band magnitude. First convert au to pc
     
     # Find the central band that is closest to the imaging wavelength
     band_name = bands.iloc[np.argmin(abs(bands['wavelength']-imaging_wavelength))]['band']
 
     if band_name not in mamajek_table.columns:
         raise Exception("There is no data for the imaging band in the Mamajek table.\
-                         Find imaging data in the V, R, I, J, H, K, L' bands")
+                         Find imaging data in the V, R, I, J, H, K, or L' bands")
     else:
         # Linearly interpolate between Mamajek entries to estimate Vmag ==> Xmag conversion
-    
         f = interp1d(mamajek_table['V'], mamajek_table[band_name])
     
     host_abs_Xmag = f(host_abs_vmag)
@@ -169,7 +170,6 @@ def mag_to_mass(mags, masses, abs_Xmag_list):
                                    length as mags
     abs_Xmag_list (list of floats, mag): List of absolute magnitudes from the
                                         contrast curve.
-    
     
     returns:
         mass_list (list of floats, M_jup): Interpolated masses corresponding to
