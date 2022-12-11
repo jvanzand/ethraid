@@ -2,7 +2,7 @@
 # cython: binding=True
 # cython: profile=True
 # cython: linetrace=True
-from kern_profiler_dummy import *
+from trends.kern_profiler_dummy import *
 from c_kepler._kepler import kepler_single
 
 from astropy.time import Time

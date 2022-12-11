@@ -6,19 +6,15 @@ import radvel as rv
 import os
 import sys
 
-path = os.getcwd()
-sys.path.append(path+'/trends')
-
 import plotter
 import system_params as sp
+import load_save as ls
 
 #########################
-import helper_functions_general as hlp
-import helper_functions_rv as hlp_rv
-import helper_functions_astro as hlp_astro
-import helper_functions_imaging as hlp_imag
-
-import load_save as ls
+from trends import helper_functions_general as hlp
+from trends import helper_functions_rv as hlp_rv
+from trends import helper_functions_astro as hlp_astro
+from trends import helper_functions_imaging as hlp_imag
 #########################
 
 
