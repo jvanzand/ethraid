@@ -66,9 +66,9 @@ parser.add_argument('-cs', '--contrast_str', type=str, metavar='',
 # nargs='+' so I can use the same flag to pass both semi-major axis and mass of a companion to plot
 parser.add_argument('-sp', '--scatter_plot', type=float, metavar='\b', required=False, nargs='+',
                     help='Semi-major axis (AU) and mass (M_J) of a known companion to plot. Separate values by a space only.')               
-parser.add_argument('-n', '--num_points', type=int, metavar='\b', required=False,
+parser.add_argument('-n', '--num_points', type=int, metavar='\b', required=False, default=1000000,
                     help='Number of orbit models to run')
-parser.add_argument('-gn', '--grid_num', type=int, metavar='\b', required=False,
+parser.add_argument('-gn', '--grid_num', type=int, metavar='\b', required=False, default=100,
                     help='Dimension of binned probability array')
 
 # # The 'save' and 'plot' args are special. Rather than having an assigned type, the "action='store_true'" argument assumes 1) boolean type and 2) default = False if the flag is not given. It also allows there to be no argument after the flag (in which case the value is set to True).
@@ -78,6 +78,9 @@ parser.add_argument('-p', '--plot', action='store_true', required=False,
                     help='Whether to plot joint (a,m) posterior')
 parser.add_argument('-r', '--read', type=str, metavar='\b', required=False,
                     help='File path to read in already-calculated posterior array')
+
+parser.add_argument('-od', '--outdir', type=str, metavar='\b', required=False, default='',
+                    help='Path to directory where output files will be saved')
 
 # parser.set_defaults(func=run)
 args = parser.parse_args()
@@ -91,4 +94,4 @@ if __name__=="__main__":
         vmag=args.vmag, imag_wavelength=args.imag_wavelength, contrast_str=args.contrast_str,
         scatter_plot=args.scatter_plot,
         num_points=args.num_points, grid_num=args.grid_num,
-        save=args.save, plot=args.plot, read_file_path=args.read)
+        save=args.save, plot=args.plot, read_file_path=args.read, outdir=args.outdir)
