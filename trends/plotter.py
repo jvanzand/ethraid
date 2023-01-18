@@ -8,7 +8,7 @@ from trends import helper_functions_plotting as hlp_plot
 from trends.compiled import helper_functions_general as hlp
 
 def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
-               scatter_plot=None, period_lines=False, marginalized=True):
+               scatter_plot=None, period_lines=False, marginalized=True, outdir=''):
     
     tick_num = 6
     tick_size = 40
@@ -173,8 +173,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
 
 
     fig.tight_layout()
-    # save_dir_2D = 'results/'+star_name+'/' # Each star gets its own folder
-    save_dir_2D = 'results/2D_posts/' # 2D images of all stars in one folder, 1D images in another
+    save_dir_2D = outdir+'results/2D_posts/' # 2D images of all stars in one folder, 1D images in another
     # Try to make directory. If it exists, just continue. Parallel code was bugging out here, so exist_ok is great.
     os.makedirs(save_dir_2D, exist_ok = True)
     fig.savefig(save_dir_2D + star_name + '.png')
@@ -187,7 +186,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     if marginalized:
         
         hlp_plot.marginalized_1d(star_name, post_tot, grid_num, twosig_inds, 
-                                 a_lim, m_lim, tick_labels_a, tick_labels_m)
+                                 a_lim, m_lim, tick_labels_a, tick_labels_m, outdir=outdir)
 
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior

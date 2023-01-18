@@ -56,7 +56,8 @@ def period_lines(m_star, a_lim, m_lim, a_lim_plot, m_lim_plot, grid_num_2d, n, h
     return const_per_a_inds[values_in_bounds], const_per_m_inds[values_in_bounds], fmt
 
         
-def marginalized_1d(star_name, post_tot, grid_num, twosig_inds, a_lim, m_lim, tick_labels_a, tick_labels_m):
+def marginalized_1d(star_name, post_tot, grid_num, twosig_inds, a_lim, m_lim, 
+                    tick_labels_a, tick_labels_m, outdir=''):
     
     title_size = 30
     label_size = 25
@@ -92,7 +93,7 @@ def marginalized_1d(star_name, post_tot, grid_num, twosig_inds, a_lim, m_lim, ti
     ax[1].vlines(twosig_inds[1][0], 0, 1, colors='r', linestyles='dashed')
     ax[1].vlines(twosig_inds[1][1], 0, 1, colors='r', linestyles='dashed')
     
-    save_dir_1D = 'results/1D_posts/' # 2D images of all stars in one folder, 1D images in another
+    save_dir_1D = outdir+'results/1D_posts/' # 2D images of all stars in one folder, 1D images in another
     if not os.path.isdir(save_dir_1D):
         os.makedirs(save_dir_1D)
     

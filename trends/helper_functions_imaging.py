@@ -27,7 +27,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
         d_star (float, pc): Distance to the host star
         vmag (float, mag): Apparent V-band magnitude of host star
         imag_wavelength (float, μm): Wavelength of imaging data in contrast_curve
-        contrast_curve (str): Path to contrast curve with columns of 
+        contrast_str (str): Path to contrast curve with columns of 
                               'ang_sep' (arcseconds) and 'delta_mag' (mag)
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max).
