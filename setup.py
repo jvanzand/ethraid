@@ -1,7 +1,8 @@
-from distutils.core import setup
+from setuptools import setup
 from Cython.Build import cythonize
 from distutils.extension import Extension
 import numpy as np
+import re
 
 import line_profiler
 profile = line_profiler.LineProfiler()
@@ -39,7 +40,25 @@ extensions = [
 
 ##############################
 
-# Specify a build directory to store the .c and .html files separately. Improves readability.
+# # Specify a build directory to store the .c and .html files separately. Improves readability.
+# setup(
+#     ext_modules = cythonize(extensions, build_dir = 'trends/compiled', language_level='3', annotate=True)
+# )
+
 setup(
+    name = "trends",
+    packages = ["trends"],
+    entry_points = {
+        "console_scripts": ['trends = trends.cli:main']
+        },
+    version = "0.1.0",
+    description = "Command line application for trend code",
+    author = "Judah Van Zandt",
+    author_email = "judahvz@astro.ucla.edu",
+    url = "",
     ext_modules = cythonize(extensions, build_dir = 'trends/compiled', language_level='3', annotate=True)
-)
+    )
+    
+    
+    
+    
