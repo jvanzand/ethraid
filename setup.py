@@ -46,10 +46,10 @@ extensions = [
 # )
 
 setup(
-    name = "trends_name",
+    name = "trends",
     packages = ["trends"],
     entry_points = {
-        "console_scripts": ['trends_name = trends.cli:main']
+        "console_scripts": ['trends = trends.cli:main']
         },
     version = "0.1.0",
     description = "Command line application for trend code",
