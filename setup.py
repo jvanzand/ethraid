@@ -35,7 +35,6 @@ extensions = [
     Extension("trends.compiled.helper_functions_astro",
              ['trends/helper_functions_astro.pyx'],
               include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
-    
 ]
 
 ##############################
