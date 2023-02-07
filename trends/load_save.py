@@ -59,40 +59,41 @@ def load(read_file_path, grid_num):
 
 def save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag,
          a_list, m_list, a_lim, m_lim, min_a, min_m, outdir=''):
+         
          """
          Note that you don't have to specify grid_num in order to save the arrays.
          You can save the raw arrays and later use load() to load them back in
          and specify grid_num then to form them to whatever shape you want.
          """
         
-    save_dir = outdir+'results/post_arrays/' # Arrays for all stars go in one folder
-    os.makedirs(save_dir, exist_ok=True)
-    
-    
-    post_file_path = save_dir+star_name+'.h5'
-    post_file = h5py.File(post_file_path, 'w')
-    
-    # Save the un-binned values and arrays in case you want to use a different grid_num later
-    post_file.create_dataset('star_name', data=star_name)
-    post_file.create_dataset('m_star', data=m_star)
-    post_file.create_dataset('d_star', data=d_star)
-    
-    post_file.create_dataset('rv_list', data=rv_list)
-    post_file.create_dataset('astro_list', data=astro_list)
-    post_file.create_dataset('no_astro', data=no_astro)
-    post_file.create_dataset('post_imag', data=post_imag)
-    
-    post_file.create_dataset('a_list', data=a_list)
-    post_file.create_dataset('m_list', data=m_list)
-    
-    post_file.create_dataset('a_lim', data=a_lim)
-    post_file.create_dataset('m_lim', data=m_lim)
-    
-    post_file.create_dataset('min_vals', data=(min_a, min_m))
-    
-    post_file.close()
-    print('Posterior file saved to '+post_file_path)
-    
-    return
+         save_dir = outdir+'results/post_arrays/'# Arrays for all stars go in one folder
+         os.makedirs(save_dir, exist_ok=True)
+         
+         
+         post_file_path = save_dir+star_name+'.h5'
+         post_file = h5py.File(post_file_path, 'w')
+         
+         # Save the un-binned values and arrays in case you want to use a different grid_num later
+         post_file.create_dataset('star_name', data=star_name)
+         post_file.create_dataset('m_star', data=m_star)
+         post_file.create_dataset('d_star', data=d_star)
+         
+         post_file.create_dataset('rv_list', data=rv_list)
+         post_file.create_dataset('astro_list', data=astro_list)
+         post_file.create_dataset('no_astro', data=no_astro)
+         post_file.create_dataset('post_imag', data=post_imag)
+         
+         post_file.create_dataset('a_list', data=a_list)
+         post_file.create_dataset('m_list', data=m_list)
+         
+         post_file.create_dataset('a_lim', data=a_lim)
+         post_file.create_dataset('m_lim', data=m_lim)
+         
+         post_file.create_dataset('min_vals', data=(min_a, min_m))
+         
+         post_file.close()
+         print('Posterior file saved to '+post_file_path)
+         
+         return
     
     
