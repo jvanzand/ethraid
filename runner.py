@@ -90,6 +90,7 @@ def run(star_name, m_star, d_star,
         m_lim = (min_m, max_m)
 
         num_points = int(num_points)
+        grid_num = int(grid_numd)
         # np.set_printoptions(threshold=np.inf)
     
         
