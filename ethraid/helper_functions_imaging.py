@@ -1,17 +1,16 @@
+import os
 import numpy as np
 import pandas as pd
 from scipy.interpolate import interp1d
 
-import trends.compiled.helper_functions_general as hlp
-
-from pathlib import Path
-dir_path = str(Path(__file__).parents[1])
+from ethraid import _ROOT
+import ethraid.compiled.helper_functions_general as hlp
 
 # Estimate that Ks (2.15μm) ~ K (2.2μm) and W1 (3.37μm) ~ L' (3.77μm) bc Baraffe uses K and L'
 mamajek_rename = {'K_s':'K', 'W1':'L_prime'}
-mamajek_table = pd.read_csv(dir_path+'/data/mamajek.csv').rename(columns=mamajek_rename)
-baraffe_table = pd.read_csv(dir_path+'/data/baraffe_table_4.csv')
-bands= pd.read_csv(dir_path+'/data/bands.csv')
+mamajek_table = pd.read_csv(_ROOT+'/data/mamajek.csv').rename(columns=mamajek_rename)
+baraffe_table = pd.read_csv(_ROOT+'/data/baraffe_table_4.csv')
+bands= pd.read_csv(_ROOT+'/data/bands.csv')
 pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 
 

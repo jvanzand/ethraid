@@ -3,17 +3,17 @@ Command Line Interface
 """
 
 from argparse import ArgumentParser
-import trends.driver
+import ethraid.driver
 
-###############
-import trends.system_params as sp
-###############
+# ###############
+# import ethraid.system_params as sp
+# ###############
 
 def main():
     parser = ArgumentParser(description="Perform trend analysis", prefix_chars="-")
 
     parser.add_argument('-sn', '--star_name', type=str, metavar='\b', required=True,
-                        help='Name of host star')
+                        help='Name of host star for file naming. Need not be official.')
     parser.add_argument('-ms', '--m_star', type=float, metavar='\b', required=True,
                         help='Stellar mass in units of Jupiter masses')
     parser.add_argument('-ds', '--d_star', type=float, metavar='\b', required=True,
@@ -23,14 +23,9 @@ def main():
                         help='Linear trend in RVs in m/s/day')
     parser.add_argument('-gde', '--gammadot_err', type=float, metavar='\b', required=True,
                         help='Error on gamma_dot')
-
-    parser.add_argument('-rvb', '--rv_baseline', type=float, metavar='\b', required=True,
-                        help='Length of RV time baseline in days')
-    parser.add_argument('-rvep', '--rv_epoch', type=float, metavar='\b', required=True,
-                        help='Epoch of RV timeseries in BJD, usually around baseline midpoint')
-                
+                        
     # required=False so we can have targets with no curvature
-    # default=0/1e8 so that if the flag isn't passed, we have values to pass to RV code
+    # default=0/1e8 so that if the flag isn't provided, we have values to pass to RV code
     # nargs='?' so I can pass a blank argument into Cadence (useful for running lists of targets)
     # const=0/1e8 so that if the flag IS passed but with NO args (like on Cadence), default values are filled in
     parser.add_argument('-gdd', '--gammaddot', type=float, metavar='\b', 
@@ -39,6 +34,11 @@ def main():
     parser.add_argument('-gdde', '--gammaddot_err', type=float, metavar='\b', 
                         required=False, default=1e8, nargs='?', const=1e8,
                         help='Error on gamma_ddot')
+
+    parser.add_argument('-rvb', '--rv_baseline', type=float, metavar='\b', required=True,
+                        help='Length of RV time baseline in days')
+    parser.add_argument('-rvep', '--rv_epoch', type=float, metavar='\b', required=True,
+                        help='Epoch of RV timeseries in BJD, usually around baseline midpoint')
                 
     # required=False for targets with no astrometry
     # nargs='?' so I can pass blank args for Cadence (because in a list of stars, some don't have dmu and some do; my .sh script has to provide a single command with which all stars are run)
@@ -82,16 +82,9 @@ def main():
     parser.add_argument('-od', '--outdir', type=str, metavar='\b', required=False, default='',
                         help='Path to directory where output files will be saved')
 
-    parser.set_defaults(func=trends.driver.run)
+    parser.set_defaults(func=ethraid.driver.run)
     args = parser.parse_args()
     args.func(args)
 
 if __name__=="__main__":
     main()
-    # run(args.star_name, args.m_star, args.d_star, args.gdot, args.gdot_err,
-    #     args.gddot, args.gddot_err, args.baseline,
-    #     args.rv_epoch, args.delta_mu, args.delta_mu_err,
-    #     vmag=args.vmag, imag_wavelength=args.imag_wavelength, contrast_str=args.contrast_str,
-    #     scatter_plot=args.scatter_plot,
-    #     num_points=args.num_points, grid_num=args.grid_num,
-    #     save=args.save, plot=args.plot, read_file_path=args.read, outdir=args.outdir)

@@ -1,9 +1,9 @@
 # cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False
 # cython: binding=True
-from trends.kern_profiler_dummy import *
+from ethraid.kern_profiler_dummy import *
 import numpy as np
 cimport numpy as np
-from c_kepler._kepler import kepler_single
+from ethraid.compiled._kepler import kepler_single
 
 from astropy.time import Time
 from tqdm import tqdm

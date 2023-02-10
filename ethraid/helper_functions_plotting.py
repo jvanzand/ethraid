@@ -4,7 +4,7 @@ from astropy.time import Time
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 
-from trends.compiled import helper_functions_general as hlp
+from ethraid.compiled import helper_functions_general as hlp
 
 
 def scatter_companion(scatter_plot, grid_num_2d, a_lim_plot, m_lim_plot):

@@ -2,8 +2,8 @@
 # cython: binding=True
 # cython: profile=True
 # cython: linetrace=True
-from trends.kern_profiler_dummy import *
-from c_kepler._kepler import kepler_single
+from ethraid.kern_profiler_dummy import *
+from ethraid.compiled._kepler import kepler_single
 
 from astropy.time import Time
 from tqdm import tqdm

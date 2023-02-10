@@ -2,7 +2,7 @@ import os
 import numpy as np
 import h5py
 
-from trends.compiled import helper_functions_general as hlp
+from ethraid.compiled import helper_functions_general as hlp
 
 
 def load(read_file_path, grid_num):

@@ -6,15 +6,15 @@ import radvel as rv
 import os
 import sys
 
-from trends import plotter
-from trends import system_params as sp
-from trends import load_save as ls
-from trends import helper_functions_imaging as hlp_imag
+from ethraid import plotter
+from ethraid import system_params as sp
+from ethraid import load_save as ls
+from ethraid import helper_functions_imaging as hlp_imag
 
 #########################
-from trends.compiled import helper_functions_general as hlp
-from trends.compiled import helper_functions_rv as hlp_rv
-from trends.compiled import helper_functions_astro as hlp_astro
+from ethraid.compiled import helper_functions_general as hlp
+from ethraid.compiled import helper_functions_rv as hlp_rv
+from ethraid.compiled import helper_functions_astro as hlp_astro
 #########################
 
 
@@ -26,7 +26,7 @@ M_earth = 5.972167867791379e+27
 def run(args):
         
     """
-    Primary function to run trend code.
+    Primary function to run code.
         
     Arguments:
         star_name (str): Name of host star

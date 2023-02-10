@@ -4,8 +4,8 @@ from astropy.time import Time
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 
-from trends import helper_functions_plotting as hlp_plot
-from trends.compiled import helper_functions_general as hlp
+from ethraid import helper_functions_plotting as hlp_plot
+from ethraid.compiled import helper_functions_general as hlp
 
 def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
                scatter_plot=None, period_lines=False, marginalized=True, outdir=''):
