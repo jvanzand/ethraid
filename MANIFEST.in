@@ -1,0 +1,7 @@
+global-include c_kepler/*.pyx
+global-include c_kepler/*.c
+global-include c_kepler/*.txt
+include requirements.txt
+global-include *.pyx
+global-include *.so
+recursive-include ethraid/data *
