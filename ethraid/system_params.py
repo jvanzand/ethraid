@@ -14,12 +14,12 @@ params_8umi= ('8UMi', 2.26*Ms2Mj, 149.9*pc_in_au, 0.033, 0.018, 0, 1e8,
 
 params_191939 = ('191939',  0.807*Ms2Mj, 53.8*pc_in_au, 0.1261, 0.0031, -5.92e-5, 3.4e-6, 
                 980, 2459330, 0.12767382507786398, 0.034199052901953214,
-                8.97, 0.832, 'data/EDG_clean_curves/191939_2200_AO.csv', [3.825, 3.0])
+                8.97, 2.2, 'data/EDG_clean_curves/191939_2200_AO.csv', [3.825, 3.0])
 
 # # From 191939 paper (~mid-2021)
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 53.8*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5,
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214,
-                8.97,0.832, 'ethraid/data/EDG_clean_curves/191939_2200_AO.csv')
+                8.97, 2.2, 'ethraid/data/EDG_clean_curves/191939_2200_AO.csv')
 
 
 # EDG trend systems
@@ -42,7 +42,7 @@ params_219134 = ('219134', 0.79*Ms2Mj, 6.53*pc_in_au, -0.00072, 0.00015, 0, 1e8,
                 5.56, 0.832, 'data/EDG_clean_curves/219134_832_speckle.csv')
 params_12572 = ('12572', 0.91*Ms2Mj, 65.9*pc_in_au, -0.0608, 0.0042, 5e-8, 6e-6,
                 916, 2459320, 0.0748781, 0.0451,
-                9.2, 0.832, 'data/EDG_clean_curves/12572_832_speckle.csv')
+                9.2, 0.832, 'ethraid/data/EDG_clean_curves/12572_832_speckle.csv')
 params_156141 = ('156141', 1.03*Ms2Mj, 73*pc_in_au, 0.0738, 0.0046, -4.03e-5, 6.2e-6,
                 658, 2459355, None, None, 
                 8.86, 0.832, 'data/EDG_clean_curves/156141_832_speckle.csv')

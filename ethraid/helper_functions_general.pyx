@@ -1,11 +1,8 @@
-# cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False, linetrace=True
-# cython: binding=True
-from ethraid.kern_profiler_dummy import *
 import numpy as np
-cimport numpy as np
 import scipy as sp
 import scipy.stats as spst
 
+cimport numpy as np
 cimport cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
@@ -31,8 +28,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
         m_star (float, M_sun): Mass of host star.
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max).
-        m_lim (tuple of floats, M_jup): Mass limits, (m_min, m_max).
-        grid_num (int): Dimensions of (a,m) grid.
+        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max).
+        grid_num (int): Dimensions of square (a,m) grid.
         num_points (int): Number of random orbital models to simulate.
     
     Returns:
@@ -40,7 +37,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
         i_list, om_list, M_anom_0_list (numpy arrays, len = num_points):
                                         Lists of randomly sampled semi-major axis, mass,
                                         eccentricity, inclination, argument of
-                                        periastron, and initial mean anomaly. We do not
+                                        periastron, and initial mean anomaly. Do not
                                         sample directly in period.
         a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
                                         (a, m, per, e, i, om, M_anom_0) model 
@@ -252,8 +249,13 @@ def ecc_dist(double [:] per_list, int num_points):
     It might make more sense to use a third (Bowler) distribution 
     for much longer periods (bc Kipping only used 400 exoplanet 
     eccentricities back in 2013, and no BDs).
-
-    per_list (list of floats, days): List of companion periods
+    
+    Arguments:
+        per_list (list of floats, days): List of companion periods
+        num_points (int): Number of random eccentricities to generate
+    
+    Returns:
+        e_list (list of floats): List of randomly sampled eccentricities
     """
     cdef int i
     cdef double per, e
@@ -263,7 +265,7 @@ def ecc_dist(double [:] per_list, int num_points):
                                     kipping_long = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
           
-    # Note that I make lists that are too long, so I only use part of each. I don't think this can be avoided while using pre-determined list lengths.                                
+    # Note that I make lists that are each num_points long, so I only use part of each. I don't think this can be avoided while using pre-determined list lengths.                                
     kipping_short = spst.beta(0.697, 3.27).rvs(size=int(num_points))
     kipping_long = spst.beta(1.12, 3.09).rvs(size=int(num_points))
 
@@ -292,112 +294,79 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
     Contour drawing method taken from 
     https://stackoverflow.com/questions/37890550/python-plotting-percentile-contour-lines-of-a-probability-distribution
     This function takes a 2-D array of probabilities and returns a 1-D array 
-    of the probability values corresponding to 1-sigma and 2-sigma contours. 
-    In this case, the 1-sigma contour encloses 68% of the total probability. 
-    The array is expected to be normalized. sig_list is a list containing 
-    any combination of the integers 1, 2, or 3 to indicate desired contours. 
-    For example, [1,3] will return the 1 and 3 sigma contours.
-    This function uses scipy.interpolate.interp1d.
+    of the probability values p1, p2, and p3 such that a contour drawn through 
+    the probabilities equal to p1 would encompass 68% of the total probability. 
+    Similarly, a contour through the probabilities equaling p2 would encompass
+    95% of the total probability, and 99.7% for p3. The user can specify a subset
+    of [p1, p2, p3] with the sig_list argument.
+    
+    Arguments:
+        prob_array (2D array of floats): Normalized probability array
+        sig_list (list of ints): Any combination of [1,2,3] to indicate
+                                 the desired probability encompassed by
+                                 each contour
+    
+    Returns:
+        t_contours (list of floats): List giving the probability value at which
+                                     to draw contours. Will have the same length
+                                     as sig_list
     """
 
 
     # An array of probabilites from 0 to prob_max in rate_array
     t = np.linspace(0, np.array(prob_array).max(), int(t_num))
 
-    # (prob_array >= t[:, None, None]) is a 3D array of shape (array_num, array_num, t_num). Each (array_num, array_num) layer is a 2D array of bool values indicating which values are greater than the value of the given t step.
+    # (prob_array >= t[:, None, None]) is a 3D array of shape (array_num, array_num, t_num). Each (array_num, array_num) layer is a 2D array of bool values indicating which values in prob_array are greater than the value of the given t step.
     # Multiplying this 3D array of bools by prob_array replaces the bools with the array value if the bool is T and 0 if the bool is F.
     # Finally, sum along the array_num axes to get a single list of values, each with the total summed probability in its array.
-    # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t
+    # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t.
 
     integral = ((prob_array > t[:, None, None])*prob_array).sum(axis=(1,2))
 
     # Now create a function that takes integral as the x (not the y) and then returns the corresponding prob value from the t array. Interpolating between integral values allows me to choose any enclosed total prob. value (ie, integral value) and get the corresponding prob. value to use as my contour.
-    # Use zero-order spline to address the interpolation issues that come with highly concentrated probability regions
+    # Use zero-order spline to address the interpolation issues that come with highly concentrated probability regions.
     f = sp.interpolate.interp1d(integral, t, kind='zero')
 
     contour_list = []
     prob_list = [0.68, 0.95, 0.997]
-
+    
     for i in sig_list:
         contour_list.append(prob_list[i-1])
 
-    # The plt.contourf function requires at least 2 levels. So if we want just one level, include a tiny contour that encompasses a small fraction of the total probability.
+    # The plt.contourf function requires at least 2 contour values. So if we want just one contour, include another contour that encompasses almost exactly the same total probability.
     if len(sig_list) == 1:
         contour_list.append(contour_list[0]-1e-4)
-        # contour_list.append(1e-3)
 
     # Make sure contour_list is in descending order
     t_contours = f(np.array(sorted(contour_list, reverse=True)))
     
-    #print('HERE', t_contours)
-    #import matplotlib.pyplot as plt
-    #probs = np.linspace(0.001, 0.999, 100)
-    #contours = f(probs)
-    #plt.plot(contours, probs, c='blue')
-    #plt.scatter(t, integral, s=1, c='red')
-    #plt.ylabel('Total probability encompassed')
-    #plt.xlabel('Probability at which to draw contours')
-    #print(len(t), len(integral))
-    #plt.show()
-    
-    # Make sure the probability contours do not have identical values. This generally only occurs for the imaging posterior, which is designed so that all pixels have either p=0 or p=some single value.
+    # Make sure the no two probability contours have identical values. This generally only occurs for the imaging posterior, which is designed so that all pixels have either p=0 or p=some single value.
     for i in range(len(t_contours)):
       if i == 0:
           continue
       if t_contours[i] == t_contours[i-1]:
           t_contours[i] = t_contours[i-1]*1.001
-
+          
+    # Return t_countours, which might look like [0.0004, 0.0015, 0.0062]. It will be passed to matplotlib's contourf() function.
     return t_contours
 
-
-def CDF_indices(prob_list, sig_list):
-    
-    # First make a list of indices in prob_list. This list is one element longer than prob_list (see below).
-    ind = np.linspace(0, len(prob_list), len(prob_list)+1)
-
-    # The input prob_list is the PDF. Use cumsum to calculate the CDF.
-    CDF = np.cumsum(prob_list)
-    # Insert 0 at the beginning of the cumulative sum (now the length matched ind). Matching this up with ind, we are saying that before the 0th index, we have 0 prob. Before the 1st index (and after adding the 0th), we have the prob corresponding to the 1th probability sum, and so on. Depending on where the index is actually placed (I believe it's in the center of each grid block), this could incur a ~pixel-level error.
-    CDF = np.insert(CDF,0,0)
-    
-    # Now we have a list of indices, running from eg low mass to high mass, AND the cumulative sum at (before) each index.
-    # I want to be able to put in a cumulative probability and get out the index where the CDF attains that value.
-    f = sp.interpolate.interp1d(CDF, ind)
-    
-    # n_sig_inds will be a list of 2-tuples. Each 2-tuple contains the indices marking the nth-sigma interval.
-    nsig_inds = []
-    nsig_prob_list = [0.68, 0.95, 0.997]
-    
-    for i in sig_list:
-        prob = nsig_prob_list[i-1]
-        
-        prob1 = (1 - prob)/2 # Eg, (1-0.95)/2 gives the 2.5% as the first prob
-        prob2 = 1 - prob1 # And 97.5% as the second
-        
-        bounds_indices = f(prob1), f(prob2)
-        
-        nsig_inds.append(bounds_indices)
-    
-    return nsig_inds
-    
-    
 
 def bounds_1D(prob_array, value_spaces, sig):
     """
     Given a 2D probability array, this function collapses the array along each 
     axis to find the desired confidence interval.
-    
+
     Arguments:
-        prob_array (np.array of floats): Square array of probabilities
+        prob_array (2D array of floats): Square array of probabilities
         value_spaces (list of 2 2-tuples): Mass and semi-major axis limits, in the form 
                                          [(min_value_m, max_value_m), (min_value_a, max_value_a)]
         sig (int): Standard deviation limits to compute. If sig==1, compute the 68% ~ 1σ limits.
-    
+
     Returns:                                       
         inds_sig_list (list of 2 lists): The indices on the horizontal axis where the CDF of 
                                         the collapsed prob_array reaches the upper/lower limit
                                         determined by sig.
-                                         
+                                 
         bounds_list (list of 2 lists): a/m values corresponding to the indices above.
     """
     lvls_sig_list = []
@@ -409,52 +378,95 @@ def bounds_1D(prob_array, value_spaces, sig):
 
         array_1D = prob_array.sum(axis=i)
         grid_num = len(array_1D)    
-        
+
         inds_sig = CDF_indices(array_1D, [sig])[0]
-        
+
         ### # value_bounds is a tuple of actual values, not indices.
-        ### # Reverse the order of value_spaces because if we collapse along m, we are interested in the a bounds
+        ### # Reverse the order of value_spaces because if we are interested in the a bounds, we collapse along m
         value_bounds = index2value(inds_sig, (0, grid_num), value_spaces[::-1][i])
-    
+
         inds_sig_list.append(inds_sig)
-    
+
         bounds_list.append(value_bounds)
 
     return bounds_list, inds_sig_list
 
 
-def value2index(value, index_space, value_space):
+def CDF_indices(prob_list, sig_list):
     """
-    The inverse of index2value: take a value on a
-    log scale and convert it to an index. index_space
-    and value_space are expected as tuples of the form
-    (min_value, max_value).
+    This function is the 1D analog of contour_levels(). Given a list of 
+    probabilities representing a probability density function (or
+    probability mass function because it is discrete), it determines 
+    the interval containing a specified fraction of the total probability.
+    
+    Arguments:
+        prob_list (array of floats): Normalized probability density function
+        sig_list (list of ints): Any combination of [1,2,3] to indicate
+                                 the desired probability encompassed by
+                                 each set of indices. [1,2,3]-sigma
+                                 correspond to [0.68, 0.95, 0.997].
+    
+    Returns:
+        nsig_inds (list of tuples of floats): Then nth tuple in nsig_inds 
+                                              gives the lower and upper
+                                              indices within which is contained
+                                              the probability given by the nth
+                                              sigma value in sig_list.
     """
-    # The log base doesn't matter (it cancels) as long as it's consistent.
-    min_index, max_index = index_space[0],  index_space[1]
-    min_value, max_value = value_space[0], value_space[1]
+    
+    # First make a list of indices in prob_list. This list is one element longer than prob_list (see below).
+    ind = np.linspace(0, len(prob_list), len(prob_list)+1)
 
-    index_range = max_index - min_index
-    log_value_range = np.log(max_value) - np.log(min_value)
-
-    value_arr = np.array(value)
-
-    index = (np.log(value_arr)-np.log(min_value))\
-            *(index_range/log_value_range) + min_index
-
-    return index
+    # The input prob_list is the PDF. Use cumsum to calculate the CDF.
+    CDF = np.cumsum(prob_list)
+    # Insert 0 at the beginning of the cumulative sum (now the length matches ind).
+    CDF = np.insert(CDF,0,0)
+    # Eg: ind = [0,1,2,3,4] ; CDF = [0, 0.15, 0.4, 0.9, 1.0]
+    # Matching this up with ind, we are saying that at the 0th index, we have 0 prob. At the 1st index (and after adding the 0th), we have the prob corresponding to the 1st probability sum, and so on. Depending on where the index is actually placed (I believe it's in the center of each grid block), this could incur a ~pixel-level error.
+    
+    # Now we have a list of indices, running from eg low mass to high mass, AND the cumulative sum at each index.
+    # I want to be able to put in a cumulative probability and get out the index where the CDF attains that value.
+    f = sp.interpolate.interp1d(CDF, ind)
+    
+    # n_sig_inds will be a list of 2-tuples. Each 2-tuple contains the indices marking the nth-sigma interval.
+    # Eg, the first element might be (38.3, 65.9), which are the indices which encompass 68% of the total probability.
+    nsig_inds = []
+    nsig_prob_list = [0.68, 0.95, 0.997]
+    
+    for i in sig_list:
+        prob = nsig_prob_list[i-1]
+        
+        # This method demands that there be equal probability excluded on both sides of the interval, which can give misleading results for multimodal or extended distributions.
+        prob1 = (1-prob)/2 # Eg, (1-0.95)/2 gives the 2.5% as the first prob
+        prob2 = 1-prob1 # And 97.5% as the second
+        
+        bounds_indices = f(prob1), f(prob2)
+        
+        nsig_inds.append(bounds_indices)
+    
+    return nsig_inds
+    
 
 def index2value(index, index_space, value_space):
     """
+    Converts indices to physical values.
     The axis values for a plotted array are just the array indices.
-    I want to convert these to Msini and a values, and on a log
-    scale. This function takes a single index from a linear index range,
-    and converts it to a parameter value in log space. index_space and
-    value_space are expected as tuples of the form (min_value, max_value).
-    index is in the range of index_space.
+    The objective is to convert these to M and a values on a log
+    scale. This function takes an index from a linear index range,
+    and converts it to a parameter value in log space. 
+    
+    Arguments:
+        index (float): Value in index space. Need not be an integer.
+        index_space (tuple of floats): Index range in the form 
+                                       (min_value, max_value)
+        value_space (tuple of floats): Mass or semi-major axis range
+                                       in the form 
+                                       (min_value, max_value)
+                                       
+    Returns:
+        value (float): Physical value corresponding to the given index
     """
     # The log base doesn't matter (it cancels) as long as it's consistent.
-    # Here I'm using base e, so it needs to be the base as well.
     index = np.array(index)
 
     min_index, max_index = index_space[0],  index_space[1]
@@ -470,6 +482,38 @@ def index2value(index, index_space, value_space):
 
     return value
 
+
+def value2index(value, index_space, value_space):
+    """
+    The inverse of index2value: take a value on a log scale
+    and convert it to an index. 
+    
+    Arguments:
+        value (float): Physical mass/semi-major axis value
+        index_space (tuple of floats): Index range in the form 
+                                       (min_value, max_value)
+        value_space (tuple of floats): Mass or semi-major axis range
+                                       in the form 
+                                       (min_value, max_value)
+    
+    Returns:
+        index (float): Value in index space corresponding to the
+                       given physical value
+    """
+    min_index, max_index = index_space[0],  index_space[1]
+    min_value, max_value = value_space[0], value_space[1]
+
+    index_range = max_index - min_index
+    log_value_range = np.log(max_value) - np.log(min_value)
+
+    value_arr = np.array(value)
+
+    index = (np.log(value_arr)-np.log(min_value))\
+            *(index_range/log_value_range) + min_index
+
+    return index
+
+
 def period_lines(m, per, m_star):
     """
     Function to draw lines of constant period on the final plot.
@@ -477,15 +521,15 @@ def period_lines(m, per, m_star):
     varies with period, companion mass, and stellar mass.
 
     Intended usage: Calculate an array of a values for a fixed per
-                and m_star and an array of companion masses.
+                    and m_star and an array of companion masses.
             
     Arguments:
-            m (list of floats): companion masses (M_J)
-            per (float): companion orbital period (days)
-            m_star (float): stellar mass (M_J)
+            m (list of floats, M_J): companion masses
+            per (float, days): companion orbital period
+            m_star (float, M_J): stellar mass
 
     Returns:
-            a (list of floats): Semi-major axis values (au)
+            a (list of floats, au): Semi-major axis values (au)
     """
 
     a = ((per/two_pi)**2*G*(m+m_star))**0.3333333333333

@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages, Extension
-# from Cython.Build import cythonize
+from Cython.Build import cythonize
 from setuptools.command.build_ext import build_ext as _build_ext
 # from distutils.extension import Extension
 # import numpy as np
@@ -88,7 +88,7 @@ setup(
     author = "Judah Van Zandt",
     author_email = "judahvz@astro.ucla.edu",
     url = "",
-    ext_modules = extensions
+    ext_modules = cythonize(extensions, build_dir = 'ethraid/compiled', language_level='3', annotate=True)
     )
 
 # ext_modules = cythonize(extensions, build_dir = 'ethraid/compiled', language_level='3', annotate=True)
