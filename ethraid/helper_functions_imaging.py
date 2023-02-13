@@ -121,8 +121,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     return np_imag_array
 
 
-# An important question I might ask later: why do I jump straight to “imag_array” (100X100) rather than first creating “imag_list” (len=1e8) and forming it into an array, as I do for RVs and astrometry? Answer: Basically, it takes too long and it's not needed. The constraints imposed on imaging are fairly rough (in my model): at a given separation, rule out all masses greater than X. Iterating through 1e8 points to assign each one a probability takes forever (specifically because I need to make 1e8 calls to an interpolation function), and moreover is unnecessary. I can jump to a 100X100 grid without really losing precision. This is not the case for RVs and astrometry, where the likelihood of a given model depends on all of its orbital parameters.
-
+# An important question I might ask later: why do I jump straight to “imag_array” (100X100) rather than first creating “imag_list” (len=1e8) and forming it into an array, as I do for RVs and astrometry? Answer: Basically, it takes too long and it's not needed. The constraints my model imposes on imaging are fairly rough: at a given separation, rule out all masses greater than X. Iterating through 1e8 points to assign each one a probability takes forever (specifically because I need to make 1e8 calls to an interpolation function), and moreover is unnecessary. I can jump to a 100X100 grid without losing precision. This is not the case for RVs and astrometry, where the likelihood of a given model depends on all of its orbital parameters.
 
 
 def abs_Xmag(d_star, vmag, imaging_wavelength):

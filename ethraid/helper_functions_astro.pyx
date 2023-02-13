@@ -30,11 +30,10 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
                double [:] per_list, 
                double m_star, double d_star, double delta_mu, double delta_mu_err):
     """
-    Calculate the likelihoods of a list of orbital models
-    conditioned on the astrometry data, and return a list
-    of those likelihoods. All input lists must have the
-    same length, and the output lik_list has that length
-    as well.
+    Calculates the likelihood of the astrometry data conditioned 
+    on each of a list of orbital models, resulting in a list of 
+    likelihoods. All input lists must have the same length, and 
+    the output lik_list has that length as well.
     
     Arguments:
         a_list (list of floats, AU): Semi-major axes
@@ -92,8 +91,8 @@ def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom
                 double per, double m_star, double d_star,
                 double dmu_data, double dmu_data_err):
     """
-    Compute the log-likelihood of a given orbital model 
-    conditioned on the astrometry data.
+    Computes the log-likelihood of the astrometry data conditioned on
+    a given orbital model (set of a, Mp, e, i, om, and M_anom_0).
     
     Arguments:
         a (float, AU): Semi-major axis
@@ -127,7 +126,7 @@ def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom
 def dmu(double a, double m, double e, double i, double om, double M_anom_0, 
         double per, double m_star, double d_star):
     """
-    Compute the change in proper motion, delta_mu, for 
+    Computes the change in proper motion, delta_mu, for 
     a set of model parameters
     
     Arguments:

@@ -1,14 +1,11 @@
-# cython: language_level=3, boundscheck=False, cdivision=True, wraparound=False
-# cython: binding=True
-from ethraid.kern_profiler_dummy import *
 import numpy as np
-cimport numpy as np
-from ethraid.compiled._kepler import kepler_single
-
 from astropy.time import Time
 from tqdm import tqdm
 import cython
+cimport numpy as np
 from libc.math cimport sin, cos, tan, atan, sqrt, log
+
+from ethraid.compiled._kepler import kepler_single
 
 
 cdef double two_pi, math_e, G, auday2ms, hip_beginning
@@ -16,7 +13,7 @@ cdef double two_pi, math_e, G, auday2ms, hip_beginning
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
 
-# G in AU, M_Jup, day units.
+# G in {AU, M_Jup, day} units.
 G = 2.824760877012879e-07 # (c.G.cgs*(1/c.au.cgs)**3 * (c.M_jup.cgs) * (24*3600)**2).value
 
 # Converts AU/day to m/s
@@ -29,6 +26,30 @@ def rv_list(double [:] a_list, double [:] m_list, double [:] e_list,
             double [:] i_list, double [:] om_list, double [:] M_anom_0_list,
             double [:] per_list, double m_star, double rv_epoch, 
             double gdot, double gdot_err, double gddot, double gddot_err):
+    
+    """
+    Calculates the likelihood of the RV data (measured gdot, gddot,
+    and their uncertainties) conditioned on each of a list of orbital 
+    models, resulting in a list of likelihoods. All input lists must 
+    have the same length, and the output lik_list has that length as well.
+    
+    Arguments:
+        a_list (list of floats, AU): Semi-major axis
+        m_list (list of floats, M_jup): Companion mass
+        e_list (list of floats): Orbital eccentricity
+        i_list (list of floats, radians): Orbital inclination
+        om_list (list of floats, radians): Argument of periastron
+        M_anom_0_list (list of floats, radians): 
+        per_list (list of floats, days): Orbital period
+        m_star (float, M_jup): Host star mass
+        rv_epoch (float, days): BJD at which the model RV trend
+                                and curv are calculated.
+        gdot (float, m/s/day): Measured linear trend term
+        gdot (float, m/s/day): Error on gdot
+        gddot (float, m/s/day/day): Measured quadratic curvature 
+                                    term
+        gddot_err (float, m/s/day/day): Error on gddot
+    """
     
     cdef int num_points, j
     cdef double a, m, e, i, om, M_anom_0, per, log_lik
@@ -55,22 +76,40 @@ def rv_list(double [:] a_list, double [:] m_list, double [:] e_list,
                                 gdot, gdot_err, gddot, gddot_err)
                               
         lik_list[j] = math_e**log_lik
+        
     return lik_list
 
 def log_lik_gamma(double a, double m, double e, double i, double om, double M_anom_0, 
                   double per, double m_star, double rv_epoch,
                   double gdot, double gdot_err, double gddot, double gddot_err):
     """
-    Compute the log-likelihood of a model (set of a, Mp, e, i, om, and M_anom_0)
-    given the RV data (true gammas and their uncertainties).
+    Computes the log-likelihood of the RV data conditioned on
+    a model (set of a, Mp, e, i, om, and M_anom_0).
+    
+    Arguments:
+        a (float, AU): Semi-major axis
+        m (float, M_jup): Companion mass
+        e (float): Orbital eccentricity
+        i (float, radians): Orbital inclination
+        om (float, radians): Argument of periastron
+        M_anom_0 (float, radians): 
+        per (float, days): Orbital period
+        m_star (float, M_jup): Host star mass
+        rv_epoch (float, days): BJD at which the model RV trend
+                                and curv are calculated.
+        gdot (float, m/s/day): Measured linear trend term
+        gdot (float, m/s/day): Error on gdot
+        gddot (float, m/s/day/day): Measured quadratic curvature 
+                                    term
+        gddot_err (float, m/s/day/day): Error on gddot
     
     Returns:
-        log_likelihood_total (float): Likelihood of gdot AND gddot given the model.
+        log_likelihood_total (float): Likelihood of gdot AND gddot 
+                                      conditioned on the model.
     """
     cdef double E, gdot_model, gddot_model
     cdef double log_likelihood_gdot, log_likelihood_gddot, log_likelihood_total
     
-    #per = hlp.P(a, m, m_star)
     E = M_2_evolvedE(M_anom_0, per, e, rv_epoch)
 
     gdot_model, gddot_model = gamma(a, m, e, i, om, E, per, m_star)
@@ -92,7 +131,8 @@ cpdef (double, double) gamma(double a, double m, double e,
                              double i, double om, double E, 
                              double per, double m_star):
     """
-    Given an orbital model, calculate gdot and gddot.
+    Given an orbital model, calculates RV trend (gdot) and 
+    curvature (gddot).
     
     Arguments:
         a (float, AU): Semi-major axis
@@ -105,8 +145,8 @@ cpdef (double, double) gamma(double a, double m, double e,
         m_star (float, M_jup): Host star mass
     
     Returns:
-        gdot (float, m/s/day): Linear trend term
-        gddot (float, m/s/day/day): Quadratic curvature term
+        gdot (float, m/s/day): Model linear trend term
+        gddot (float, m/s/day/day): Model quadratic curvature term
     """
 
     cdef double     e_term, sqrt_eterm,\
@@ -133,7 +173,7 @@ cpdef (double, double) gamma(double a, double m, double e,
     sin_nu_om = sin(nu+om)
     sin_i = sin(i)
 
-    # Fischer (analytic)
+    # Lovis+Fischer 2010 (analytic)
     pre_fac = sqrt(G)/sqrt_e_sq_term * m*sin_i/sqrt((m+m_star)*(a)) * auday2ms # AU/day ==> m/s
 
     gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/day
@@ -144,14 +184,25 @@ cpdef (double, double) gamma(double a, double m, double e,
     
 cpdef M_2_evolvedE(double M0, double per, double e, double rv_epoch):
     """
-    Takes a mean anomaly at the beginning of the Hip mission, 
-    evolves it to the RV epoch, and converts it to eccentric anomaly.
-
-    M0 is the mean anomaly in radians.
-    per is the period in days.
-    e is the eccentricity.
-    rv_epoch is the bjd corresponding to the ~midpoint of the RV baseline, 
-    where gdot and gddot are measured.
+    Use Radvel Kepler solver to take a mean anomaly at the beginning 
+    of the Hip mission, evolve it to the RV epoch, and convert it to
+    eccentric anomaly.
+    
+    Arguments:
+        M0 (float, radians): Mean anomaly at the beginning of the 
+                             Hipparcos mission
+        per (float, days): Orbital period
+        e (float): Orbital eccentricity
+        rv_epoch (float, days): BJD at which the model RV trend and 
+                                curv are calculated. This time should 
+                                be close to the midpoint of the RV
+                                baseline, where the measured trend
+                                and curvature (presumably) fit the
+                                time series best.
+    
+    Returns:
+        E (float, radians): Eccentric anomaly at time = rv_epoch
+  
     """
     # Fewer python references with no declarations. Not sure why.
     
