@@ -6,7 +6,10 @@ from scipy.interpolate import interp1d
 from ethraid import _ROOT
 import ethraid.compiled.helper_functions_general as hlp
 
-# Estimate that Ks (2.15μm) ~ K (2.2μm) and W1 (3.37μm) ~ L' (3.77μm) bc Baraffe uses K and L'
+# This module makes use of Table 5 of Pecaut & Mamajek (2013), available at https://www.pas.rochester.edu/~emamajek/EEM_dwarf_UBVIJHK_colors_Teff.txt
+# It also uses Table 4 from Baraffe+03
+# Both of these tables are included in the data/ directory
+# Estimate that Ks (2.15μm) ~ K (2.2μm) and W1 (3.37μm) ~ L' (3.77μm) because Baraffe uses K and L'
 mamajek_rename = {'K_s':'K', 'W1':'L_prime'}
 mamajek_table = pd.read_csv(_ROOT+'/data/mamajek.csv').rename(columns=mamajek_rename)
 baraffe_table = pd.read_csv(_ROOT+'/data/baraffe_table_4.csv')
@@ -40,7 +43,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
                                         "1" (actually 1 / the sum of the 
                                         array before normalization).
     """
-    # If no imaging provided, just return an array of 1s
+    # If no imaging is provided, just return an array of 1s
     if vmag is None or imag_wavelength is None or contrast_str is None:
         return np.ones((grid_num, grid_num))
     
@@ -69,7 +72,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     # Find the dimmest mag in Mamajek and start using Baraffe mags after that. 
     max_mag = interp_df_mamajek[band_name].max()
 
-    # Just like we took super bright entries from Mamajek, take even the dimmest from Baraffe to be safe.
+    # Just like we took even the brightest entries from Mamajek, take even the dimmest from Baraffe to be safe.
     interp_df_baraffe = baraffe_table.query("{}>{}".format(band_name, max_mag))[['M_jup', band_name]]
 
     # Concatenate the two dfs above
@@ -93,14 +96,6 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     # Mass values below bounds are +inf (bc -inf contrast), while those above bounds are last m value within bounds.
     a_m_interp_fn = interp1d(a_m_contrast['sep'], a_m_contrast['M_jup'], 
                              bounds_error=False, fill_value=(np.inf,last_m))
-    
-    # import matplotlib.pyplot as plt
-    # a_list = np.linspace(8, 100, 40)
-    # plt.plot(a_list, a_m_interp_fn(a_list))
-    # plt.xlabel('Separation (AU)', size=20)
-    # plt.ylabel(r'Mass ($M_{Jup}$)', size=20)
-    # plt.show()
-    # fdf
                              
     imag_array = np.ones((grid_num, grid_num))
     
@@ -134,7 +129,7 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
         vmag (float, mag): Apparent V-band magnitude of host star
         imaging_wavelength (float, micrometers): Wavelength of imaging data
     
-    returns:
+    Returns:
         band_name (str): Name of band pass whose center is nearest to
                         the imaging wavelength
         host_abs_Xmag (float, mag): Absolute magnitude of host star in
@@ -165,12 +160,13 @@ def mag_to_mass(mags, masses, abs_Xmag_list):
     magnitudes and masses to create a function. Then apply this function to
     the list of absolute magnitudes to calculate corresponding masses.
     
-    mags (list of floats, mag): List of reference absolute magnitudes in a 
-                                given band
-    masses (list of floats, M_jup): List of companion masses with the same 
-                                   length as mags
-    abs_Xmag_list (list of floats, mag): List of absolute magnitudes from the
-                                        contrast curve.
+    Arguments:
+        mags (list of floats, mag): List of reference absolute magnitudes in a 
+                                    given band
+        masses (list of floats, M_jup): List of companion masses with the same 
+                                       length as mags
+        abs_Xmag_list (list of floats, mag): List of absolute magnitudes from the
+                                            contrast curve.
     
     returns:
         mass_list (list of floats, M_jup): Interpolated masses corresponding to
@@ -183,30 +179,6 @@ def mag_to_mass(mags, masses, abs_Xmag_list):
     mass_list = f(abs_Xmag_list)
     
     return mass_list
-    
-
-
-# if __name__ == "__main__":
-
-# import matplotlib.pyplot as plt
-# ####################################
-# contrast_curve = pd.read_csv('data/TOI1174_832_sensitivity.dat',
-#                               skiprows=29,
-#                               delimiter=' ',
-#                               header=None)
-# new_header = ['ang_sep', 'delta_mag']
-# contrast_curve.columns = new_header
-# d_star = 94.9
-# vmag = 10.96
-# wavelength = 0.832
-# ####################################
-#
-# my_interp = m_a_interp_fn(d_star, vmag, wavelength, contrast_curve)
-#
-# a_list = np.linspace(1, 90, 100)
-#
-# plt.plot(a_list, my_interp(a_list))
-# plt.show()
 
 
 
