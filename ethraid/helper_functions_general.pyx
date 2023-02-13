@@ -25,12 +25,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     Create the parameter arrays which will be used for the RV and astrometry posteriors.
     
     Arguments:
-        m_star (float, M_sun): Mass of host star.
+        m_star (float, M_sun): Mass of host star
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
-                                     in the form (a_min, a_max).
-        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max).
-        grid_num (int): Dimensions of square (a,m) grid.
-        num_points (int): Number of random orbital models to simulate.
+                                     in the form (a_min, a_max)
+        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
+        grid_num (int): Dimensions of square (a,m) grid
+        num_points (int): Number of random orbital models to simulate
     
     Returns:
         a_list, m_list, per_list, e_list, 
@@ -42,7 +42,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
         a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
                                         (a, m, per, e, i, om, M_anom_0) model 
                                         will be placed, based on the model's 
-                                        a and m values.
+                                        a and m values
     """
 
     cdef double tp, a_min, a_max, m_min, m_max
@@ -116,14 +116,14 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list,
     
     Arguments:
         rv_post_list (np array of floats, len=num_points): List of model likelihoods
-                     given the RV data.
+                     given the RV data
         rv_post_list (np array of floats, len=num_points): List of model likelihoods
-                    given the astrometry data.
-        grid_num (int): Dimension of square (a,m) grid.
+                    given the astrometry data
+        grid_num (int): Dimension of square (a,m) grid
         a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
                                         (a, m, per, e, i, om, M_anom_0) model will 
                                         be placed, based on the model's 
-                                        a and m values.
+                                        a and m values
                                         
     Returns:
         tot_prob_array (numpy array, dim = grid_num x grid_dum): 2-D array of binned
@@ -166,13 +166,13 @@ def post_single(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid
     Form a list of probabilities into a 2D array.
     
     Arguments:
-        prob_list (list/array): List of probabilities to be be reshaped.
+        prob_list (list/array): List of probabilities to be be reshaped
         a_inds, m_inds (numpy arrays of ints): Coordinates where each probability
                                                will be placed. Probabilities with
                                                matching coordinates are summed 
                                                (marginalized).
         grid_num (int): Dimension of square array into which prob_list will be 
-                        formed.
+                        formed
     
     Returns:
         prob_array (np array, dim = grid_num x grid_num): Array of binned 
@@ -363,11 +363,10 @@ def bounds_1D(prob_array, value_spaces, sig):
         sig (int): Standard deviation limits to compute. If sig==1, compute the 68% ~ 1σ limits.
 
     Returns:                                       
+        bounds_list (list of 2 lists): a/m values corresponding to the indices below.
         inds_sig_list (list of 2 lists): The indices on the horizontal axis where the CDF of 
-                                        the collapsed prob_array reaches the upper/lower limit
-                                        determined by sig.
-                                 
-        bounds_list (list of 2 lists): a/m values corresponding to the indices above.
+                                         the collapsed prob_array reaches the upper/lower limit
+                                         determined by sig.
     """
     lvls_sig_list = []
     inds_sig_list = []
@@ -514,27 +513,28 @@ def value2index(value, index_space, value_space):
     return index
 
 
-def period_lines(m, per, m_star):
-    """
-    Function to draw lines of constant period on the final plot.
-    Rearranges Kepler's 3rd law to find how semi-major axis a 
-    varies with period, companion mass, and stellar mass.
-
-    Intended usage: Calculate an array of a values for a fixed per
-                    and m_star and an array of companion masses.
-            
-    Arguments:
-            m (list of floats, M_J): companion masses
-            per (float, days): companion orbital period
-            m_star (float, M_J): stellar mass
-
-    Returns:
-            a (list of floats, au): Semi-major axis values (au)
-    """
-
-    a = ((per/two_pi)**2*G*(m+m_star))**0.3333333333333
-
-
-    return a
+#def period_lines(m, per, m_star):
+#    """
+#    Function to help draw lines of constant period on 
+#    the final plot. Rearranges Kepler's 3rd law to find 
+#    how semi-major axis a varies with period, companion 
+#    mass, and stellar mass.
+#
+#    Intended usage: Calculate an array of a values for a fixed per
+#                    and m_star and an array of companion masses.
+#            
+#    Arguments:
+#            m (list of floats, M_J): companion masses
+#            per (float, days): companion orbital period
+#            m_star (float, M_J): stellar mass
+#
+#    Returns:
+#            a (list of floats, au): Semi-major axis values (au)
+#    """
+#
+#    a = ((per/two_pi)**2*G*(m+m_star))**0.3333333333333
+#
+#
+#    return a
     
     

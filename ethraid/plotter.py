@@ -23,20 +23,9 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     grid_pad = int(np.round(grid_num/15)) # grid_pad is the number of index blocks by which the grid is padded
     
     frac_exp = grid_pad/grid_num # This is the fraction by which the grid is extended to include the ruled out regions. Since it's log scale, this is an exponent.
-    
-    
+      
     a_min_plot = a_min/(a_max/a_min)**(frac_exp)
     m_min_plot = m_min/(m_max/m_min)**(frac_exp)
-    
-    
-    ######################
-    # import helper_functions_imaging as hlp_imag
-    # post_imag2 = hlp_imag.imag_array(d_star, vmag, 3.77, 'data/EDG_clean_curves/vortex_Lband.csv', a_lim, m_lim, 100)
-    # post_imag2_pad = np.pad(post_imag2, [(grid_pad, 0), (grid_pad, 0)])
-    # t_contours_imag2 = hlp.contour_levels(post_imag2, [1,2])
-    # post_imag_cont2 = ax.contourf(post_imag2_pad, t_contours_imag2,
-    #                            cmap='gray', extend='max', alpha=0.7, zorder=1)
-    ######################
     
     post_imag_pad = np.pad(post_imag, [(grid_pad, 0), (grid_pad, 0)])
     post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
@@ -64,13 +53,13 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                                cmap='Reds', extend='max', alpha=0.75, zorder=30)
     
-    # grid_num_2d is the side length of the 2D plotting array
-    grid_num_2d = grid_num+grid_pad
+    # grid_num_ext is the side length of the 2D plotting array
+    grid_num_ext = grid_num+grid_pad
     
-    # We want the rectangles to be grid_num_2d long, and grid_pad wide
-    mass_rect = ptch.Rectangle((0, 0), grid_num_2d-1, grid_pad,
+    # We want the rectangles to be grid_num_ext long, and grid_pad wide
+    mass_rect = ptch.Rectangle((0, 0), grid_num_ext-1, grid_pad,
                                        color='gray', alpha=1.0)
-    a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num_2d-1,
+    a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num_ext-1,
                                        color='gray', alpha=1.0)
 
     ax.add_patch(mass_rect)
@@ -81,9 +70,9 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     region_label_size = 50
     restricted_region_label_size = 40
 
-    plt.text((5/16)*grid_num_2d, (1/8)*(grid_pad/2), 'Ruled out by RVs', 
+    plt.text((5/16)*grid_num_ext, (1/8)*(grid_pad/2), 'Ruled out by RVs', 
               size=restricted_region_label_size)
-    plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_2d, 'Ruled out by minimum period', 
+    plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_ext, 'Ruled out by minimum period', 
               size=restricted_region_label_size, rotation=90)
 
 
@@ -115,21 +104,9 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     a_lim_plot = (a_min_plot, a_max)
     m_lim_plot = (m_min_plot, m_max)
     
-    tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num_2d-1), a_lim_plot)
-    tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num_2d-1), m_lim_plot)
-    
-    
-    # #############################
-    # M_sun = 1.988409870698051e+33
-    # M_jup = 1.8981245973360504e+30
-    #
-    # raw_labels_msun = np.array([0.01, 0.05, 0.25, 1.0])
-    # raw_labels_mjup = raw_labels_msun*M_sun/M_jup
-    #
-    # tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_msun))
-    # tick_positions_m = hlp.value2index(raw_labels_mjup, (0, grid_num_2d-1), m_lim_plot)
+    tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num_ext-1), a_lim_plot)
+    tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num_ext-1), m_lim_plot)
 
-    # #############################
     
     plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
     plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)
@@ -145,30 +122,32 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     plt.xticks(tick_positions_a, tick_labels_sep, size=tick_size*0.75)
     plt.xlabel('Angular separation (arcsec)', size=label_size*0.75)
     
-    
-    
-    
+    ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:
         
-        sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_plot, grid_num_2d, a_lim_plot, m_lim_plot)
+        sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot)
 
         plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=4)
     
+    ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
     if period_lines:
+        ## Plot harmonics of total baseline
+        const_per_a_inds_list, const_per_m_inds_list, fmt =\
+                                hlp_plot.period_lines(m_star, a_lim, m_lim, 
+                                                      a_lim_plot, m_lim_plot, 
+                                                      grid_num_ext, 3, how='tot')
+        num_lines = len(const_per_a_inds_list)
+        for i in range(num_lines):
+            plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5)
+            
         
-        for n in range(5):
-            const_per_a_inds, const_per_m_inds, fmt =\
-                                    hlp_plot.period_lines(m_star, a_lim, m_lim, 
-                                                          a_lim_plot, m_lim_plot, 
-                                                          grid_num_2d, n, how='tot')
-            plt.plot(const_per_a_inds, const_per_m_inds, fmt, alpha=0.5)
-            
-            
-            const_per_a_inds, const_per_m_inds, fmt =\
-                                    hlp_plot.period_lines(m_star, a_lim, m_lim, 
-                                                          a_lim_plot, m_lim_plot, 
-                                                          grid_num_2d, n, how='gaia')                             
-            plt.plot(const_per_a_inds, const_per_m_inds, fmt, alpha=0.5)
+        ## Plot harmonics of Gaia baseline
+        const_per_a_inds_list, const_per_m_inds_list, fmt =\
+                                hlp_plot.period_lines(m_star, a_lim, m_lim,
+                                                      a_lim_plot, m_lim_plot,
+                                                      grid_num_ext, 3, how='gaia')
+        for i in range(num_lines):
+            plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5)
             
 
 
@@ -184,8 +163,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
 
     if marginalized:
-        
-        hlp_plot.marginalized_1d(star_name, post_tot, grid_num, twosig_inds, 
+        hlp_plot.marginalized_1d(star_name, post_tot, twosig_inds, 
                                  a_lim, m_lim, tick_labels_a, tick_labels_m, outdir=outdir)
 
         

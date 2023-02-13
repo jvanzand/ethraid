@@ -155,7 +155,7 @@ def run(star_name, m_star, d_star,
         plotter.joint_plot(star_name, m_star, d_star, vmag, 
                            post_tot, post_rv, post_astro, post_imag, 
                            grid_num, a_lim, m_lim, scatter_plot=scatter_plot, 
-                           period_lines = False, outdir=outdir)
+                           period_lines = True, outdir=outdir)
     
     return
     
