@@ -17,7 +17,7 @@ def main():
     parser.add_argument('-ms', '--m_star', type=float, metavar='\b', required=True,
                         help='Stellar mass in units of Jupiter masses')
     parser.add_argument('-ds', '--d_star', type=float, metavar='\b', required=True,
-                        help='Distance to the host star in AU')
+                        help='Distance from Earth to the host star in AU')
                 
     parser.add_argument('-gd', '--gammadot', type=float, metavar='\b', required=True,
                         help='Linear trend in RVs in m/s/day')
