@@ -180,7 +180,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     sqrt_eterm = sqrt((1+e)/(1-e))
     a_star = a*mass_ratio
     e_sq = e**2
-    rot_matrix(i, om, 0, rot_mtrx) # Omega = 0 arbitrarily
+    rot_matrix(i, om, rot_mtrx)
     r_star_num_fac = a*(1-e_sq)
     
     
@@ -335,46 +335,39 @@ cdef vel_avg(double a, double n, double e, double E1, double E2,
 
     return x_avg, y_avg
 
-
-cdef void rot_matrix(double i, double om, double Om, double [:,:] rot_mtrx):
+cdef void rot_matrix(double i, double om, double [:,:] rot_mtrx):
     """
-    This is P3*P2*P1 from Murray & Dermott Eqs. 2.119 and 2.120. It is not given 
-    explicitly in the text. They multiply it immediately by r*[cos(f), sin(f), 0] 
-    because this gives the projection of position onto the sky. However, we also 
-    need the projection of velocity, so we need the matrix before multiplication 
-    by the position vector.
+    This is P2*P1 from Murray & Dermott Eqs. 2.119. We omit P3 (2.120) because
+    the longitude of the ascending node (Omega) can be set arbitrarily to 0 for
+    our purposes, saving some time.
 
     This function doesn't return anything. Instead, declare a matrix in your 
     function and this will update it, saving lots of time by not allocating memory 
     to and returning a matrix.
-    
+
     Arguments:
         i (float, radians): orbital inclination (0 = face-on)
         om (float, radians): argument of periastron
         Om (float, radians): longitude of the ascending node
         rot_mtrx (3x3 array of zeros): Initial array, modified in place
-        
+
     Returns:
         None (but populates rot_mtrx with values)
     """
-    cdef double sin_Om, sin_om, sin_i, cos_Om, cos_om, cos_i
+    cdef double sin_om, sin_i, cos_om, cos_i
 
-    sin_Om = sin(Om)
     sin_om = sin(om)
     sin_i  = sin(i)
-    cos_Om = cos(Om)
     cos_om = cos(om)
     cos_i  = cos(i)
-    sin_Om_cos_i = sin_Om*cos_i
-    cos_Om_cos_i = cos_Om*cos_i
 
-    rot_mtrx[0][0] = cos_Om*cos_om - sin_Om_cos_i*sin_om
-    rot_mtrx[0][1] = -sin_om*cos_Om - sin_Om_cos_i*cos_om
-    rot_mtrx[0][2] = sin_Om*sin_i
+    rot_mtrx[0][0] = cos_om
+    rot_mtrx[0][1] = -sin_om
+    rot_mtrx[0][2] = 0
 
-    rot_mtrx[1][0] = sin_Om*cos_om + cos_Om_cos_i*sin_om
-    rot_mtrx[1][1] = -sin_om*sin_Om + cos_Om_cos_i*cos_om
-    rot_mtrx[1][2] = -cos_Om*sin_i
+    rot_mtrx[1][0] = cos_i*sin_om
+    rot_mtrx[1][1] = cos_i*cos_om
+    rot_mtrx[1][2] = -sin_i
 
     rot_mtrx[2][0] = sin_i*sin_om
     rot_mtrx[2][1] = sin_i*cos_om
