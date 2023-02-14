@@ -6,6 +6,25 @@ from ethraid.compiled import helper_functions_general as hlp
 
 
 def load(read_file_path, grid_num):
+    """
+    Loads probability arrays from a specified h5py file.
+    
+    Arguments:
+        read_file_path (str): Path to saved data
+        grid_num (int): Desired array shape
+    
+    Returns:
+        star_name (str): Name of star (does not need to be official)
+        m_star (float, M_jup): Mass of host star
+        d_star (float, AU): Distance from Earth to host star
+        post_tot (array of floats): Total posterior array
+        post_rv (array of floats): Model probabilities given RV data only
+        post_astro (array of floats): Model probabilities given astrometry data only
+        post_imag (array of floats): Model probabilities given imaging data only
+        a_lim (tuple of floats, au): Semi-major axis limits to consider, 
+                                     in the form (a_min, a_max)
+        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
+    """
     
     
     print('Reading posterior in from '+read_file_path)
@@ -25,7 +44,6 @@ def load(read_file_path, grid_num):
     m_list = np.array(post_file.get('m_list')) # Companion mass values
     a_lim = np.array(post_file.get('a_lim')) # Limits over which a is sampled
     m_lim = np.array(post_file.get('m_lim')) # Limits over which m is sampled
-    min_a, min_m = np.array(post_file.get('min_vals'))
     
     # Calculate indices using provided grid_num
     a_bins = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
@@ -38,32 +56,26 @@ def load(read_file_path, grid_num):
     if no_astro:
         num_points = len(rv_list)
         astro_list = np.ones(num_points)
-        post_astro = np.zeros((grid_num, grid_num))
-        
-        grid_pad = int(np.round(grid_num/15))
-        post_astro = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
+        post_astro = np.ones((grid_num, grid_num))
+
         print('No astrometry data provided. Bounds will be based on RVs only.')
         
     else:                                       
         post_astro = hlp.post_single(astro_list, a_inds, m_inds, grid_num)
-        # post_astro = post_astro/post_astro.sum()
-    
     post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
-    # post_rv = post_rv/post_rv.sum()
-
     post_tot = hlp.post_tot(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
-    # post_tot = post_tot/post_tot.sum()
     
-    return star_name, m_star, d_star, post_tot, post_rv, post_astro, post_imag, a_lim, m_lim, min_a, min_m
+    return star_name, m_star, d_star, post_tot, post_rv, post_astro, post_imag, a_lim, m_lim
 
 
 def save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag,
-         a_list, m_list, a_lim, m_lim, min_a, min_m, outdir=''):
+         a_list, m_list, a_lim, m_lim, outdir=''):
          
          """
+         Save results of modeling procedure to a .h5 file.
          Note that you don't have to specify grid_num in order to save the arrays.
-         You can save the raw arrays and later use load() to load them back in
-         and specify grid_num then to form them to whatever shape you want.
+         You can save the raw arrays and later use load() to load them back in,
+         specify grid_num then, and form them to whatever shape you want.
          """
         
          save_dir = outdir+'results/post_arrays/'# Arrays for all stars go in one folder
@@ -88,8 +100,6 @@ def save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag,
          
          post_file.create_dataset('a_lim', data=a_lim)
          post_file.create_dataset('m_lim', data=m_lim)
-         
-         post_file.create_dataset('min_vals', data=(min_a, min_m))
          
          post_file.close()
          print('Posterior file saved to '+post_file_path)

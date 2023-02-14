@@ -9,6 +9,44 @@ from ethraid.compiled import helper_functions_general as hlp
 
 def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
                scatter_plot=None, period_lines=False, marginalized=True, outdir=''):
+    """
+    Plots the 2D joint mass-semi-major axis posteriors calculated using 
+    provided RV, astrometry, and imaging data.
+               
+    
+    """
+               
+   """
+   Loads probability arrays from a specified h5py file.
+
+   Arguments:
+       star_name (str): Name of star (does not need to be official)
+       m_star (float, M_jup): Mass of host star
+       d_star (float, AU): Distance from Earth to host star
+       vmag (float, mag): Visual magnitude of host star
+       post_tot (array of floats): Total posterior array
+       post_rv (array of floats): Model probabilities given RV data only
+       post_astro (array of floats): Model probabilities given astrometry data only
+       post_imag (array of floats): Model probabilities given imaging data only
+       grid_num (int): Shape of square posterior arrays
+       a_lim (tuple of floats, au): Semi-major axis limits to consider, 
+                                    in the form (a_min, a_max)
+       m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
+       scatter_plot (tuple of floats): Optional (semi-major axis, mass) pair
+                                       specifying the location of a known
+                                       companion to plot. Sma in AU, mass in
+                                       M_jup.
+        period_lines (bool): Optionally plot lines of constant period
+                             at periods equal to harmonics of the Gaia and 
+                             HG baselines
+        marginalized (bool): Optionally create a separate plot of the
+                             marginalized 1D mass and semi-major axis
+                             posteriors
+        out_dir (str): Path to save generated plot
+
+   Returns:
+        None (plots 2D joint posterior)
+   """
     
     tick_num = 6
     tick_size = 40
@@ -19,6 +57,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
     
     ######## Padding arrays #########
+    ## Companions of low mass and close separation are ruled out based on the RV trend alone. To illustrate this, expand the grid slightly on the left and bottom.
     
     grid_pad = int(np.round(grid_num/15)) # grid_pad is the number of index blocks by which the grid is padded
     
@@ -37,7 +76,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
         post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
                          cmap='Blues', extend='max', alpha=0.5, zorder=10)
     
-    except:
+    except Exception as e:
         print('Error encountered in astrometry plot. Moving on.')
         pass
     
@@ -78,7 +117,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
 
     ax.set_xlabel('Semi-major axis (au)', size=label_size)
     ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
-    # ax.set_ylabel(r'$M_p$ ($M_{\odot}$)', size=label_size)
+
     ###################################################
     ############ Axis ticks and labels ################
     
@@ -112,7 +151,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)
     
     
-    ######## Done with x and y axes. Now to add the top x axis, which is separation in arcseconds
+    ######## Done with x and y axes. Now to add the top x axis, which is separation in arcseconds ########
     raw_labels_sep = hlp_plot.tick_function_a(tick_labels_a, d_star)
     tick_labels_sep = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_sep))
 

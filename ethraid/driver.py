@@ -29,6 +29,8 @@ def run(args):
     Primary function to run code.
         
     Arguments:
+        args: Command line arguments, including:
+    
         star_name (str): Name of host star
         m_star (Jupiter masses): Mass of host star
         d_star (AU): Distance to host star
@@ -88,14 +90,6 @@ def run(args):
         # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
         min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
         
-        
-        #############################
-        # min_a = 0.1
-        # min_m = 0.01*M_sun/M_jup
-        #
-        # max_a = 100
-        # max_m = 1*M_sun/M_jup
-        #############################
 
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
@@ -158,13 +152,13 @@ def run(args):
             no_astro = True if (delta_mu is None or delta_mu_err is None) else False
                 
             ls.save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag, a_list, m_list,
-                    a_lim, m_lim, min_a, min_m, outdir=outdir)
+                    a_lim, m_lim, outdir=outdir)
     
     # Otherwise, load in existing data:
     else:
         star_name, m_star, d_star,\
         post_tot, post_rv, post_astro, post_imag,\
-        a_lim, m_lim, min_a, min_m = ls.load(read_file_path, grid_num)
+        a_lim, m_lim = ls.load(read_file_path, grid_num)
         
         
     if plot==True:

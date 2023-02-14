@@ -20,8 +20,8 @@ def scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot):
         grid_num_ext (int): Dimension of square plotting array, including
                            extension for ruled-out regions
         a_lim_plot (tuple of floats, au): Semi-major axis limits to plot 
-                                          over, in the form (a_min, a_max).
-        m_lim_plot (tuple of floats, M_jup): Mass limits as (m_min, m_max).
+                                          over, in the form (a_min, a_max)
+        m_lim_plot (tuple of floats, M_jup): Mass limits as (m_min, m_max)
     
     Returns:
         sep_ind, mp_ind (tuple of floats): Indices corresponding to given

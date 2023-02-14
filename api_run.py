@@ -142,28 +142,27 @@ def run(star_name, m_star, d_star,
             no_astro = True if (delta_mu is None or delta_mu_err is None) else False
                 
             ls.save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag, a_list, m_list,
-                    a_lim, m_lim, min_a, min_m, outdir=outdir)
+                    a_lim, m_lim, outdir=outdir)
     
     # Otherwise, load in existing data:
     else:
         star_name, m_star, d_star,\
         post_tot, post_rv, post_astro, post_imag,\
-        a_lim, m_lim, min_a, min_m = ls.load(read_file_path, grid_num)
+        a_lim, m_lim = ls.load(read_file_path, grid_num)
         
         
     if plot==True:
         plotter.joint_plot(star_name, m_star, d_star, vmag, 
                            post_tot, post_rv, post_astro, post_imag, 
                            grid_num, a_lim, m_lim, scatter_plot=scatter_plot, 
-                           period_lines = True, outdir=outdir)
+                           period_lines = False, outdir=outdir)
     
     return
     
 
 if __name__ == "__main__":
     
-    run(*sp.params_12572, num_points=1e6, grid_num=100, plot=True, read_file_path=None, outdir='')
-    #'results/post_arrays/191939_old_1e8.h5')
+    run(*sp.params_12572, num_points=1e6, grid_num=100, plot=True, read_file_path='results/post_arrays/T001174.h5', outdir='')
     #'results/post_arrays/12572.h5'
     # run(*sp.params_synth, num_points=1e6, grid_num=100, save=False, plot=True)
     
