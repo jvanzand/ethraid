@@ -17,10 +17,15 @@ def load(read_file_path, grid_num):
         star_name (str): Name of star (does not need to be official)
         m_star (float, M_jup): Mass of host star
         d_star (float, AU): Distance from Earth to host star
-        post_tot (array of floats): Total posterior array
-        post_rv (array of floats): Model probabilities given RV data only
-        post_astro (array of floats): Model probabilities given astrometry data only
-        post_imag (array of floats): Model probabilities given imaging data only
+        post_tot (array of floats): Total posterior array, shape=(grid_num,grid_num)
+        post_rv (array of floats): Model probabilities given RV data only, marginalized
+                                   over all orbital parameters except a and m
+        post_astro (array of floats): Model probabilities given astrometry data only,
+                                      marginalized over all orbital parameters except 
+                                      a and m
+        post_imag (array of floats): Model probabilities given imaging data only, 
+                                     marginalized over all orbital parameters 
+                                     except a and m
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max)
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
@@ -72,10 +77,39 @@ def save(star_name, m_star, d_star, rv_list, astro_list, no_astro, post_imag,
          a_list, m_list, a_lim, m_lim, outdir=''):
          
          """
-         Save results of modeling procedure to a .h5 file.
+         Saves calculated probability arrays to a specified h5py file.
          Note that you don't have to specify grid_num in order to save the arrays.
          You can save the raw arrays and later use load() to load them back in,
          specify grid_num then, and form them to whatever shape you want.
+    
+         Arguments:
+             read_file_path (str): Path to saved data
+             grid_num (int): Desired array shape
+    
+         Arguments:
+             star_name (str): Name of star (does not need to be official)
+             m_star (float, M_jup): Mass of host star
+             d_star (float, AU): Distance from Earth to host star
+             rv_list (list floats): RV data likelihoods conditioned
+                                    on full orbit models
+             astro_list (list of floats): Astrometry data likelihoods 
+                                          conditioned on full orbit models
+             no_astro (bool): Is astrometry data included?
+             post_imag (array of floats): Model probabilities given imaging 
+                                          data only,marginalized over all 
+                                          orbital parameters except a and m.
+                                          NOTE that post_imag is a 2D array,
+                                          not a list.
+             a_list (list of floats): Semi-major axes corresponding to above
+                                      model probabilities
+             m_list (list of floats): Companion masses corresponding to above
+                                      model probabilities
+             a_lim (tuple of floats, au): Semi-major axis limits to consider, 
+                                          in the form (a_min, a_max)
+             m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
+         
+         Returns:
+             None
          """
         
          save_dir = outdir+'results/post_arrays/'# Arrays for all stars go in one folder
