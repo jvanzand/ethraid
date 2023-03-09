@@ -7,46 +7,43 @@ import matplotlib.patches as ptch
 from ethraid import helper_functions_plotting as hlp_plot
 from ethraid.compiled import helper_functions_general as hlp
 
-def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim,
-               scatter_plot=None, period_lines=False, marginalized=True, outdir=''):
+def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, 
+               post_astro, post_imag, grid_num, a_lim, m_lim,
+               scatter_plot=None, period_lines=False, marginalized=True, 
+               outdir=''):
+    
     """
     Plots the 2D joint mass-semi-major axis posteriors calculated using 
     provided RV, astrometry, and imaging data.
-               
-    
+
+    Arguments:
+        star_name (str): Name of star (does not need to be official)
+        m_star (float, M_jup): Mass of host star
+        d_star (float, AU): Distance from Earth to host star
+        vmag (float, mag): Visual magnitude of host star
+        post_tot (array of floats): Total posterior array
+        post_rv (array of floats): Model probabilities given RV data only
+        post_astro (array of floats): Model probabilities given astrometry data only
+        post_imag (array of floats): Model probabilities given imaging data only
+        grid_num (int): Shape of square posterior arrays
+        a_lim (tuple of floats, au): Semi-major axis limits to consider, 
+                                     in the form (a_min, a_max)
+        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
+        scatter_plot (tuple of floats): Optional (semi-major axis, mass) pair
+                                        specifying the location of a known
+                                        companion to plot. Sma in AU, mass in
+                                        M_jup.
+         period_lines (bool): Optionally plot lines of constant period
+                              at periods equal to harmonics of the Gaia and 
+                              HG baselines
+         marginalized (bool): Optionally create a separate plot of the
+                              marginalized 1D mass and semi-major axis
+                              posteriors
+         out_dir (str): Path to save generated plot
+
+    Returns:
+         None (plots 2D joint posterior)
     """
-               
-   """
-   Loads probability arrays from a specified h5py file.
-
-   Arguments:
-       star_name (str): Name of star (does not need to be official)
-       m_star (float, M_jup): Mass of host star
-       d_star (float, AU): Distance from Earth to host star
-       vmag (float, mag): Visual magnitude of host star
-       post_tot (array of floats): Total posterior array
-       post_rv (array of floats): Model probabilities given RV data only
-       post_astro (array of floats): Model probabilities given astrometry data only
-       post_imag (array of floats): Model probabilities given imaging data only
-       grid_num (int): Shape of square posterior arrays
-       a_lim (tuple of floats, au): Semi-major axis limits to consider, 
-                                    in the form (a_min, a_max)
-       m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
-       scatter_plot (tuple of floats): Optional (semi-major axis, mass) pair
-                                       specifying the location of a known
-                                       companion to plot. Sma in AU, mass in
-                                       M_jup.
-        period_lines (bool): Optionally plot lines of constant period
-                             at periods equal to harmonics of the Gaia and 
-                             HG baselines
-        marginalized (bool): Optionally create a separate plot of the
-                             marginalized 1D mass and semi-major axis
-                             posteriors
-        out_dir (str): Path to save generated plot
-
-   Returns:
-        None (plots 2D joint posterior)
-   """
     
     tick_num = 6
     tick_size = 40
@@ -92,14 +89,32 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                                cmap='Reds', extend='max', alpha=0.75, zorder=30)
     
+    
+    ########
+    ### Adding Vortex contrast curve to plot
+    from ethraid import helper_functions_imaging as hlp_imag
+    contrast_str = 'ethraid/data/clean_curves/vortex_Lband.csv'
+    post_vortex = hlp_imag.imag_array(d_star, vmag, 3.77, contrast_str, a_lim, m_lim, grid_num)
+
+    # plt.imshow(post_imag)
+    # plt.show()
+
+    post_vortex_pad = np.pad(post_vortex, [(grid_pad, 0), (grid_pad, 0)])
+    t_contours_vortex = hlp.contour_levels(post_vortex, [1,2])
+
+    post_vortex_cont = ax.contour(post_vortex_pad, t_contours_vortex,
+                               cmap='autumn', extend='both', alpha=1.0, zorder=35)
+    #######
+    
+    
     # grid_num_ext is the side length of the 2D plotting array
     grid_num_ext = grid_num+grid_pad
     
     # We want the rectangles to be grid_num_ext long, and grid_pad wide
     mass_rect = ptch.Rectangle((0, 0), grid_num_ext-1, grid_pad,
-                                       color='gray', alpha=1.0)
+                                       color='gray', alpha=1.0, zorder=100)
     a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num_ext-1,
-                                       color='gray', alpha=1.0)
+                                       color='gray', alpha=1.0, zorder=100)
 
     ax.add_patch(mass_rect)
     ax.add_patch(a_rect)
@@ -110,9 +125,9 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, post_astro, p
     restricted_region_label_size = 40
 
     plt.text((5/16)*grid_num_ext, (1/8)*(grid_pad/2), 'Ruled out by RVs', 
-              size=restricted_region_label_size)
+              size=restricted_region_label_size, zorder=101)
     plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_ext, 'Ruled out by minimum period', 
-              size=restricted_region_label_size, rotation=90)
+              size=restricted_region_label_size, rotation=90, zorder=101)
 
 
     ax.set_xlabel('Semi-major axis (au)', size=label_size)

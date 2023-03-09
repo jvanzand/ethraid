@@ -26,7 +26,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     on the mass regime.
     
     Arguments:
-        d_star (float, pc): Distance to the host star
+        d_star (float, AU): Distance to the host star
         vmag (float, mag): Apparent V-band magnitude of host star
         imag_wavelength (float, μm): Wavelength of imaging data in contrast_curve
         contrast_str (str): Path to contrast curve with columns of 
@@ -45,31 +45,32 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     """
     # If no imaging is provided, just return an array of 1s
     if vmag is None or imag_wavelength is None or contrast_str is None:
+        print('Missing imaging inputs. Moving on.')
         return np.ones((grid_num, grid_num))
-    
+
     # Get band of observations and host star abs mag in that band
     band_name, host_abs_Xmag = abs_Xmag(d_star, vmag, imag_wavelength)
-    
+
     contrast_curve = pd.read_csv(contrast_str)
-    
+
     if not set(['ang_sep', 'delta_mag']).issubset(contrast_curve.columns):
         raise Exception("The dataframe must contain columns 'ang_sep' and 'delta_mag'")
-    
+
     # Objective is sep (AU) vs. mass (M_jup)
-    ############## 1: Get separation. Make sure to convert d_star from au to pc
+    ############## 1: Get physical separation. Make sure to convert d_star from au to pc
     seps = contrast_curve['ang_sep']*(d_star/pc_in_au)
     ##############
-    
+
     ############## 2: Get companion absolute mag at each Δmag
-    # The absolute magnitudes of the companion are the delta_mag values plus the host star abs mag
+    # The absolute magnitudes of the companions are the delta_mag values plus the host star abs mag
     Xband_abs_mags = contrast_curve['delta_mag']+host_abs_Xmag
-    
-    ############## 3: Create interp_df, a function between companion absolute magnitude and companion mass
+
+    ############## 3: Create interp_df, a csv relating companion absolute magnitude to companion mass
     # Start with Mamajek. We could cut super bright targets from the interpolation, but no need
     interp_df_mamajek = mamajek_table[['M_jup', band_name]]
-    
+
     # It may be that Mamajek covers the whole contrast curve and we don't need Baraffe, but maybe not.
-    # Find the dimmest mag in Mamajek and start using Baraffe mags after that. 
+    # Find the dimmest mag in Mamajek and start using Baraffe mags after that.
     max_mag = interp_df_mamajek[band_name].max()
 
     # Just like we took even the brightest entries from Mamajek, take even the dimmest from Baraffe to be safe.
@@ -78,12 +79,13 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     # Concatenate the two dfs above
     interp_df = pd.concat([interp_df_mamajek, interp_df_baraffe]).sort_values(by=band_name)
     
-    ############## 4: Use interpolation function to get companion masses
+    ############## 4: Use interpolation function to get companion masses from Xband_abs_mags
     companion_masses = mag_to_mass(interp_df[band_name], interp_df['M_jup'], Xband_abs_mags)
     ##############
     
     # Discrete correspondence between separation and mass. We get a continuous correspondence below
     a_m_contrast = pd.DataFrame({'M_jup':companion_masses, 'sep':seps}).reset_index(drop=True)
+
     
     # We might want to plot sma values greater than what's given in the contrast curve.
     # In that case, conservatively estimate that the curve becomes flat after the last sma value
@@ -117,7 +119,6 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
 
 
 # An important question I might ask later: why do I jump straight to “imag_array” (100X100) rather than first creating “imag_list” (len=1e8) and forming it into an array, as I do for RVs and astrometry? Answer: Basically, it takes too long and it's not needed. The constraints my model imposes on imaging are fairly rough: at a given separation, rule out all masses greater than X. Iterating through 1e8 points to assign each one a probability takes forever (specifically because I need to make 1e8 calls to an interpolation function), and moreover is unnecessary. I can jump to a 100X100 grid without losing precision. This is not the case for RVs and astrometry, where the likelihood of a given model depends on all of its orbital parameters.
-
 
 def abs_Xmag(d_star, vmag, imaging_wavelength):
     """
@@ -181,9 +182,50 @@ def mag_to_mass(mags, masses, abs_Xmag_list):
     return mass_list
 
 
+def interp_fn(d_star, vmag, imag_wavelength, which='C2M'):
+    """
+    Helper function to interpolate between contrast and mass. Choose
+    whether the output function takes contrasts and returns mass, or
+    vice versa.
+    
+    Arguments:
+        d_star (float, AU): Distance to the host star
+        vmag (float, mag): Apparent V-band magnitude of host star
+        imag_wavelength (float, μm): Wavelength of imaging data in contrast_curve
+        which (str): Either 'C2M' or 'M2C' to choose whether contrast/mass
+                     should be the input/output of the returned function.
+    
+    Returns:
+        interp_fn (scipy function): Function taking contrast as an argument
+                                    and returning companion mass, or vice versa.
+    """
+    
+    # Get band of observations and host star abs mag in that band
+    band_name, host_abs_Xmag = abs_Xmag(d_star, vmag, imag_wavelength)
+    
+    ############## Create interp_df, a csv relating companion absolute magnitude to companion mass
+    # Start with Mamajek. We could cut super bright targets from the interpolation, but no need
+    interp_df_mamajek = mamajek_table[['M_jup', band_name]]
+    
+    # It may be that Mamajek covers the whole contrast curve and we don't need Baraffe, but maybe not.
+    # Find the dimmest mag in Mamajek and start using Baraffe mags after that. 
+    max_mag = interp_df_mamajek[band_name].max()
 
+    # Just like we took even the brightest entries from Mamajek, take even the dimmest from Baraffe to be safe.
+    interp_df_baraffe = baraffe_table.query("{}>{}".format(band_name, max_mag))[['M_jup', band_name]]
 
-
+    # Concatenate the two dfs above
+    interp_df = pd.concat([interp_df_mamajek, interp_df_baraffe]).sort_values(by=band_name)[[band_name, 'M_jup']]
+    interp_df['delta_mag'] = interp_df[band_name] - host_abs_Xmag # Contrast column
+    
+    if which=='C2M': # Function from contrast to mass
+        interp_fn = interp1d(interp_df['delta_mag'], interp_df['M_jup'])
+    
+    elif which=='M2C': # Function from mass to contrast
+        interp_fn = interp1d(interp_df['M_jup'], interp_df['delta_mag'])
+        
+    
+    return interp_fn
 
 
 

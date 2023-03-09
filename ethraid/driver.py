@@ -78,7 +78,6 @@ def run(args):
     read_file_path = args.read_file_path
     outdir = args.outdir
     
-    
 
     # If no data to read in, calculate new arrays
     if read_file_path is None:
@@ -93,19 +92,19 @@ def run(args):
 
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
-
+        
+        
+        ### General ###
+        # Arbitrary upper limits
         max_a = 1e2
         max_m = 5e2
         
-        # General
         a_lim = (min_a, max_a)
         m_lim = (min_m, max_m)
 
         num_points = int(num_points)
         grid_num = int(grid_num)
-        # np.set_printoptions(threshold=np.inf)
     
-        
         a_list, m_list, per_list, e_list, i_list,\
         om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(m_star, a_lim, m_lim,\
                                                                 grid_num, num_points)

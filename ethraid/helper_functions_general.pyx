@@ -320,6 +320,8 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
     # Multiplying this 3D array of bools by prob_array replaces the bools with the array value if the bool is T and 0 if the bool is F.
     # Finally, sum along the array_num axes to get a single list of values, each with the total summed probability in its array.
     # integral is a 1D array of floats. The ith float is the sum of all probabilities in prob_array greater than the ith probability in t. Because prob_array is normalized, integral starts with 1 (all values are greater than 0, which is the first value in t) and ends with 0 (no values are greater than the greatest value).
+    # Example t: t = [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6] (0.6 is the maximum array value)
+    # Example integral: integral = [1, 0.95, 0.8, 0.66, 0.43, 0.1, 0]
 
     integral = ((prob_array > t[:, None, None])*prob_array).sum(axis=(1,2))
 
