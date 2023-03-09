@@ -2,10 +2,10 @@
 /build
 /cython_practice
 
-/data/*
-!/data/mamajek.csv
-!/data/baraffe_table_4.csv
-!/data/bands.csv
+/ethraid/data/*
+!/ethraid/data/mamajek.csv
+!/ethraid/data/baraffe_table_4.csv
+!/ethraid/data/bands.csv
 
 # exclude contents of results/ but keep the folder
 results/*
