@@ -92,6 +92,3 @@ setup(
     )
 
 # ext_modules = cythonize(extensions, build_dir = 'ethraid/compiled', language_level='3', annotate=True)
-    
-    
-    
