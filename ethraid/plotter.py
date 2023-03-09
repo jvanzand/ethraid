@@ -95,9 +95,7 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
     from ethraid import helper_functions_imaging as hlp_imag
     contrast_str = 'ethraid/data/clean_curves/vortex_Lband.csv'
     post_vortex = hlp_imag.imag_array(d_star, vmag, 3.77, contrast_str, a_lim, m_lim, grid_num)
-
-    # plt.imshow(post_imag)
-    # plt.show()
+    
 
     post_vortex_pad = np.pad(post_vortex, [(grid_pad, 0), (grid_pad, 0)])
     t_contours_vortex = hlp.contour_levels(post_vortex, [1,2])

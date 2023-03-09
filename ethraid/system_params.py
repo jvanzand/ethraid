@@ -11,12 +11,12 @@ Ms2Mj = M_sun/M_jup
 
 params_191939 = ('191939',  0.807*Ms2Mj, 53.8*pc_in_au, 0.1261, 0.0031, -5.92e-5, 3.4e-6, 
                 980, 2459330, 0.12767382507786398, 0.034199052901953214,
-                8.97, 2.2, 'ethraid/data/clean_curves/191939_2200_AO.csv', [3.825, 3.0])
+                8.97, 2.2, 'ethraid/data/clean_curves/TOI1339_K_band.csv', [3.825, 3.0])
 
 # # From 191939 paper (~mid-2021)
 params_191939_old = ('191939_old', 0.807*Ms2Mj, 53.8*pc_in_au, 0.114, 0.006, -6e-5, 1.9e-5,
                 430.2527364352718, 2458847.780463, 0.12767382507786398, 0.034199052901953214,
-                8.97, 2.2, 'ethraid/data/clean_curves/191939_2200_AO.csv')
+                8.97, 2.2, 'ethraid/data/clean_curves/TOI1339_K_band.csv')
 
 ## 6 DG trend systems for 2023B proposal
 params_t001174 = ('T001174', 858.61968, 19575475.289, -0.077994, 0.008711, 1.4103e-4, 2.8656280365e-5, 
