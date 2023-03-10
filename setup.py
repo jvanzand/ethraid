@@ -1,8 +1,6 @@
 from setuptools import setup, find_packages, Extension
 from Cython.Build import cythonize
 from setuptools.command.build_ext import build_ext as _build_ext
-# from distutils.extension import Extension
-# import numpy as np
 import re
 
 import os
@@ -51,14 +49,8 @@ class build_ext(_build_ext):
         self.include_dirs.append(numpy.get_include())
 
 lib_folder = os.path.dirname(os.path.realpath(__file__))
-# requirement_path = lib_folder + '/requirements.txt'
 def get_requires():
     reqs = []
-    # print('WE MADE IT HEREEEEE')
-    # print('\n'*5)
-    # for line in open('ethraid/__init__.py').readlines():
-    #     print(sys.path)
-    #     print(line)
     for line in open('requirements.txt', 'r').readlines():
         reqs.append(line)
     return reqs
