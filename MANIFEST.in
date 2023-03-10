@@ -4,4 +4,5 @@ global-include c_kepler/*.txt
 include requirements.txt
 global-include *.pyx
 global-include *.so
-recursive-include ethraid/data *
+
+recursive-exclude ethraid/data/clean_curves
