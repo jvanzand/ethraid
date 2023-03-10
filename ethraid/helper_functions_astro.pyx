@@ -169,7 +169,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     
     mass_ratio = m/(m_star + m)
     d_star = d_star/206264.80624548031 # Divide by (c.pc.cgs/c.au.cgs).value to get units of pc
-    au_2_mas = 1e3/d_star # Conversion factor btwn au and milli-arcseconds
+    au_2_mas = 1e3/d_star # Conversion factor btwn au and milli-arcseconds, with d_star converted to pc
     aud_2_masyr = au_2_mas * 365.25 # au/day to milli-arcseconds/year
 
     time_endpoints = [[hip_times[0], gaia_times[0]], 
@@ -182,7 +182,6 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     e_sq = e**2
     rot_matrix(i, om, rot_mtrx)
     r_star_num_fac = a*(1-e_sq)
-    
     
     
     for l in range(2): # Hipparcos or Gaia
