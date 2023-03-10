@@ -4,8 +4,8 @@
 
 ## Environment
 - Create new environment with python 3.7
-- *\$ conda create --name trends_env python=3.7*
-- *\$ conda activate trends_env*
+	- *\$ conda create --name trends_env python=3.7*
+	- *\$ conda activate trends_env*
 
 ## Download from Test PyPI (regular pip download coming soon)
 - *\$ python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple ethraid*
