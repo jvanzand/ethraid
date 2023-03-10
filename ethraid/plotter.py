@@ -90,19 +90,19 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
                                cmap='Reds', extend='max', alpha=0.75, zorder=30)
     
     
-    ########
-    ### Adding Vortex contrast curve to plot
-    from ethraid import helper_functions_imaging as hlp_imag
-    contrast_str = 'ethraid/data/clean_curves/vortex_Lband.csv'
-    post_vortex = hlp_imag.imag_array(d_star, vmag, 3.77, contrast_str, a_lim, m_lim, grid_num)
-    
-
-    post_vortex_pad = np.pad(post_vortex, [(grid_pad, 0), (grid_pad, 0)])
-    t_contours_vortex = hlp.contour_levels(post_vortex, [1,2])
-
-    post_vortex_cont = ax.contour(post_vortex_pad, t_contours_vortex,
-                               cmap='autumn', extend='both', alpha=1.0, zorder=35)
-    #######
+    # ########
+    # ### Adding Vortex contrast curve to plot
+    # from ethraid import helper_functions_imaging as hlp_imag
+    # contrast_str = 'ethraid/data/clean_curves/vortex_Lband.csv'
+    # post_vortex = hlp_imag.imag_array(d_star, vmag, 3.77, contrast_str, a_lim, m_lim, grid_num)
+    #
+    #
+    # post_vortex_pad = np.pad(post_vortex, [(grid_pad, 0), (grid_pad, 0)])
+    # t_contours_vortex = hlp.contour_levels(post_vortex, [1,2])
+    #
+    # post_vortex_cont = ax.contour(post_vortex_pad, t_contours_vortex,
+    #                            cmap='autumn', extend='both', alpha=1.0, zorder=35)
+    # #######
     
     
     # grid_num_ext is the side length of the 2D plotting array

@@ -64,6 +64,10 @@ params_t001669 = ('T001669', 1.13*Ms2Mj, 111.6*pc_in_au, -0.0226, 0.006, 0, 1e10
 params_t001174_vtx = ('T001174_vtx', 0.82*Ms2Mj, 94.9*pc_in_au, -0.116, 0.019, 4.7e-5, 7.2e-5, 
                     748, 2459209, None, None, 
                     10.96, 3.77, 'ethraid/data/clean_curves/vortex_Lband.csv')
+                    
+params_t001736 = ('T001736', 1.03*Ms2Mj, 89.2*pc_in_au, -0.1811, 0.0021, 0, 1e8, 
+                    909, 2459527, None, None, 
+                    8.95, None, None)
              
 # Joey's target. Baseline and epoch taken from time series on Slack. It's a Hip target, but not in HGCA.
 # Astrometry calculated manually from astro values in Table 3 of https://arxiv.org/pdf/1906.02058.pdf
