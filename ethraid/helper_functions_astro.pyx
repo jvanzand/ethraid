@@ -169,7 +169,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     
     mass_ratio = m/(m_star + m)
     d_star = d_star/206264.80624548031 # Divide by (c.pc.cgs/c.au.cgs).value to get units of pc
-    au_2_mas = 1e3/d_star # Conversion factor btwn au and milli-arcseconds
+    au_2_mas = 1e3/d_star # Conversion factor between au and milli-arcseconds
     aud_2_masyr = au_2_mas * 365.25 # au/day to milli-arcseconds/year
 
     time_endpoints = [[hip_times[0], gaia_times[0]], 
@@ -182,7 +182,6 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     e_sq = e**2
     rot_matrix(i, om, rot_mtrx)
     r_star_num_fac = a*(1-e_sq)
-    
     
     
     for l in range(2): # Hipparcos or Gaia
@@ -209,7 +208,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         vec[2] = 0
 
         # vec is overwritten and replaced by the rotated version. The rotated version points from barycenter to the star's average position, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth.
-        # Overwriting vec saves a lot of time vs. defining a new object
+        # Note that vec is both the input and the output vector. Overwriting vec saves a lot of time vs. defining a new object
         mat_mul(rot_mtrx, vec, vec)
 
         # Average angular position of the star relative to barycenter in milli-arcseconds.
