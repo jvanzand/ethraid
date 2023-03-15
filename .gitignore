@@ -2,6 +2,9 @@
 /build
 /cython_practice
 
+# Exclude my custom params file
+/ethraid/system_params_local.py
+
 /ethraid/data/*
 !/ethraid/data/mamajek.csv
 !/ethraid/data/baraffe_table_4.csv
