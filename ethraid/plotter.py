@@ -89,7 +89,6 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
                                cmap='Reds', extend='max', alpha=0.75, zorder=30)
     
-    
     # grid_num_ext is the side length of the 2D plotting array
     grid_num_ext = grid_num+grid_pad
     
