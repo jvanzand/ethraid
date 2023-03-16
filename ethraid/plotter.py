@@ -7,10 +7,10 @@ import matplotlib.patches as ptch
 from ethraid import helper_functions_plotting as hlp_plot
 from ethraid.compiled import helper_functions_general as hlp
 
-def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv, 
+def joint_plot(star_name, m_star, d_star, post_tot, post_rv, 
                post_astro, post_imag, grid_num, a_lim, m_lim,
-               scatter_plot=None, period_lines=False, marginalized=True, 
-               outdir=''):
+               scatter_plot=None, period_lines=False, marginalized=False, 
+               outdir='', verbose=False):
     
     """
     Plots the 2D joint mass-semi-major axis posteriors calculated using 
@@ -20,7 +20,6 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
         star_name (str): Name of star (does not need to be official)
         m_star (float, M_jup): Mass of host star
         d_star (float, AU): Distance from Earth to host star
-        vmag (float, mag): Visual magnitude of host star
         post_tot (array of floats): Total posterior array
         post_rv (array of floats): Model probabilities given RV data only
         post_astro (array of floats): Model probabilities given astrometry data only
@@ -45,9 +44,6 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
          None (plots 2D joint posterior)
     """
     
-    tick_num = 6
-    tick_size = 40
-    
     a_min, m_min = a_lim[0], m_lim[0]
     a_max, m_max = a_lim[1], m_lim[1]
     
@@ -68,13 +64,16 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
     post_astro_pad = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
     post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
     
+    
     try:
         t_contours_astro = hlp.contour_levels(post_astro, [1,2])
         post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
                          cmap='Blues', extend='max', alpha=0.5, zorder=10)
     
-    except Exception as e:
-        print('Error encountered in astrometry plot. Moving on.')
+    except Exception as err:
+        
+        if verbose:
+            print('plotter.joint_plot: Error encountered in astrometry plot. Moving on.')
         pass
     
     t_contours_imag = hlp.contour_levels(post_imag, [1,2])
@@ -133,7 +132,8 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
 
     ###################################################
     ############ Axis ticks and labels ################
-    
+    tick_num = 6
+    tick_size = 40
     # List of round numbers to use as labels for both a and m
     # tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
     min_exp = -4
@@ -204,24 +204,72 @@ def joint_plot(star_name, m_star, d_star, vmag, post_tot, post_rv,
 
 
     fig.tight_layout()
-    save_dir_2D = outdir+'results/2D_posts/' # 2D images of all stars in one folder, 1D images in another
+    save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
     # Try to make directory. If it exists, just continue. Parallel code was bugging out here, so exist_ok is great.
-    os.makedirs(save_dir_2D, exist_ok = True)
-    fig.savefig(save_dir_2D + star_name + '.png')
+    os.makedirs(save_dir, exist_ok = True)
+    fig.savefig(save_dir + star_name + '_2d.png')
     plt.close()
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices where the CDF reaches the upper and lower values associated with the 95% confidence interval.
     bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
 
-    if marginalized:
-        hlp_plot.marginalized_1d(star_name, post_tot, twosig_inds, 
-                                 a_lim, m_lim, tick_labels_a, tick_labels_m, outdir=outdir)
+    
+    # # Print out the 2-sigma boundaries (bounds) for the joint posterior
+    # # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained within the interval twosig_inds[i]
+    # print('a_lim = ', bounds[0], ' AU')
+    # print('m_lim = ', bounds[1], ' M_J')
+    
+    return
 
-        
-    # Print out the 2-sigma boundaries (bounds) for the joint posterior
-    # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained in the part of the posterior inside of which a horizontal line at height two_sig_levels[i] falls.
-    print('a_lim = ', bounds[0], ' AU')
-    print('m_lim = ', bounds[1], ' M_J')
+
+def plot_1d(star_name, post_tot, a_lim, m_lim, outdir=''):
+    
+    """
+    Plots the 1D joint mass and semi-major axis posteriors calculated with 
+    provided RV, astrometry, and imaging data.
+
+    Arguments:
+        star_name (str): Name of star (does not need to be official)
+        post_tot (array of floats): Total posterior array
+        a_lim (tuple of floats, au): Semi-major axis limits to consider, 
+                                     in the form (a_min, a_max)
+        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
+        out_dir (str): Path to save generated plot
+
+    Returns:
+         None (plots 1D posteriors)
+    """
+               
+    ###################################################
+    ############ Axis ticks and labels ################
+    tick_num = 6
+    # List of round numbers to use as labels for both a and m
+    # tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
+    min_exp = -4
+    max_exp = 13
+    n = max_exp-min_exp+1
+    # tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
+    tick_labels = np.logspace(min_exp, max_exp, n, base=4)
+
+    # Chop out any labels outside the a or m bounds
+    raw_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
+    raw_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])][:tick_num]
+    
+    # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
+    tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_a))
+    tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_m))
+    
+    ###################################################
+    ###################################################
+    
+    # bounds is the final answer: [range of 2σ a, range of 2σ m].
+    # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
+    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
+
+
+    hlp_plot.marginalized_1d(star_name, post_tot, twosig_inds, 
+                             a_lim, m_lim, tick_labels_a, tick_labels_m, 
+                             outdir=outdir)
     
     return

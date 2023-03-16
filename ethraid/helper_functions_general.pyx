@@ -438,8 +438,8 @@ def CDF_indices(prob_list, sig_list):
         prob = nsig_prob_list[i-1]
         
         # This method demands that there be equal probability excluded on both sides of the interval, which can give misleading results for multimodal or extended distributions.
-        prob1 = (1-prob)/2 # Eg, (1-0.95)/2 gives the 2.5% as the first prob
-        prob2 = 1-prob1 # And 97.5% as the second
+        prob1 = (1-prob)/2 # Eg, (1-0.95)/2 gives the 2.5% as the first prob...
+        prob2 = 1-prob1 # ... and 97.5% as the second
         
         bounds_indices = f(prob1), f(prob2)
         

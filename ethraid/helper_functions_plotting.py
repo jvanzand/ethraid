@@ -92,7 +92,7 @@ def period_lines(m_star, a_lim, m_lim, a_lim_plot, m_lim_plot, grid_num_ext, n, 
         baseline = gaia_baseline_days
         fmt = '--r'
     else:
-        raise Exception('Argument "how" must be either "tot" or "gaia"')
+        raise Exception('helper_functions_plotting.py: Argument "how" must be either "tot" or "gaia"')
 
     # Lines of constant period for p = baseline_days/n
     #
@@ -199,12 +199,13 @@ def marginalized_1d(star_name, post_tot, twosig_inds, a_lim, m_lim,
     ax[1].vlines(twosig_inds[1][0], 0, 1, colors='r', linestyles='dashed')
     ax[1].vlines(twosig_inds[1][1], 0, 1, colors='r', linestyles='dashed')
     
-    save_dir_1D = outdir+'results/1D_posts/' # 2D images of all stars in one folder, 1D images in another
-    if not os.path.isdir(save_dir_1D):
-        os.makedirs(save_dir_1D)
+    save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
+    os.makedirs(save_dir, exist_ok = True)
+    # if not os.path.isdir(save_dir):
+    #     os.makedirs(save_dir)
     
     fig.tight_layout()
-    fig.savefig(save_dir_1D + star_name + '_1d.png')
+    fig.savefig(save_dir + star_name + '_1d.png')
     
     return
 

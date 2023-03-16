@@ -45,7 +45,8 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     """
     # If no imaging is provided, just return an array of 1s
     if vmag is None or imag_wavelength is None or contrast_str is None:
-        print('Missing imaging inputs. Moving on.')
+        print("helper_functions_imaging.imag_array: At least one imaging param is None. \n"
+              "                                     post_imag will be a uniform array.")
         return np.ones((grid_num, grid_num))
 
     # Get band of observations and host star abs mag in that band
@@ -118,7 +119,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     return np_imag_array
 
 
-# An important question I might ask later: why do I jump straight to “imag_array” (100X100) rather than first creating “imag_list” (len=1e8) and forming it into an array, as I do for RVs and astrometry? Answer: Basically, it takes too long and it's not needed. The constraints my model imposes on imaging are fairly rough: at a given separation, rule out all masses greater than X. Iterating through 1e8 points to assign each one a probability takes forever (specifically because I need to make 1e8 calls to an interpolation function), and moreover is unnecessary. I can jump to a 100X100 grid without losing precision. This is not the case for RVs and astrometry, where the likelihood of a given model depends on all of its orbital parameters.
+# An important question I might ask later: why do I jump straight to “imag_array” (100X100) rather than first creating “imag_list” (len=1e8) and forming it into an array, as I do for RVs and astrometry? Answer: Basically, it takes too long and it's not needed. The constraints my model imposes on imaging are fairly rough: at a given separation, rule out all masses greater than X. Iterating through 1e8 points to assign each one a probability takes forever (specifically because I need to make 1e8 calls to an interpolation function), and moreover is unnecessary because I model imaging constraints as dependent ONLY on mass and sma. I can jump to a 100X100 grid without losing precision. This is not the case for RVs and astrometry, where the likelihood of a given model depends on all of its orbital parameters.
 
 def abs_Xmag(d_star, vmag, imaging_wavelength):
     """
