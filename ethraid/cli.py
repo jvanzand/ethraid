@@ -139,10 +139,17 @@ def main():
                         help='Dimension of binned probability array')
 
     # # The 'save' arg is special. Rather than having an assigned type, the "action='store_true'" argument assumes 1) boolean type and 2) default = False if the flag is not given. It also allows there to be no argument after the flag (in which case the value is set to True).
-    psr_run.add_argument('-s', '--save', 
-                        action='store_true', 
+    psr_run.add_argument('-s', '--save',
+                        nargs='+',
+                        default='proc',
+                        choices=['raw', 'proc'], 
                         required=False,
-                        help='Whether to save raw probability arrays')
+                        help = 'How to save probability arrays. \n'
+                               'Pass no flag to save processed arrays. \n'
+                               'Pass with "raw" or "proc" flags to save raw, processed, or both.'
+                        )
+
+
 
     psr_run.set_defaults(func=ethraid.driver.run)
     

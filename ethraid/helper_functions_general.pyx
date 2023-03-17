@@ -549,34 +549,5 @@ def min_mass(trend, curv, rv_baseline, min_per, m_star):
                            0, Msini_units='jupiter')
     
     return min_m
-                           
-    
-    
-    
-
-
-#def period_lines(m, per, m_star):
-#    """
-#    Function to help draw lines of constant period on 
-#    the final plot. Rearranges Kepler's 3rd law to find 
-#    how semi-major axis a varies with period, companion 
-#    mass, and stellar mass.
-#
-#    Intended usage: Calculate an array of a values for a fixed per
-#                    and m_star and an array of companion masses.
-#            
-#    Arguments:
-#            m (list of floats, M_J): companion masses
-#            per (float, days): companion orbital period
-#            m_star (float, M_J): stellar mass
-#
-#    Returns:
-#            a (list of floats, au): Semi-major axis values (au)
-#    """
-#
-#    a = ((per/two_pi)**2*G*(m+m_star))**0.3333333333333
-#
-#
-#    return a
     
     

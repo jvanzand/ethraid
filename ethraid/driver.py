@@ -157,19 +157,19 @@ def run(args):
 
     no_astro = True if None in [delta_mu, delta_mu_err] else False
     no_imag = True if None in [vmag, imag_wavelength, contrast_str] else False
-    if save==True:
+    
+    if 'proc' in save:
+        ls.save_processed(star_name, m_star, d_star, post_tot,
+                          post_rv, post_astro, post_imag, 
+                          no_astro, no_imag,
+                          a_lim, m_lim, outdir=outdir)
+    if 'raw' in save:
         ls.save_raw(star_name, m_star, d_star, 
                     rv_list, astro_list, post_imag, 
                     no_astro, no_imag,
                     vmag, imag_wavelength, contrast_str,
                     a_list, m_list, a_lim, m_lim, 
                     outdir=outdir, verbose=args.verbose)
-        
-    else:
-        ls.save_processed(star_name, m_star, d_star, post_tot,
-                          post_rv, post_astro, post_imag, 
-                          no_astro, no_imag,
-                          a_lim, m_lim, outdir=outdir)
         
     return
     

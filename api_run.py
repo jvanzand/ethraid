@@ -154,19 +154,18 @@ def run(star_name=None, m_star=None, d_star=None,
 
         no_astro = True if None in [delta_mu, delta_mu_err] else False
         no_imag = True if None in [vmag, imag_wavelength, contrast_str] else False
-        if save==True:
+        if 'proc' in save:
+            ls.save_processed(star_name, m_star, d_star, post_tot,
+                              post_rv, post_astro, post_imag, 
+                              no_astro, no_imag,
+                              a_lim, m_lim, outdir=outdir)
+        if 'raw' in save:
             ls.save_raw(star_name, m_star, d_star, 
                         rv_list, astro_list, post_imag, 
                         no_astro, no_imag,
                         vmag, imag_wavelength, contrast_str,
                         a_list, m_list, a_lim, m_lim, 
-                        outdir=outdir, verbose=verbose)
-        
-        else:
-            ls.save_processed(star_name, m_star, d_star, post_tot,
-                              post_rv, post_astro, post_imag, 
-                              no_astro, no_imag,
-                              a_lim, m_lim, outdir=outdir)
+                        outdir=outdir, verbose=args.verbose)
     
     # Otherwise, load in existing data:
     else:
@@ -198,7 +197,7 @@ if __name__ == "__main__":
     
     rfp = 'results/191939/191939_raw.h5'
     run(*sp.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None, 
-        save=False, outdir='', verbose=True)
+        save=['proc'], outdir='', verbose=True)
     
     
     
