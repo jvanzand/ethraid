@@ -88,12 +88,11 @@ def run(star_name=None, m_star=None, d_star=None,
     # If no data to read in, calculate new arrays
     if read_file_path is None:
         
-        min_per = rv_baseline*0.7
-        min_m = 1
-
-        m_star_Ms = m_star * M_jup/M_sun
+        min_per = rv_baseline*4
+        min_m = hlp.min_mass(gammadot, gammaddot, rv_baseline, min_per, m_star)
+        print("MINM ", min_m)
         # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
-        min_a = rv.utils.semi_major_axis(min_per, (m_star_Ms + min_m*(M_jup/M_sun)))
+        min_a = rv.utils.semi_major_axis(min_per, ((m_star + min_m)*(M_jup/M_sun)))
 
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
@@ -197,8 +196,9 @@ def run(star_name=None, m_star=None, d_star=None,
 
 if __name__ == "__main__":
     
-    rfp = 'results/191939/191939.h5'
-    run(*sp.params_191939, num_points=1e6, grid_num=50, plot=True, read_file_path=rfp, save=True, outdir='', verbose=False)
+    rfp = 'results/191939/191939_raw.h5'
+    run(*sp.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None, 
+        save=False, outdir='', verbose=True)
     
     
     

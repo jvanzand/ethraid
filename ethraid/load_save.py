@@ -56,6 +56,10 @@ def load(read_file_path, grid_num=None, verbose=False):
         
         if verbose:
             print('Searching for processed arrays')
+            
+            if 'grid_num' is not None:
+                print("load_save.load: Argument 'grid_num' has no effect when loading processed arrays.\n"
+                      "                Only raw arrays can be reshaped.")
         
         post_tot = np.array(post_file.get('post_tot')) # Marginalized probabity array associated with RV/astro models
         post_rv = np.array(post_file.get('post_rv')) # Marginalized probabity array associated with RV models
@@ -175,7 +179,7 @@ def save_raw(star_name, m_star, d_star,
          os.makedirs(save_dir, exist_ok=True)
          
          
-         post_file_path = save_dir+star_name+'.h5'
+         post_file_path = save_dir+star_name+'_raw.h5'
          post_file = h5py.File(post_file_path, 'w')
          
          # Save the un-binned values and arrays in case you want to use a different grid_num later
@@ -252,7 +256,7 @@ def save_processed(star_name, m_star, d_star, post_tot,
          os.makedirs(save_dir, exist_ok=True)
          
          
-         post_file_path = save_dir+star_name+'.h5'
+         post_file_path = save_dir+star_name+'_processed.h5'
          post_file = h5py.File(post_file_path, 'w')
          
          # Save the un-binned values and arrays in case you want to use a different grid_num later

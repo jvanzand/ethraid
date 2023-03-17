@@ -160,6 +160,7 @@ def main():
                           )
     psr_plot.add_argument('-t', '--type',
                           type=str, nargs='+',
+                          required=True,
                           choices=['2d', '1d'],
                           help='Generate either 2D or 1D posteriors'
                           )

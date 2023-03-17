@@ -2,6 +2,7 @@ import numpy as np
 import scipy as sp
 import scipy.stats as spst
 
+import radvel as rv
 cimport numpy as np
 cimport cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
@@ -513,6 +514,45 @@ def value2index(value, index_space, value_space):
             *(index_range/log_value_range) + min_index
 
     return index
+    
+def min_mass(trend, curv, rv_baseline, min_per, m_star):
+    """
+    Estimate a lower bound on the companion mass, given the amount
+    of RV variation observed so far.
+    
+    Arguments:
+        trend (float, m/s/day): Linear RV trend
+        curv (float, m/s/day/day): Quadratic RV curvature
+        rv_baseline (float, days): Time interval over which the 
+                                   RVs from which trend and curv 
+                                   are calculated were taken
+        min_per (float, days): The minimum period the companion
+                               could have. Usually some factor larger
+                               than rv_baseline, or else we would see
+                               periodicity.
+        m_star (float, M_Jup): Mass of host star
+    
+    Returns:
+        min_m (float, M_Jup): Estimated minimum companion mass, used
+                              as lower bound for sampling model masses
+    """
+    
+    # Start with the minimum RV semi-amplitude K.
+    # The lowest K could be is 1/2 of the current observed RV variation
+    min_K = 0.5*(trend*rv_baseline + curv*rv_baseline**2)
+    
+    # Now calculate Msini with minimum period and K amplitude
+    # Make sure m_star is in solar masses
+    # e=0 for simplicity, though mass could be lower if e were very high
+    # High-e companion near min_per is an edge case that can be checked later
+    min_m = rv.utils.Msini(min_K, min_per, m_star*M_jup/M_sun, 
+                           0, Msini_units='jupiter')
+    
+    return min_m
+                           
+    
+    
+    
 
 
 #def period_lines(m, per, m_star):

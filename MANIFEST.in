@@ -5,4 +5,5 @@ include requirements.txt
 global-include *.pyx
 global-include *.so
 
+include ethraid/data/*
 recursive-exclude ethraid/data/clean_curves

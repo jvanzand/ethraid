@@ -89,8 +89,7 @@ def run(args):
 
         
     min_per = rv_baseline*4
-    min_m = 1
-
+    min_m = hlp.min_mass(gammadot, gammaddot, rv_baseline, min_per, m_star)
     # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
     # Radvel requires solar masses.
     min_a = rv.utils.semi_major_axis(min_per, ((m_star + min_m)*(M_jup/M_sun)))
@@ -196,7 +195,7 @@ def plot(args):
     
     star_name, m_star, d_star,\
     post_tot, post_rv, post_astro, post_imag,\
-    grid_num, a_lim, m_lim = ls.load(args.read_file_path, args.grid_num)
+    grid_num, a_lim, m_lim = ls.load(args.read_file_path, args.grid_num, args.verbose)
     
     if "2d" in args.type:
         plotter.joint_plot(star_name, m_star, d_star, 
