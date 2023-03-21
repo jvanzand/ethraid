@@ -175,7 +175,7 @@ def main():
                           type=int,  
                           required=False, 
                           default=None,
-                          help='Dimension of binned probability array'
+                          help='Dimension of binned probability array. Required for raw  input arrays.'
                           )
     # nargs='+' so I can use the same flag to pass both semi_major axis and mass of a companion to plot
     psr_plot.add_argument('-sp', '--scatter_plot', 
@@ -197,6 +197,12 @@ def main():
                         type=str,  
                         required=True,
                         help='File path to read in already-calculated posterior array')
+    psr_less.add_argument('-gn', '--grid_num',
+                          type=int,
+                          required=False,
+                          default=100,
+                          help='Dimension of binned probability array. Required for raw  input arrays.'
+                          )
     psr_less.set_defaults(func=ethraid.driver.less)
 
     

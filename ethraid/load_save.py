@@ -72,7 +72,7 @@ def load(read_file_path, grid_num=None, verbose=False):
         
         if verbose:
             print('Searching for raw arrays')
-        
+
         assert grid_num is not None, "To load raw arrays, grid_num must be provided"
         
         rv_list = np.array(post_file.get('rv_list')) # Probability list associated with RV models

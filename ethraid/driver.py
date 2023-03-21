@@ -202,7 +202,7 @@ def plot(args):
         plotter.joint_plot(star_name, m_star, d_star, 
                            post_tot, post_rv, post_astro, post_imag, 
                            grid_num, a_lim, m_lim, 
-                           scatter_plot=args.scatter_plot, period_lines = False,
+                           scatter_plot=args.scatter_plot, period_lines=False,
                            outdir=args.outdir, verbose=args.verbose)
     
     if "1d" in args.type:
@@ -229,7 +229,7 @@ def less(args):
 
     star_name, m_star, d_star,\
     post_tot, post_rv, post_astro, post_imag,\
-    grid_num, a_lim, m_lim = ls.load(args.read_file_path, args.verbose)
+    grid_num, a_lim, m_lim = ls.load(args.read_file_path, args.grid_num, args.verbose)
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.

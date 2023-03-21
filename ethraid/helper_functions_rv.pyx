@@ -3,7 +3,7 @@ from astropy.time import Time
 from tqdm import tqdm
 import cython
 cimport numpy as np
-from libc.math cimport sin, cos, tan, atan, sqrt, log
+from libc.math cimport sin, cos, tan, atan, atan2, sqrt, log
 
 from ethraid.compiled._kepler import kepler_single
 
@@ -153,20 +153,22 @@ cpdef (double, double) gamma(double a, double m, double e,
                     tan_Eovr2, nu, nu_dot, nu_ddot,\
                     cos_nu_om, sin_nu_om, sin_i,\
                     pre_fac, gamma_dot, gamma_ddot
-
+                 
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
     sqrt_e_sq_term = sqrt(1-e*e)
 
     cos_E = cos(E)
     sin_E = sin(E)
-    tan_Eovr2 = sin_E/(1+cos_E)
 
-    nu = 2*atan(sqrt_eterm*tan_Eovr2)
+    ## Two-argument arctan function to avoid div by 0 when E=pi
+    ## Also replacing sin(E/2)/cos(E/2) with equivalent sinE/(1+cosE) to save calculation
+    nu = 2*atan2(sqrt_eterm*sin_E, (1+cos_E))
+    
 
     # nu derivatives use days (not seconds) to give gdot/gddot correct units 
     nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2) # Units of day^-1
-    nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term # # Units of day^-2
+    nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term ## Units of day^-2
 
     cos_nu_om = cos(nu+om)
     sin_nu_om = sin(nu+om)
@@ -177,6 +179,7 @@ cpdef (double, double) gamma(double a, double m, double e,
 
     gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/day
     gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om) # m/s/day/day
+
 
     return gamma_dot, gamma_ddot
 
