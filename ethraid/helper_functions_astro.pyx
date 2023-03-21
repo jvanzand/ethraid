@@ -157,7 +157,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     
     # vec holds various values throughout dmu(). After each value
     # has served its purpose, it is overwritten so that only one
-    # vector needs to be allocated. This saves time.
+    # vector needs to be allocated, saving time.
     cdef double vec_list[3]
     cdef double [:] vec = vec_list
     

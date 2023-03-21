@@ -81,14 +81,14 @@ def run(star_name=None, m_star=None, d_star=None,
         None
     """
     if read_file_path is None and None in [star_name, m_star, d_star, gammadot, gammadot_err]:
-        raise Exception("Either read_file_path or all of\
-                         {star_name, m_star, d_star, gammadot, gammadot_err,\
-                         rv_baseline, rv_epoch} must be provided.")
+        raise Exception("Either read_file_path or all of \n"
+                        "          {star_name, m_star, d_star, gammadot, gammadot_err, \n"
+                        "          rv_baseline, rv_epoch} must be provided.")
 
     # If no data to read in, calculate new arrays
     if read_file_path is None:
         
-        min_per = rv_baseline*4
+        min_per = rv_baseline*2
         min_m = hlp.min_mass(gammadot, gammaddot, rv_baseline, min_per, m_star)
         print("MINM ", min_m)
         # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
@@ -98,7 +98,7 @@ def run(star_name=None, m_star=None, d_star=None,
         print('Min sampling a is: ', min_a)
 
         max_a = 1e2
-        max_m = 5e2
+        max_m = 1e3
         
         ### General ###
         # Arbitrary upper limits
@@ -165,7 +165,7 @@ def run(star_name=None, m_star=None, d_star=None,
                         no_astro, no_imag,
                         vmag, imag_wavelength, contrast_str,
                         a_list, m_list, a_lim, m_lim, 
-                        outdir=outdir, verbose=args.verbose)
+                        outdir=outdir, verbose=verbose)
     
     # Otherwise, load in existing data:
     else:
@@ -196,8 +196,8 @@ def run(star_name=None, m_star=None, d_star=None,
 if __name__ == "__main__":
     
     rfp = 'results/191939/191939_raw.h5'
-    run(*sp.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None, 
-        save=['proc'], outdir='', verbose=True)
+    run(*sp.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=rfp, 
+        save=['proc', 'raw'], outdir='', verbose=True)
     
     
     

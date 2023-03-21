@@ -126,7 +126,6 @@ def log_lik_gamma(double a, double m, double e, double i, double om, double M_an
     return log_likelihood_total
 
 
-# It seems gamma() needs to be a cdef function, otherwise it returns nans
 cpdef (double, double) gamma(double a, double m, double e, 
                              double i, double om, double E, 
                              double per, double m_star):

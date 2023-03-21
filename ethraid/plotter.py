@@ -90,7 +90,7 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv,
     
     
     # ########
-    # ### Adding Vortex contrast curve to plot
+    # ### Optionally add Vortex coronagraph contrast curve to 2D plot
     # from ethraid import helper_functions_imaging as hlp_imag
     # contrast_str = 'ethraid/data/clean_curves/vortex_Lband.csv'
     # post_vortex = hlp_imag.imag_array(d_star, vmag, 3.77, contrast_str, a_lim, m_lim, grid_num)
@@ -213,12 +213,6 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv,
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices where the CDF reaches the upper and lower values associated with the 95% confidence interval.
     bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
-
-    
-    # # Print out the 2-sigma boundaries (bounds) for the joint posterior
-    # # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained within the interval twosig_inds[i]
-    # print('a_lim = ', bounds[0], ' AU')
-    # print('m_lim = ', bounds[1], ' M_J')
     
     return
 

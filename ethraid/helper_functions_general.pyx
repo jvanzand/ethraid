@@ -539,7 +539,7 @@ def min_mass(trend, curv, rv_baseline, min_per, m_star):
     
     # Start with the minimum RV semi-amplitude K.
     # The lowest K could be is 1/2 of the current observed RV variation
-    min_K = 0.5*(trend*rv_baseline + curv*rv_baseline**2)
+    min_K = abs(0.5*(trend*rv_baseline + curv*rv_baseline**2))
     
     # Now calculate Msini with minimum period and K amplitude
     # Make sure m_star is in solar masses

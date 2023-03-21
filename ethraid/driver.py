@@ -86,9 +86,10 @@ def run(args):
     grid_num = args.grid_num
     save = args.save
     outdir = args.outdir
+    verbose = args.verbose
 
         
-    min_per = rv_baseline*4
+    min_per = rv_baseline*2
     min_m = hlp.min_mass(gammadot, gammaddot, rv_baseline, min_per, m_star)
     # Finally, the minimum semi-major axis is the one where period is smallest and companion mass is smallest too. If companion mass were larger at the same period, the companion would have to be farther away. Same for larger period at fixed mass.
     # Radvel requires solar masses.
@@ -137,7 +138,7 @@ def run(args):
         astro_list = np.ones(num_points)
         post_astro = np.zeros((grid_num, grid_num))
         
-        if args.verbose:
+        if verbose:
             print('driver.run: No astrometry data provided. Bounds will be based on RVs only.')
 
 
@@ -169,7 +170,7 @@ def run(args):
                     no_astro, no_imag,
                     vmag, imag_wavelength, contrast_str,
                     a_list, m_list, a_lim, m_lim, 
-                    outdir=outdir, verbose=args.verbose)
+                    outdir=outdir, verbose=verbose)
         
     return
     
