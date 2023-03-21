@@ -3,7 +3,7 @@ from astropy.time import Time
 from tqdm import tqdm
 import cython
 cimport numpy as np
-from libc.math cimport sin, cos, tan, atan, atan2, sqrt, log
+from libc.math cimport sin, cos, tan, atan2, sqrt, log
 
 from ethraid.compiled._kepler import kepler_single
 
