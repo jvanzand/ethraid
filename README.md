@@ -9,6 +9,7 @@
 
 ## Download from Test PyPI (regular pip download coming soon)
 - *\$ python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple ethraid*
+- You may have to upgrade pip using *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
 ## If downloading repo
 - Install dependencies using requirements.txt 
