@@ -75,7 +75,7 @@ setup(
         "console_scripts": ['ethraid=ethraid.cli:main']
         },
     version = get_property('__version__', 'ethraid'),
-    description = "Command line application for trend code",
+    description = "Characterize long-period companions using RV trends, astrometric accelerations, and direct imaging",
     long_description = long_description,
     author = "Judah Van Zandt",
     author_email = "judahvz@astro.ucla.edu",
