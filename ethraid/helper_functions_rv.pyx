@@ -163,9 +163,11 @@ cpdef (double, double) gamma(double a, double m, double e,
     
     #####################################
     ## Two-argument arctan function to avoid div by 0 when E=pi
-    ## Also replacing sin(E/2)/cos(E/2) with equivalent sinE/(1+cosE) to save calculation
+    ## Also replacing sin(E/2)/cos(E/2) with equivalent sinE/(1+cosE) 
+    ## This both saves calculation and guarantees the second argument
+    ## of atan2 is >= 0, a regime in which atan2() is exactly equal to atan()
+    ## (https://en.wikipedia.org/wiki/Atan2#Definition_and_computation)
     nu = 2*atan2(sqrt_eterm*sin_E, (1+cos_E))
-        
 
     # nu derivatives use days (not seconds) to give gdot/gddot correct units 
     nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2) # Units of day^-1
