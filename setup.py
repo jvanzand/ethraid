@@ -10,13 +10,11 @@ print('FILE PATH', os.path.abspath(os.path.dirname(__file__)))
 # profile = line_profiler.LineProfiler()
 
 ####################
-# # Extra stuff to profile code using kernprof -l -v file.py after it is compiled
-# # Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
-#
+# Extra stuff to profile code using kernprof -l -v file.py after it is compiled
+# Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
+
 # from Cython.Compiler.Options import get_directive_defaults
 # directive_defaults = get_directive_defaults()
-# import Cython
-# directive_defaults = Cython.Compiler.Options.get_directive_defaults()
 #
 # directive_defaults['linetrace'] = True
 # directive_defaults['binding'] = True
@@ -25,7 +23,9 @@ print('FILE PATH', os.path.abspath(os.path.dirname(__file__)))
 
 # First path is where to put compiled files (.so).
 # Second is where to find .pyx files
-## include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]
+## If profiling, add: include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]
+## to each extension
+
 extensions = [
     Extension("ethraid.compiled._kepler",
              ['ethraid/c_kepler/_kepler.pyx']),

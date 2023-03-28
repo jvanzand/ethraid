@@ -1,3 +1,5 @@
+from ethraid.kern_profiler_dummy import *
+
 import numpy as np
 from astropy.time import Time
 from tqdm import tqdm
@@ -125,14 +127,13 @@ def log_lik_gamma(double a, double m, double e, double i, double om, double M_an
 
     return log_likelihood_total
 
-
-cpdef (double, double) gamma(double a, double m, double e, 
-                             double i, double om, double E, 
-                             double per, double m_star):
+def gamma(double a, double m, double e, 
+          double i, double om, double E, 
+          double per, double m_star):
     """
     Given an orbital model, calculates RV trend (gdot) and 
     curvature (gddot).
-    
+
     Arguments:
         a (float, AU): Semi-major axis
         m (float, M_jup): Companion mass
@@ -142,18 +143,19 @@ cpdef (double, double) gamma(double a, double m, double e,
         E (float, radians): Eccentric anomaly
         per (float, days): Orbital period
         m_star (float, M_jup): Host star mass
-    
+
     Returns:
         gdot (float, m/s/day): Model linear trend term
         gddot (float, m/s/day/day): Model quadratic curvature term
     """
 
     cdef double     e_term, sqrt_eterm,\
-                    sqrt_e_sq_term, cos_E, sin_E,\
+                    sqrt_e_sq_term,\
+                    cos_E, sin_E, cos_E_2, sin_E_2,\
                     nu, nu_dot, nu_ddot,\
                     cos_nu_om, sin_nu_om, sin_i,\
                     pre_fac, gamma_dot, gamma_ddot
-                 
+             
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
     sqrt_e_sq_term = sqrt(1-e*e)
@@ -161,11 +163,13 @@ cpdef (double, double) gamma(double a, double m, double e,
     cos_E = cos(E)
     sin_E = sin(E)
     
+    cos_E_2 = cos(E/2)
+    sin_E_2 = sin(E/2)
+
     #####################################
     ## Two-argument arctan function to avoid div by 0 when E=pi
-    ## Also replacing sin(E/2)/cos(E/2) with equivalent sinE/(1+cosE) to save calculation
-    nu = 2*atan2(sqrt_eterm*sin_E, (1+cos_E))
-        
+    nu = 2*atan2(sqrt_eterm*sin_E_2, cos_E_2)
+    
 
     # nu derivatives use days (not seconds) to give gdot/gddot correct units 
     nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2) # Units of day^-1
@@ -183,6 +187,64 @@ cpdef (double, double) gamma(double a, double m, double e,
 
 
     return gamma_dot, gamma_ddot
+
+#cpdef (double, double) gamma(double a, double m, double e, 
+#                             double i, double om, double E, 
+#                             double per, double m_star):
+#    """
+#    Given an orbital model, calculates RV trend (gdot) and 
+#    curvature (gddot).
+#    
+#    Arguments:
+#        a (float, AU): Semi-major axis
+#        m (float, M_jup): Companion mass
+#        e (float): Orbital eccentricity
+#        i (float, radians): Orbital inclination
+#        om (float, radians): Argument of periastron
+#        E (float, radians): Eccentric anomaly
+#        per (float, days): Orbital period
+#        m_star (float, M_jup): Host star mass
+#    
+#    Returns:
+#        gdot (float, m/s/day): Model linear trend term
+#        gddot (float, m/s/day/day): Model quadratic curvature term
+#    """
+#
+#    cdef double     e_term, sqrt_eterm,\
+#                    sqrt_e_sq_term, cos_E, sin_E,\
+#                    nu, nu_dot, nu_ddot,\
+#                    cos_nu_om, sin_nu_om, sin_i,\
+#                    pre_fac, gamma_dot, gamma_ddot
+#                 
+#    e_term = (1+e)/(1-e)
+#    sqrt_eterm = sqrt(e_term)
+#    sqrt_e_sq_term = sqrt(1-e*e)
+#
+#    cos_E = cos(E)
+#    sin_E = sin(E)
+#    
+#    #####################################
+#    ## Two-argument arctan function to avoid div by 0 when E=pi
+#    ## Also replacing sin(E/2)/cos(E/2) with equivalent sinE/(1+cosE) to save calculation
+#    nu = 2*atan2(sqrt_eterm*sin_E, (1+cos_E))
+#        
+#
+#    # nu derivatives use days (not seconds) to give gdot/gddot correct units 
+#    nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2) # Units of day^-1
+#    nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term # # Units of day^-2
+#
+#    cos_nu_om = cos(nu+om)
+#    sin_nu_om = sin(nu+om)
+#    sin_i = sin(i)
+#
+#    # Lovis+Fischer 2010 (analytic)
+#    pre_fac = sqrt(G)/sqrt_e_sq_term * m*sin_i/sqrt((m+m_star)*(a)) * auday2ms # AU/day ==> m/s
+#
+#    gamma_dot = -pre_fac*nu_dot*sin_nu_om # m/s/day
+#    gamma_ddot = -pre_fac*(nu_dot**2*cos_nu_om + nu_ddot*sin_nu_om) # m/s/day/day
+#
+#
+#    return gamma_dot, gamma_ddot
 
     
 cpdef M_2_evolvedE(double M0, double per, double e, double rv_epoch):
