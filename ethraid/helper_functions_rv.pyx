@@ -168,6 +168,10 @@ def gamma(double a, double m, double e,
 
     #####################################
     ## Two-argument arctan function to avoid div by 0 when E=pi
+    ## It's faster to use the identity tan(E/2)=sin(E)/(1+cos(E))
+    ## because it saves calculations, but that again allows for a
+    ## singularity at E=pi. This safer version only adds ~10% to this
+    ## function, and even less overall.
     nu = 2*atan2(sqrt_eterm*sin_E_2, cos_E_2)
     
 
