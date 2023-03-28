@@ -157,16 +157,16 @@ cpdef (double, double) gamma(double a, double m, double e,
     e_term = (1+e)/(1-e)
     sqrt_eterm = sqrt(e_term)
     sqrt_e_sq_term = sqrt(1-e*e)
-
+    
     cos_E = cos(E)
     sin_E = sin(E)
     
     #####################################
     ## Two-argument arctan function to avoid div by 0 when E=pi
-    ## Also replacing sin(E/2)/cos(E/2) with equivalent sinE/(1+cosE) 
-    ## This both saves calculation and guarantees the second argument
-    ## of atan2 is >= 0, a regime in which atan2() is exactly equal to atan()
-    ## (https://en.wikipedia.org/wiki/Atan2#Definition_and_computation)
+    ## Also replacing sin(E/2)/cos(E/2) with equivalent sinE/(1+cosE)
+    ## This saves calculation, but is still vulnerable to a singularity at
+    ## E==pi. In this case, we'll calculate nu=0 when we should get nu=pi.
+    ## But E==pi is unlikely to happen even once, let alone 10^6-10^8 times.
     nu = 2*atan2(sqrt_eterm*sin_E, (1+cos_E))
 
     # nu derivatives use days (not seconds) to give gdot/gddot correct units 
