@@ -5,7 +5,7 @@ import re
 
 import os
 import sys
-print('FILE PATH', os.path.abspath(os.path.dirname(__file__)))
+
 # import line_profiler
 # profile = line_profiler.LineProfiler()
 

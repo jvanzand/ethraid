@@ -162,17 +162,14 @@ cpdef (double, double) gamma(double a, double m, double e,
     
     cos_E = cos(E)
     sin_E = sin(E)
-    
-    cos_E_2 = cos(E/2)
-    sin_E_2 = sin(E/2)
 
     #####################################
-    ## Two-argument arctan function to avoid div by 0 when E=pi
+    ## Two-argument arctan function to avoid div by 0 when E=pi.
     ## It's faster to use the identity tan(E/2)=sin(E)/(1+cos(E))
-    ## because it saves calculations, but that again allows for a
-    ## singularity at E=pi. This safer version only adds ~10% to this
-    ## function, and even less overall.
-    nu = 2*atan2(sqrt_eterm*sin_E_2, cos_E_2)
+    ## because it saves calculations. Although this allows for a
+    ## singularity at E=pi, in practice np.sin(pi) ~ 1.2E-16 > 0,
+    ## so arctan2 correctly evaluates to pi/2.
+    nu = 2*atan2(sqrt_eterm*sin_E, 1+cos_E)
 
     # nu derivatives use days (not seconds) to give gdot/gddot correct units 
     nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2) # Units of day^-1
