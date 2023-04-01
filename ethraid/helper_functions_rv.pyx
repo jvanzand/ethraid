@@ -1,11 +1,11 @@
-from ethraid.kern_profiler_dummy import *
+#from ethraid.kern_profiler_dummy import *
 
 import numpy as np
 from astropy.time import Time
 from tqdm import tqdm
 import cython
 cimport numpy as np
-from libc.math cimport sin, cos, tan, atan2, sqrt, log
+from libc.math cimport sin, cos, tan, atan, sqrt, log
 
 from ethraid.compiled._kepler import kepler_single
 
@@ -127,7 +127,9 @@ def log_lik_gamma(double a, double m, double e, double i, double om, double M_an
 
     return log_likelihood_total
 
-cpdef (double, double) gamma(double a, double m, double e, 
+
+@cython.cdivision(True)
+cdef (double, double) gamma(double a, double m, double e, 
                              double i, double om, double E, 
                              double per, double m_star):
     """
@@ -149,32 +151,30 @@ cpdef (double, double) gamma(double a, double m, double e,
         gddot (float, m/s/day/day): Model quadratic curvature term
     """
 
-    cdef double     e_term, sqrt_eterm,\
+    cdef double     sqrt_eterm,\
                     sqrt_e_sq_term,\
-                    cos_E, sin_E, cos_E_2, sin_E_2,\
+                    cos_E, sin_E,\
                     nu, nu_dot, nu_ddot,\
                     cos_nu_om, sin_nu_om, sin_i,\
                     pre_fac, gamma_dot, gamma_ddot
              
-    e_term = (1+e)/(1-e)
-    sqrt_eterm = sqrt(e_term)
+    sqrt_eterm = sqrt((1+e)/(1-e))
     sqrt_e_sq_term = sqrt(1-e*e)
     
     cos_E = cos(E)
     sin_E = sin(E)
 
     #####################################
-    ## Two-argument arctan function to avoid div by 0 when E=pi.
-    ## It's faster to use the identity tan(E/2)=sin(E)/(1+cos(E))
-    ## because it saves calculations. Although this allows for a
-    ## singularity at E=pi, in practice np.sin(pi) ~ 1.2E-16 > 0,
-    ## so arctan2 correctly evaluates to pi/2.
-    nu = 2*atan2(sqrt_eterm*sin_E, 1+cos_E)
+    ## Regular tan and arctan functions.
+    ## Manipulations are possible with trig identities,
+    ## but they don't give much of a speedup.
+    nu = 2*atan(sqrt_eterm*tan(E/2))
 
     # nu derivatives use days (not seconds) to give gdot/gddot correct units 
     nu_dot = two_pi*sqrt_e_sq_term/(per*(1-e*cos_E)**2) # Units of day^-1
     nu_ddot = -nu_dot**2 * 2*e*sin_E/sqrt_e_sq_term # # Units of day^-2
-
+    
+    
     cos_nu_om = cos(nu+om)
     sin_nu_om = sin(nu+om)
     sin_i = sin(i)

@@ -5,19 +5,36 @@ import re
 
 import os
 import sys
+<<<<<<< HEAD
 
 # import line_profiler
 # profile = line_profiler.LineProfiler()
+=======
+>>>>>>> working
 
 ####################
-# Extra stuff to profile code using kernprof -l -v file.py after it is compiled
-# Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
+## Extra stuff to profile code using kernprof -l -v file.py after it is compiled
+## Taken from https://stackoverflow.com/questions/28301931/how-to-profile-cython-functions-line-by-line
 
+# import line_profiler
+# profile = line_profiler.LineProfiler()
+# import numpy as np
 # from Cython.Compiler.Options import get_directive_defaults
 # directive_defaults = get_directive_defaults()
 #
 # directive_defaults['linetrace'] = True
 # directive_defaults['binding'] = True
+
+# extensions = [
+#     Extension("ethraid.compiled._kepler",
+#              ['ethraid/c_kepler/_kepler.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+#     Extension("ethraid.compiled.helper_functions_general",
+#              ['ethraid/helper_functions_general.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+#     Extension("ethraid.compiled.helper_functions_rv",
+#              ['ethraid/helper_functions_rv.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')]),
+#     Extension("ethraid.compiled.helper_functions_astro",
+#              ['ethraid/helper_functions_astro.pyx'], include_dirs=[np.get_include()], define_macros=[('CYTHON_TRACE', '1')])
+# ]
 
 ###########################################
 
@@ -82,5 +99,3 @@ setup(
     url = "",
     ext_modules = cythonize(extensions, build_dir = 'ethraid/compiled', language_level='3', annotate=True)
     )
-
-# ext_modules = cythonize(extensions, build_dir = 'ethraid/compiled', language_level='3', annotate=True)

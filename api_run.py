@@ -1,5 +1,4 @@
 ## This is a version of driver.py that can be run directly as a module.
-
 import astropy.constants as c
 import numpy as np
 import time
@@ -195,7 +194,7 @@ def run(star_name=None, m_star=None, d_star=None,
 if __name__ == "__main__":
     
     rfp = 'results/191939/191939_raw.h5'
-    run(*sp.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None, 
+    run(*sp.params_191939, num_points=1e5, grid_num=100, plot=False, read_file_path=None, 
         save=['proc', 'raw'], outdir='', verbose=True)
     
     
