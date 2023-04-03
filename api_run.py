@@ -192,9 +192,9 @@ def run(star_name=None, m_star=None, d_star=None,
     
 
 if __name__ == "__main__":
-    
+    from ethraid import system_params_local as spl
     rfp = 'results/191939/191939_raw.h5'
-    run(*sp.params_191939, num_points=1e5, grid_num=100, plot=False, read_file_path=None, 
+    run(*spl.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None, 
         save=['proc', 'raw'], outdir='', verbose=True)
     
     
