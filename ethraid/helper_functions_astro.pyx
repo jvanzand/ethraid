@@ -1,6 +1,8 @@
 from astropy.time import Time
 from tqdm import tqdm
 import numpy as np
+from astroquery.vizier import Vizier
+
 import cython
 cimport numpy as np
 from libc.math cimport sin, cos, tan, atan, sqrt, log
@@ -378,7 +380,6 @@ cdef void rot_matrix(double i, double om, double [:,:] rot_mtrx):
 # THIS version of the function will let me input the same vector as in_vec and out_vec.
 # I want to do this because it will allow me to allocate fewer arrays in the dmu function,
 # hopefully giving significant speedups.
-#
 cpdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This function is written specifically to matrix multiply rot_mtrx (3x3)
@@ -427,4 +428,120 @@ cpdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     out_vec[2] = ov2
             
     # Do not return out_vec
-            
+
+def HGCA_retrieval(hip_id=None, gaia_id=None):
+    """
+    Access the HGCA (EDR3 version) on Vizier and calculate
+    Δμ and Δμ_error for a given target. This function allows
+    a user to input astrometry constraints without having
+    to download the HGCA or propagate errors themselves.
+    
+    NOTE: Vizier's values are rounded to 3 decimal places. 
+          The Vizier quantities are still consistent with
+          those from the HGCA, but not perfectly equal.
+          
+    Arguments:
+        hip_id (str): Hipparcos identifier
+        gaia_id (str): Gaia identifier
+    
+    Returns:
+        dmu (float, mas/yr): Absolute value of the difference between the 
+                             average Hipparcos-Gaia proper motion over the 
+                             ~24 years between the two missions and the 
+                             Gaia proper motion.
+        dmu_err (float, mas/yr): Error on dmu
+    """
+    assert not(hip_id is None and gaia_id is None), 'Must provide either Hipparcos ID or Gaia DR3 ID'
+    
+    if hip_id is not None and gaia_id is not None:
+        filter_dict = {'HIP':hip_id, 'Gaia':gaia_id}
+    elif hip_id is not None:
+        filter_dict = {'HIP':hip_id}
+    elif gaia_id is not None:
+        filter_dict = {'Gaia':gaia_id}
+
+
+    include_cols = ['HIP', 'Gaia',
+                    'pmRA',  'pmDE',   'pmRAhg',   'pmDEhg', 
+                    'e_pmRA','e_pmDE', 'e_pmRAhg', 'e_pmDEhg']
+
+    # Query Vizier for HGCA entry. 'J/ApJS/254/42' is the name of the
+    # HGCA EDR3.
+    v = Vizier(columns=include_cols,
+               column_filters=filter_dict, catalog='J/ApJS/254/42')
+
+    assert len(v.get_catalogs(v.catalog))!=0, "No matching targets found in HGCA. Try a different identifier or enter Δμ manually."
+    table = v.get_catalogs(v.catalog)[0]
+    
+    assert not(len(table)>1), "Multiple matching targets found in HGCA. Try a different identifier or enter Δμ manually."
+    
+    pmra_gaia = table['pmRA']
+    pmra_hg = table['pmRAhg']
+    pmdec_gaia = table['pmDE']
+    pmdec_hg = table['pmDEhg']
+
+    pmra_gaia_error = table['e_pmRA']
+    pmra_hg_error = table['e_pmRAhg']
+    pmdec_gaia_error = table['e_pmDE']
+    pmdec_hg_error = table['e_pmDEhg']
+
+    dmu = float(calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
+    dmu_err = float(calc_dmu_error(pmra_gaia_error, pmra_hg_error,\
+                                   pmdec_gaia_error, pmdec_hg_error,\
+                                   pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
+    
+    return dmu, dmu_err
+    
+
+def calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
+    """
+    Simple pythagorean calculation of |proper motion change|
+    
+    Arguments:
+        pmra_gaia (float, mas/yr): Proper motion in RA during the Gaia mission
+        pmra_hg (float, mas/yr): Average proper motion in RA between the 
+                                 Hipparcos and Gaia missions
+        pmdec_gaia (float, mas/yr): Proper motion in DEC during the Gaia mission
+        pmdec_hg (float, mas/yr): Average proper motion in DEC between the 
+                                  Hipparcos and Gaia missions
+    
+    Returns:
+        dmu_mag (float, mas/yr): Absolute value of the difference between the 
+                                 average Hipparcos-Gaia proper motion over the 
+                                 ~24 years between the two missions and the 
+                                 Gaia proper motion.
+    """
+    
+    dmu_mag = np.sqrt((pmra_gaia-pmra_hg)**2+(pmdec_gaia-pmdec_hg)**2)
+
+    return dmu_mag
+
+def calc_dmu_error(pmra_gaia_err, pmra_hg_err, pmdec_gaia_err, pmdec_hg_err, pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
+    """
+    Error on proper motion magnitude using error propagation formula.
+    This simplified formula assumes independent variables (see Wiki page on
+    Propagation of Uncertainty).
+    
+    Arguments:
+        pmra_gaia_err (float, mas/yr): Error on pmra_gaia
+        .
+        .
+        .
+    
+    Returns:
+        dmu_err (float, mas/yr): Error on the change in proper motion
+    """
+
+    numerator = np.sqrt((pmra_gaia-pmra_hg)**2   * (pmra_gaia_err**2+pmra_hg_err**2)\
+                      + (pmdec_gaia-pmdec_hg)**2 * (pmdec_gaia_err**2+pmdec_hg_err**2))
+
+    denominator = calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg)
+    
+    dmu_err = numerator/denominator
+
+    return dmu_err
+
+
+
+
+

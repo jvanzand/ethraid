@@ -5,6 +5,7 @@ from scipy.interpolate import interp1d
 
 from ethraid import _ROOT
 import ethraid.compiled.helper_functions_general as hlp
+from ethraid.kern_profiler_dummy import *
 
 # This module makes use of Table 5 of Pecaut & Mamajek (2013), available at https://www.pas.rochester.edu/~emamajek/EEM_dwarf_UBVIJHK_colors_Teff.txt
 # It also uses Table 4 from Baraffe+03

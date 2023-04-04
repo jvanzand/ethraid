@@ -108,6 +108,14 @@ def main():
                         required=False, 
                         nargs='?',
                         help='Error on dmu')
+    psr_run.add_argument('-hid', '--hip_id', 
+                        type=str, 
+                        required=False,
+                        help='Hipparcos identifier of stellar host')
+    psr_run.add_argument('-gid', '--gaia_id', 
+                        type=str, 
+                        required=False,
+                        help='Gaia DR3 identifier of stellar host')
 
     # required=False for targets without imaging
     # nargs='?' to let me pass the flag with no args for Cadence

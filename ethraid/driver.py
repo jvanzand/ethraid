@@ -48,6 +48,10 @@ def run(args):
                         in astrometric proper motion between 
                         Hipparcos and Gaia epochs.
         delta_mu_err: Error on delta_mu
+        hip_id (string): Hipparcos identifier to retrieve astrometry data;
+                         alternative to providing delta_mu/delta_mu_err
+        gaia_id (string): Gaia identifier to retrieve astrometry data;
+                          alternative to providing delta_mu/delta_mu_err
     
         vmag (mag): Apparent V-band magnitude of host star
         imag_wavelength (μm): Wavelength of imaging observations
@@ -59,8 +63,10 @@ def run(args):
         num_points (int): Number of orbits to simulate (usually 1e6 - 1e8)
         grid_num (int): Dimensions of 2D posterior. Determines "resolution"
         
-        save (bool): Whether to save raw probability arrays.
-                     Processed arrays will be saved by default.
+        save (list): List containing 'raw' and/or 'proc'
+                     to indicate whether raw or processed arrays
+                     should be saved. With the CLI, only processed 
+                     arrays will be saved by default.
         outdir (str): Path to save outputs to
         verbose (bool): Optionally print out extra information
     
@@ -71,17 +77,23 @@ def run(args):
     star_name = args.star_name
     m_star = args.m_star
     d_star = args.d_star
+
     gammadot = args.gammadot
     gammadot_err = args.gammadot_err
     gammaddot = args.gammaddot
     gammaddot_err = args.gammaddot_err
     rv_baseline = args.rv_baseline
     rv_epoch = args.rv_epoch
+    
     delta_mu = args.delta_mu
     delta_mu_err = args.delta_mu_err
+    hip_id = args.hip_id
+    gaia_id = args.gaia_id
+    
     vmag = args.vmag
     imag_wavelength = args.imag_wavelength
     contrast_str = args.contrast_str
+    
     num_points = args.num_points
     grid_num = args.grid_num
     save = args.save
@@ -127,6 +139,10 @@ def run(args):
     ## Now the astrometry posterior.
     # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
     try:
+        # If delta_mu is not provided directly, use provided name
+        if any([val is None for val in [delta_mu, delta_mu_err]]):
+            delta_mu, delta_mu_err = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
+            
         astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                           om_list, M_anom_0_list, per_list,
                                           m_star, d_star, delta_mu, delta_mu_err)                     
@@ -139,7 +155,7 @@ def run(args):
         post_astro = np.zeros((grid_num, grid_num))
         
         if verbose:
-            print('driver.run: No astrometry data provided. Bounds will be based on RVs only.')
+            print('driver.run: Error encountered in astrometry data (or none provided). Bounds will be based on RVs only.')
 
 
     ## Last we calculate the RV posterior
