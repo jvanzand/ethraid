@@ -451,8 +451,9 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
                              Gaia proper motion.
         dmu_err (float, mas/yr): Error on dmu
     """
-    assert not(hip_id is None and gaia_id is None), 'Must provide either Hipparcos ID or Gaia DR3 ID'
-    
+    if hip_id is None and gaia_id is None:
+        raise Exception('Must provide either Hipparcos ID or Gaia DR3 ID')
+
     if hip_id is not None and gaia_id is not None:
         filter_dict = {'HIP':hip_id, 'Gaia':gaia_id}
     elif hip_id is not None:
@@ -469,11 +470,19 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
     # HGCA EDR3.
     v = Vizier(columns=include_cols,
                column_filters=filter_dict, catalog='J/ApJS/254/42')
+    
+    table_set = v.get_catalogs(v.catalog)
+    
+    if len(table_set)==0:
+        raise Exception("helper_functions_astro.HGCA_retrieval:\n"
+                        "           No matching targets found. Target may not be in the HGCA.")
 
-    assert len(v.get_catalogs(v.catalog))!=0, "No matching targets found in HGCA. Try a different identifier or enter Δμ manually."
     table = v.get_catalogs(v.catalog)[0]
     
-    assert not(len(table)>1), "Multiple matching targets found in HGCA. Try a different identifier or enter Δμ manually."
+    if len(table)>1:
+        raise Exception("helper_functions_astro.HGCA_retrieval:\n"
+                        "           Multiple matching targets found in HGCA.\n"
+                        "           Try a different identifier or enter Δμ manually.")
     
     pmra_gaia = table['pmRA']
     pmra_hg = table['pmRAhg']

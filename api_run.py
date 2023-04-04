@@ -143,8 +143,9 @@ def run(star_name=None, m_star=None, d_star=None,
             post_astro = np.zeros((grid_num, grid_num))
             
             if verbose:
-                print('api_run.run: Error encountered in astrometry data (or none provided). Bounds will be based on RVs only.')
-    
+                print("api_run.run: Error encountered in astrometry data (or none provided).\n"
+                      "Bounds will be based on RVs only.")
+                print(err)
 
         ## Last we calculate the RV posterior
         rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,

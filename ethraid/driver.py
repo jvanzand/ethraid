@@ -155,7 +155,9 @@ def run(args):
         post_astro = np.zeros((grid_num, grid_num))
         
         if verbose:
-            print('driver.run: Error encountered in astrometry data (or none provided). Bounds will be based on RVs only.')
+            print("api_run.run: Error encountered in astrometry data (or none provided).\n"
+                  "             Bounds will be based on RVs only.")
+            print(err)
 
 
     ## Last we calculate the RV posterior
