@@ -5,6 +5,7 @@ from scipy.interpolate import interp1d
 
 from ethraid import _ROOT
 import ethraid.compiled.helper_functions_general as hlp
+from ethraid.kern_profiler_dummy import *
 
 # This module makes use of Table 5 of Pecaut & Mamajek (2013), available at https://www.pas.rochester.edu/~emamajek/EEM_dwarf_UBVIJHK_colors_Teff.txt
 # It also uses Table 4 from Baraffe+03
@@ -185,9 +186,9 @@ def mag_to_mass(mags, masses, abs_Xmag_list):
 
 def interp_fn(d_star, vmag, imag_wavelength, which='C2M'):
     """
-    Helper function to interpolate between contrast and mass. Choose
-    whether the output function takes contrasts and returns mass, or
-    vice versa.
+    Helper function to interpolate between Δmag contrast and mass. 
+    Choose whether the output function takes contrasts and returns 
+    mass, or vice versa.
     
     Arguments:
         d_star (float, AU): Distance to the host star
@@ -223,8 +224,7 @@ def interp_fn(d_star, vmag, imag_wavelength, which='C2M'):
         interp_fn = interp1d(interp_df['delta_mag'], interp_df['M_jup'])
     
     elif which=='M2C': # Function from mass to contrast
-        interp_fn = interp1d(interp_df['M_jup'], interp_df['delta_mag'])
-        
+        interp_fn = interp1d(interp_df['M_jup'], interp_df['delta_mag'])  
     
     return interp_fn
 

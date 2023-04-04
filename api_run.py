@@ -29,6 +29,7 @@ def run(star_name=None, m_star=None, d_star=None,
         gammaddot=0, gammaddot_err=1e8, 
         rv_baseline=None, rv_epoch=None, 
         delta_mu=None, delta_mu_err=None,
+        hip_id=None, gaia_id=None,
         vmag=None, imag_wavelength=None, contrast_str=None, 
         scatter_plot=None, num_points=1e6, grid_num=100, 
         plot=True, read_file_path=None, save=False, 
@@ -55,7 +56,11 @@ def run(star_name=None, m_star=None, d_star=None,
         delta_mu (milli-arcseconds/year): Magnitude of the change
                         in astrometric proper motion between 
                         Hipparcos and Gaia epochs.
-        delta_mu_err: Error on delta_mu
+        delta_mu_err (mas/year): Error on delta_mu
+        hip_id (string): Hipparcos identifier to retrieve astrometry data;
+                         alternative to providing delta_mu/delta_mu_err
+        gaia_id (string): Gaia identifier to retrieve astrometry data;
+                          alternative to providing delta_mu/delta_mu_err
         
         vmag (mag): Apparent V-band magnitude of host star
         imag_wavelength (μm): Wavelength of imaging observations
@@ -71,8 +76,9 @@ def run(star_name=None, m_star=None, d_star=None,
         read_file_path (str): Path to saved outputs. Providing this 
                               will circumvent core probability 
                               calculations.
-        save (bool): Whether to save raw probability arrays.
-                     Processed arrays will be saved by default.
+        save (list): List containing 'raw' and/or 'proc'
+                     to indicate whether raw or processed arrays
+                     should be saved.
         outdir (str): Path to save outputs to
         verbose (bool): Optionally print out extra information
     
@@ -121,6 +127,10 @@ def run(star_name=None, m_star=None, d_star=None,
         ## Now the astrometry posterior.
         # Some targets aren't in the Hip/Gaia catalog, so we can't make the astrometry posterior for them.
         try:
+            # If delta_mu is not provided directly, use provided name
+            if any([val is None for val in [delta_mu, delta_mu_err]]):
+                delta_mu, delta_mu_err = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
+                
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
                                               m_star, d_star, delta_mu, delta_mu_err)                     
@@ -133,8 +143,9 @@ def run(star_name=None, m_star=None, d_star=None,
             post_astro = np.zeros((grid_num, grid_num))
             
             if verbose:
-                print('api_run.run: No astrometry data provided. Bounds will be based on RVs only.')
-    
+                print("api_run.run: Error encountered in astrometry data (or none provided).\n"
+                      "             Bounds will be based on RVs only.")
+                print(err)
 
         ## Last we calculate the RV posterior
         rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
@@ -192,10 +203,10 @@ def run(star_name=None, m_star=None, d_star=None,
     
 
 if __name__ == "__main__":
-    from ethraid import system_params_local as spl
+    
     rfp = 'results/191939/191939_raw.h5'
-    run(*spl.params_191939, num_points=1e6, grid_num=100, plot=True, read_file_path=None, 
-        save=['proc', 'raw'], outdir='', verbose=True)
+    run(*sp.params_191939_old, hip_id='99175', num_points=1e6, grid_num=100, plot=True, read_file_path=None,
+        save=['proc','raw'], outdir='', verbose=True)
     
     
     

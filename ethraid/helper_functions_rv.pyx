@@ -1,5 +1,3 @@
-#from ethraid.kern_profiler_dummy import *
-
 import numpy as np
 from astropy.time import Time
 from tqdm import tqdm
