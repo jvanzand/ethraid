@@ -1,3 +1,6 @@
+import os
+from ethraid import _ROOT
+
 # CONSTANTS
 # Mass of the Sun in grams
 M_sun = 1.988409870698051e+33
@@ -10,7 +13,7 @@ Ms2Mj = M_sun/M_jup
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e7
+num_points = 1e6
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
@@ -77,7 +80,7 @@ vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
 # Path to contrast curve
-contrast_str = 'ethraid/data/clean_curves/TOI1339_K_band.csv'
+contrast_str = os.path.join(_ROOT, 'data/test_K_band.csv')
 # Epoch of imaging observations (BJD).
 imag_epoch = 24593300
 

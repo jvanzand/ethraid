@@ -12,11 +12,13 @@ Characterize long-period companions with partial orbits.
 
 ## Download using pip
 - *\$ pip install ethraid*
-- You may have to first upgrade pip using *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
+- If the installation fails, try
+	- Upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
+	- Installing cython: *\$ pip install cython*
 
 ## Example CLI usage
 ### Run orbit fits using parameters in configuration file
-- *\$ ethraid run -cf ethraid/config_files/test1.py*
+- *\$ ethraid run -cf path/to/ethraid/example_config_files/config_191939.py*
 ### Load and plot saved results
 - *\$ ethraid plot -cf ethraid/config_files/test1.py -rfp results/test1/test1_raw.h5 -gn 100*
 ### Print 95\% mass and semi-major axis confidence intervals based on derived posterior

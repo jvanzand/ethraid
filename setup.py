@@ -83,7 +83,7 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     package_data={'ethraid':['/data']},
-    setup_requires=['numpy'],
+    setup_requires=['cython', 'numpy'],
     install_requires=get_requires(),
     cmdclass={'build_ext':build_ext},
     entry_points = {
