@@ -107,15 +107,6 @@ def load(read_file_path, grid_num=None, verbose=False):
             except Exception as err:
                 raise ValueError("load_save.load: some imaging param could not be loaded."
                                  "               Verify that all imag params are defined in config file.")
-                # vmag=None
-                # imag_wavelength=None
-                # contrast_str=None
-                # imag_calc=None
-                #
-                # # Only print message if user provided imaging data. If they did not, then irrelevant
-                # if verbose:
-                #     print("load_save.load: vmag, imag_wavelength, or contrast_str not saved."
-                #           "               post_imag cannot be reshaped to a new grid_num.")
             
             if imag_calc=='exact':
                 imag_list = np.array(post_file.get('imag_list')) # Probability list of imaging models
@@ -229,7 +220,8 @@ def save_raw(star_name, m_star, d_star,
         
          except Exception as err:
              # Only print message if user provided imaging data. If they did not, then irrelevant
-             if verbose and not no_imag:
+             print(err)
+             if verbose and run_imag:
                  print("load_save.save_raw: vmag, imag_wavelength, or contrast_str not saved."
                        "                    post_imag cannot be reshaped to a new grid_num.")
          
@@ -302,8 +294,6 @@ def save_processed(star_name, m_star, d_star,
          post_file.create_dataset('post_rv', data=post_rv)
          post_file.create_dataset('post_astro', data=post_astro)
          post_file.create_dataset('post_imag', data=post_imag)
-         # post_file.create_dataset('no_astro', data=no_astro)
-         # post_file.create_dataset('no_imag', data=no_imag)
          
          post_file.create_dataset('a_lim', data=a_lim)
          post_file.create_dataset('m_lim', data=m_lim)
