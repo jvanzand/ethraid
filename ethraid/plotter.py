@@ -7,9 +7,11 @@ import matplotlib.patches as ptch
 from ethraid import helper_functions_plotting as hlp_plot
 from ethraid.compiled import helper_functions_general as hlp
 
-def joint_plot(star_name, m_star, d_star, post_tot, post_rv, 
-               post_astro, post_imag, grid_num, a_lim, m_lim,
-               scatter_plot=None, period_lines=False, marginalized=False, 
+def joint_plot(star_name, m_star, d_star, 
+               run_rv, run_astro, run_imag, 
+               post_tot, post_rv, post_astro, post_imag, 
+               grid_num, a_lim, m_lim,
+               scatter_plot=None, period_lines=False, 
                outdir='', verbose=False):
     
     """
@@ -20,24 +22,30 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv,
         star_name (str): Name of star (does not need to be official)
         m_star (float, M_jup): Mass of host star
         d_star (float, AU): Distance from Earth to host star
+               
+        run_rv (bool): Was RV data used in calculation?
+        run_astro (bool): Was astrometry data used in calculation?
+        run_imag (bool): Was imaging data used in calculation?
+               
         post_tot (array of floats): Total posterior array
         post_rv (array of floats): Model probabilities given RV data only
         post_astro (array of floats): Model probabilities given astrometry data only
         post_imag (array of floats): Model probabilities given imaging data only
+               
         grid_num (int): Shape of square posterior arrays
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max)
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
-        scatter_plot (tuple of floats): Optional (semi-major axis, mass) pair
+        run_rv, run_astro, run_imag (bool): True/False values indicating whether
+                                            each data type was considered. Omitted
+                                            data types are not plotted.
+        scatter_plot (list of floats): Optional (semi-major axis, mass) pair
                                         specifying the location of a known
                                         companion to plot. Sma in AU, mass in
                                         M_jup.
          period_lines (bool): Optionally plot lines of constant period
                               at periods equal to harmonics of the Gaia and 
                               HG baselines
-         marginalized (bool): Optionally create a separate plot of the
-                              marginalized 1D mass and semi-major axis
-                              posteriors
          out_dir (str): Path to save generated plot
 
     Returns:
@@ -58,35 +66,39 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv,
       
     a_min_plot = a_min/(a_max/a_min)**(frac_exp)
     m_min_plot = m_min/(m_max/m_min)**(frac_exp)
+                 
+         
+    # Loop through all data types (rv, astro, and imag) simultaneously define and format variables, as well as the values those variables are being assigned.
+    ################################
+    data_types = ['rv', 'astro', 'imag']
+    colors = ['Greens', 'Blues', 'gray']
+    alphas = [0.5, 0.5, 0.4]
+    zorders = [20, 10, 0]
     
-    post_imag_pad = np.pad(post_imag, [(grid_pad, 0), (grid_pad, 0)])
-    post_rv_pad = np.pad(post_rv, [(grid_pad, 0), (grid_pad, 0)])
-    post_astro_pad = np.pad(post_astro, [(grid_pad, 0), (grid_pad, 0)])
-    post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
-    
-    
-    try:
-        t_contours_astro = hlp.contour_levels(post_astro, [1,2])
-        post_astro_cont = ax.contourf(post_astro_pad, t_contours_astro,
-                         cmap='Blues', extend='max', alpha=0.5, zorder=10)
-    
-    except Exception as err:
+    for i in range(3):
+        dt = data_types[i]
+        c = colors[i]
+        alpha = alphas[i]
+        z = zorders[i]
+        # First, check if run_rv, run_astro, and run_imag are True. If not, don't plot
+        if eval("run_{}".format(dt)):
+            exec("post_{0}_pad = np.pad(post_{0}, [(grid_pad, 0), (grid_pad, 0)])".format(dt))
+            exec("t_contours_{0} = hlp.contour_levels(post_{0}, [1,2])".format(dt))
+            
+            # For imaging only, use contour instead of contourf to get a line instead of a filled region
+            if dt == 'imag':
+                exec("post_{0}_cont = ax.contour(post_{0}_pad, t_contours_{0},\
+                             cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
+            else:
+                exec("post_{0}_cont = ax.contourf(post_{0}_pad, t_contours_{0},\
+                             cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
+            
         
-        if verbose:
-            print('plotter.joint_plot: Error encountered in astrometry plot. Moving on.')
-        pass
-    
-    t_contours_imag = hlp.contour_levels(post_imag, [1,2])
-    t_contours_rv = hlp.contour_levels(post_rv, [1,2])
+    post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
     t_contours_tot = hlp.contour_levels(post_tot, [1,2])
-    
-    # Un-filled contour for imaging to just show a line
-    post_imag_cont = ax.contour(post_imag_pad, t_contours_imag,
-                               cmap='gray', extend='max', alpha=0.4, zorder=0)
-    post_rv_cont = ax.contourf(post_rv_pad, t_contours_rv,
-                               cmap='Greens', extend='max', alpha=0.5, zorder=20)
     post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
-                               cmap='Reds', extend='max', alpha=0.75, zorder=30)
+                                cmap='Reds', extend='max', alpha=0.75, zorder=30)   
+    ################################
     
     
     # ########
@@ -176,7 +188,7 @@ def joint_plot(star_name, m_star, d_star, post_tot, post_rv,
     
     ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:
-        
+
         sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot)
 
         plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=4)

@@ -1,3 +1,4 @@
+import sys
 import numpy as np
 import scipy as sp
 import scipy.stats as spst
@@ -104,16 +105,65 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     return a_list, m_list, per_list, e_list, i_list,\
            om_list, M_anom_0_list, a_inds, m_inds
 
-
 def post_tot(double [:] rv_post_list, double [:] astro_post_list, 
-             double [:,:] post_imag, int grid_num,
-             long [:] a_inds, long [:] m_inds):
+            double [:] imag_post_list, int grid_num,
+            long [:] a_inds, long [:] m_inds):
+
+   """
+   Start with 2 1D lists and multiply them element-wise, THEN form 
+   the result into a 2D array. This function is for the total posterior;
+   the individual RV, astrometry, and imaging posteriors are handled by the 
+   post_single() function below.
+
+   Arguments:
+       rv_post_list (np array of floats, len=num_points): List of model likelihoods
+                    given the RV data
+       rv_post_list (np array of floats, len=num_points): List of model likelihoods
+                   given the astrometry data
+       grid_num (int): Dimension of square (a,m) grid
+       a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
+                                       (a, m, per, e, i, om, M_anom_0) model will 
+                                       be placed, based on the model's 
+                                       a and m values
+                            
+   Returns:
+       tot_prob_array (numpy array, dim = grid_num x grid_dum): 2-D array of binned
+                      (aka marginalized) posterior probabilities. Note, the binning
+                      process itself is what applies my priors, converting the
+                      individual likelihoods into posterior probabilities.
+   """
+
+   cdef int num_points, i, a_i, m_i
+   cdef double prob
+   
+   # Not cdef because then I can't change it from memview to np array
+   tot_prob_array = np.zeros((grid_num, grid_num))
+
+   num_points = rv_post_list.size
+
+   for i in range(num_points):
+
+       a_i = a_inds[i]
+       m_i = m_inds[i]
+
+       prob = rv_post_list[i]*astro_post_list[i]*imag_post_list[i]
+
+       tot_prob_array[m_i, a_i] += prob
+
+
+   tot_prob_array = np.array(tot_prob_array)
+
+   return tot_prob_array/tot_prob_array.sum()
+
+def post_tot_simplified(double [:] rv_post_list, double [:] astro_post_list, 
+                        double [:,:] post_imag, int grid_num,
+                        long [:] a_inds, long [:] m_inds):
             
     """
     Start with 2 1D lists and multiply them element-wise, THEN form 
     the result into a 2D array. This function is for the total posterior;
-    the individual RV and astrometry posteriors are handled by the 
-    prob_array() function below.
+    the individual RV, astrometry, and imaging posteriors are handled by the 
+    post_single() function below.
     
     Arguments:
         rv_post_list (np array of floats, len=num_points): List of model likelihoods
@@ -151,7 +201,7 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list,
     # Not cdef because then I can't change it from memview to np array
     tot_prob_array = np.zeros((grid_num, grid_num))
     
-    # post_imag is not a list like RVs and astrometry above. It is input to this function as a 2D array. This is because it's a lot easier to calculate for a given orbital model, and would take way longer if we calculated a whole list.
+    # post_imag is not a list like RVs and astrometry above. It is input to this function as a 2D array. This is because it's a lot easier to calculate. It would take way longer if we calculated a length-1e6 (or 1e8) list instead of a 100x100 array.
     for i in range(grid_num):
         for j in range(grid_num):
             tot_prob_array[i,j] = rv_ast_array[i,j]*post_imag[i,j]
@@ -515,10 +565,10 @@ def value2index(value, index_space, value_space):
 
     return index
     
-def min_mass(trend, curv, rv_baseline, min_per, m_star):
+def min_a_and_m(trend, curv, rv_baseline, min_per, m_star):
     """
-    Estimate a lower bound on the companion mass, given the amount
-    of RV variation observed so far.
+    Estimate a lower bound on the companion mass and semi-major
+    axis, given the amount of RV variation observed so far.
     
     Arguments:
         trend (float, m/s/day): Linear RV trend
@@ -533,6 +583,8 @@ def min_mass(trend, curv, rv_baseline, min_per, m_star):
         m_star (float, M_Jup): Mass of host star
     
     Returns:
+        min_a (float, au): Estimated minimum semi-major axis, used
+                              as lower bound for sampling model sma
         min_m (float, M_Jup): Estimated minimum companion mass, used
                               as lower bound for sampling model masses
     """
@@ -544,10 +596,14 @@ def min_mass(trend, curv, rv_baseline, min_per, m_star):
     # Now calculate Msini with minimum period and K amplitude
     # Make sure m_star is in solar masses
     # e=0 for simplicity, though mass could be lower if e were very high
-    # High-e companion near min_per is an edge case that can be checked later
+    # High-e companion near min_per is an edge case that can be handled separately
     min_m = rv.utils.Msini(min_K, min_per, m_star*M_jup/M_sun, 
                            0, Msini_units='jupiter')
+                           
+    min_m = max(min_m, 0.1) # min_mass cannot be 0 or logarithmic spacing breaks
     
-    return min_m
+    min_a = rv.utils.semi_major_axis(min_per, ((m_star + min_m)*(M_jup/M_sun)))
+    
+    return min_a, min_m
     
     

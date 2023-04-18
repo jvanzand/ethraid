@@ -79,11 +79,11 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
         om = om_list[j]
         M_anom_0 = M_anom_0_list[j]
         per = per_list[j]
-        
+
         log_lik = log_lik_dmu(a, m, e, i, om, M_anom_0,
                               per, m_star, d_star,
                               delta_mu, delta_mu_err)
-                              
+
         lik_list[j] = math_e**log_lik
     
     return lik_list
@@ -151,7 +151,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         
     """
     cdef double mass_ratio, au_2_mas, aud_2_masyr
-    cdef double mean_motion, sqrt_eterm, M1, M2, E1, E2
+    cdef double mean_motion, a_star, M1, M2, E1, E2
     cdef double x_pos_avg, y_pos_avg, x_vel_avg, y_vel_avg
     
     cdef double [:,:] rot_mtrx # This makes rot_mtrx a memview
@@ -177,19 +177,16 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     time_endpoints = [[hip_times[0], gaia_times[0]], 
                       [hip_times[1], gaia_times[1]]]
 
-
     mean_motion = two_pi/per
-    sqrt_eterm = sqrt((1+e)/(1-e))
+    #sqrt_eterm = sqrt((1+e)/(1-e))
     a_star = a*mass_ratio
-    e_sq = e**2
+    #e_sq = e**2
     rot_matrix(i, om, rot_mtrx)
-    r_star_num_fac = a*(1-e_sq)
-    
+    #r_star_num_fac = a*(1-e_sq)
     
     for l in range(2): # Hipparcos or Gaia
-        start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is automatically 0. For Gaia, it is the time between Hip_start and Gaia_start
+        start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0 by definition. For Gaia, it is the time between Hip_start and Gaia_start
         end_time = time_endpoints[1][l] - time_endpoints[0][0] # End time relative to the start of Hip.
-
 
         ## Mean anomaly is the elapsed time times the mean motion, plus a randomly-sampled starting mean anomaly
         M1 = mean_motion*start_time + M_anom_0
@@ -198,17 +195,15 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         E1 = kepler_single(M1, e)
         E2 = kepler_single(M2, e)
         
-
-        # Get position of the STAR (au).
+        # Get position of the STAR (note the - sign) in au.
         x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
-        
-        # vec points from barycenter to the average position of the *star*, not the companion (note the - sign), in the orbital plane.
+        # vec points from barycenter to the average position of the *star*, not the companion, in the orbital plane.
         # Since we're using the E_anom of the companion, the star is located in the opposite direction.
         vec[0] = -x_pos_avg
         vec[1] = -y_pos_avg
         vec[2] = 0
-
+        
         # vec is overwritten and replaced by the rotated version. The rotated version points from barycenter to the star's average position, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth.
         # Note that vec is both the input and the output vector. Overwriting vec saves a lot of time vs. defining a new object
         mat_mul(rot_mtrx, vec, vec)
@@ -216,7 +211,6 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         # Average angular position of the star relative to barycenter in milli-arcseconds.
         ang_pos_avg[l][0] = vec[0]*au_2_mas
         ang_pos_avg[l][1] = vec[1]*au_2_mas
-
         ################### Angular Velocities ########################
 
         # Only need Gaia velocities, so skip Hip velocities
@@ -244,7 +238,6 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         # Since period is in days and a_star_units is in au, velocities are in au/day. Convert to mas/yr.
         mu_avg[l][0] = vec[0]*aud_2_masyr
         mu_avg[l][1] = vec[1]*aud_2_masyr
-
         ###############################################################
         ###############################################################
 
@@ -294,7 +287,6 @@ cdef pos_avg(double a, double n, double e, double E1, double E2,
     y_integral = y_term_2 - y_term_1
  
     y_avg = 1/(t2-t1) * y_integral
-
 
     return x_avg, y_avg
 
@@ -379,7 +371,7 @@ cdef void rot_matrix(double i, double om, double [:,:] rot_mtrx):
 
 # THIS version of the function will let me input the same vector as in_vec and out_vec.
 # I want to do this because it will allow me to allocate fewer arrays in the dmu function,
-# hopefully giving significant speedups.
+# offering speedups.
 cpdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     """
     This function is written specifically to matrix multiply rot_mtrx (3x3)
@@ -452,7 +444,11 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
         dmu_err (float, mas/yr): Error on dmu
     """
     if hip_id is None and gaia_id is None:
-        raise Exception('Must provide either Hipparcos ID or Gaia DR3 ID')
+        print("helper_functions_astro.HGCA_retrieval:\n"
+              "                                      No HGCA identifier given.")
+        dmu = 0
+        dmu_err = 1e8
+        return dmu, dmu_err
 
     if hip_id is not None and gaia_id is not None:
         filter_dict = {'HIP':hip_id, 'Gaia':gaia_id}

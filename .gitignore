@@ -9,6 +9,7 @@
 !/ethraid/data/mamajek.csv
 !/ethraid/data/baraffe_table_4.csv
 !/ethraid/data/bands.csv
+!/ethraid/data/test_K_band.csv
 
 # exclude contents of results/ but keep the folder
 results/*
