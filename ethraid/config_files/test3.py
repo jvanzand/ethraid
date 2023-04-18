@@ -1,3 +1,5 @@
+## Test config file 3. Runs NONE of RVs, astrometry, or imaging
+
 # CONSTANTS
 # Mass of the Sun in grams
 M_sun = 1.988409870698051e+33

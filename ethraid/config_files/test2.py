@@ -1,3 +1,5 @@
+## Test config file 2. Runs astrometry (using target ID) and imaging (approx)
+
 # CONSTANTS
 # Mass of the Sun in grams
 M_sun = 1.988409870698051e+33
@@ -61,7 +63,7 @@ delta_mu = None
 # Error on delta_mu
 delta_mu_err = None
 # Target Hipparcos identifier. Alternative to supplying delta_mu
-hip_id = '99175'
+hip_id = '99175' # HD 191939's HIP ID
 # Target Gaia DR3 identifier. Alternative to supplying delta_mu
 gaia_id = '2248126315275354496'
 
