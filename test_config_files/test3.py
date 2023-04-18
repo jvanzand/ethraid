@@ -79,7 +79,7 @@ vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
 # Path to contrast curve
-contrast_str = 'ethraid/data/clean_curves/TOI1339_K_band.csv'
+contrast_str = 'ethraid/data/test_K_band.csv'
 # Epoch of imaging observations (BJD).
 imag_epoch = 24593300
 

@@ -19,9 +19,9 @@ def api_tester(calc=True, load=True, verbose=False):
     if calc:
         # Tests of full calculations
         # Two separate config files testing different options
-        config_files = ['ethraid/config_files/test1.py',
-                        'ethraid/config_files/test2.py',
-                        'ethraid/config_files/test3.py'
+        config_files = ['test_config_files/test1.py',
+                        'test_config_files/test2.py',
+                        'test_config_files/test3.py'
                         ]
         calc_error_count = 0
         for cf in config_files:
@@ -98,9 +98,9 @@ def cli_tester(calc=True, load=True, verbose=False):
     if calc:
         # Tests of full calculations
         # Two separate config files testing different options
-        config_files = ['ethraid/config_files/test1.py',
-                        'ethraid/config_files/test2.py',
-                        'ethraid/config_files/test3.py'
+        config_files = ['test_config_files/test1.py',
+                        'test_config_files/test2.py',
+                        'test_config_files/test3.py'
                         ]
                         
         calc_error_count = 0
@@ -130,7 +130,7 @@ def cli_tester(calc=True, load=True, verbose=False):
         for rfp in read_file_paths:
             try:
                 test_name = rfp.split('/')[-1].split('_')[0] # Eg 'test1'
-                config_name = 'ethraid/config_files/{}.py'.format(test_name)
+                config_name = 'test_config_files/{}.py'.format(test_name)
                 
                 func="plot"
                 subprocess.run(["python", "ethraid/cli.py", func, "-cf", config_name,
