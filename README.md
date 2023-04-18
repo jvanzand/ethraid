@@ -15,11 +15,11 @@ Characterize long-period companions with partial orbits.
 - You may have to first upgrade pip using *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
 ## Example CLI usage
-# Run orbit fits using parameters in configuration file
+### Run orbit fits using parameters in configuration file
 - *\$ ethraid run -cf ethraid/config_files/test1.py*
-# Load and plot saved results
+## Load and plot saved results
 - *\$ ethraid plot -cf ethraid/config_files/test1.py -rfp results/test1/test1_raw.h5 -gn 100*
-# Print 95\% confidence intervals of companion's semi-major axis and mass based on derived posterior
+#### Print 95\% confidence intervals of companion's semi-major axis and mass based on derived posterior
 - *\$ ethraid less -rfp results/test1/test1_raw.h5 -gn 100*
 
 ## If downloading repo
