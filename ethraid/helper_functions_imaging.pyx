@@ -77,7 +77,7 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     cdef np.ndarray[double, ndim=1] min_mass_list = np.ndarray(shape=(num_points,), dtype=np.float64)
     
     # Function to map angular separations from a contrast curve to the companion masses ruled out at those separations. Intermediate step: convert delta_mag to mass using tables from Pecaut/Mamajek2013 and Baraffe03
-    # Use fill_value=np.inf so that for angular separations below OR above those given in the contrast curve, we no companions can be ruled out.
+    # Use fill_value=np.inf so that for angular separations below OR above those given in the contrast curve, no companions can be ruled out.
     angsep_to_mass = interp_fn(d_star, vmag, imag_wavelength, contrast_str=contrast_str, which='A2M',
                                fill_value=np.inf)
     
@@ -92,7 +92,7 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
         M_anom_0 = M_anom_0_list[j]
         per = per_list[j]
         
-        # Angular separation in milli-arcseconds added to list
+        # Angular separation in arcseconds added to list
         ang_sep_list[j] = ang_sep(a, m, e, i, om, M_anom_0, per, 
                                   m_star, d_star, imag_epoch)
 

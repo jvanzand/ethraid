@@ -393,14 +393,14 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
     # Make sure contour_list is in descending order
     t_contours = f(np.array(sorted(contour_list, reverse=True)))
     
-    # Make sure the no two probability contours have identical values. This generally only occurs for the imaging posterior, which is designed so that all pixels have either p=0 or p=some single value.
+    # Make sure that no two probability contours have identical values. This generally only occurs for the imaging posterior in the approximate case, which is designed so that all pixels have either p=0 or p=some single value.
     for i in range(len(t_contours)):
       if i == 0:
           continue
       if t_contours[i] == t_contours[i-1]:
           t_contours[i] = t_contours[i-1]*1.001
           
-    # Return t_countours, which might look like [0.0004, 0.0015, 0.0062]. It will be passed to matplotlib's contourf() function.
+    # Return t_countours, which looks like eg [0.0004, 0.0015, 0.0062]. It will be passed to matplotlib's contourf() function.
     return t_contours
 
 
@@ -433,8 +433,8 @@ def bounds_1D(prob_array, value_spaces, sig):
 
         inds_sig = CDF_indices(array_1D, [sig])[0]
 
-        ### # value_bounds is a tuple of actual values, not indices.
-        ### # Reverse the order of value_spaces because if we are interested in the a bounds, we collapse along m
+        ### value_bounds is a tuple of actual values, not indices.
+        ### Reverse the order of value_spaces because if we are interested in the a bounds, we collapse along m
         value_bounds = index2value(inds_sig, (0, grid_num), value_spaces[::-1][i])
 
         inds_sig_list.append(inds_sig)
