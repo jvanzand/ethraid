@@ -14,7 +14,7 @@ Ms2Mj = M_sun/M_jup
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e6
+num_points = 1e7
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
@@ -90,11 +90,11 @@ vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
 # Path to contrast curve
-contrast_str = 'ethraid/data/test_K_band.csv'
+contrast_str = 'ethraid/ethraid/data/test_K_band.csv'
 # Epoch of imaging observations (BJD).
 imag_epoch = 24593300
 
 
 # PLOTTING PARAMS
 # Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-scatter_plot = [3.825, 3.0]
+scatter_plot = [3.8, 3.0]

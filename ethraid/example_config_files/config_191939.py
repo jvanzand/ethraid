@@ -84,4 +84,4 @@ imag_epoch = 24593300
 
 # PLOTTING PARAMS
 # Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-scatter_plot = [10, 10]
+scatter_plot = [3.8, 3.0]
