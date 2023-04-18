@@ -1,5 +1,7 @@
 ## Test config file 1. Runs RVs, astrometry (using delta_mu directly), and imaging (exact)
 
+import ethraid.compiled.helper_functions_general as hlp
+
 # CONSTANTS
 # Mass of the Sun in grams
 M_sun = 1.988409870698051e+33
@@ -22,12 +24,7 @@ grid_num = 100
 save = ['raw', 'proc']
 # Output directory. Destination of folder containing saved products
 outdir = ''
-# Minimum and maximum semi-major axes to sample (AU)
-min_a = 1.6489
-max_a = 1e2
-# Minimum and maximum masses to sample (M_Jup)
-min_m = 0.769
-max_m = 1e3
+## See below for min_a and min_m, calculated in terms of the RV data
 
 
 # STELLAR PARAMS
@@ -52,6 +49,20 @@ gammaddot = -6e-5
 gammaddot_err = 1.9e-5
 # Epoch at which gammadot and gammaddot are measured. Typically about 1/2 way through the observing baseline.
 rv_epoch = 2458847.780463
+
+
+###################
+## Calculate min a and min m based on RVs
+rv_baseline=500
+min_per=1000
+min_a_and_m = hlp.min_a_and_m(gammadot, gammaddot, rv_baseline, min_per, m_star)
+
+min_a = min_a_and_m[0]
+min_m = min_a_and_m[1]
+
+max_a = 1e2
+max_m = 1e3
+###################
 
 
 # ASTROMETRY PARAMS
