@@ -3,7 +3,6 @@ import numpy as np
 import scipy as sp
 import scipy.stats as spst
 
-import radvel as rv
 cimport numpy as np
 cimport cython
 from libc.math cimport sin, cos, tan, atan, sqrt, log
@@ -588,6 +587,11 @@ def min_a_and_m(trend, curv, rv_baseline, min_per, m_star):
         min_m (float, M_Jup): Estimated minimum companion mass, used
                               as lower bound for sampling model masses
     """
+    
+    try:
+        import radvel as rv
+    except ModuleNotFoundError as err:
+        raise Exception('helper_functions_general.min_a_and_m: Radvel must be installed to use this function.')
     
     # Start with the minimum RV semi-amplitude K.
     # The lowest K could be is 1/2 of the current observed RV variation

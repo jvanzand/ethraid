@@ -12,9 +12,7 @@ Characterize long-period companions with partial orbits.
 
 ## Download using pip
 - *\$ pip install ethraid*
-- If the installation fails, try
-	- Upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
-	- Installing cython: *\$ pip install cython*
+- If the installation fails, try upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
 ## Example CLI usage
 ### Run orbit fits using parameters in configuration file

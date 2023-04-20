@@ -1,5 +1,5 @@
 from setuptools import setup, find_packages, Extension
-from Cython.Build import cythonize
+import subprocess
 from setuptools.command.build_ext import build_ext as _build_ext
 import re
 
@@ -53,6 +53,14 @@ extensions = [
 ]
 
 ##############################
+
+try:
+    from Cython.Build import cythonize
+    import numpy
+except ModuleNotFoundError:
+    subprocess.run(["pip", "install", "cython==0.29.33"])
+    subprocess.run(["pip", "install", "numpy==1.21.6"])
+    from Cython.Build import cythonize
 
 # From radvel but also found on StackExchange
 class build_ext(_build_ext):

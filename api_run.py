@@ -2,7 +2,6 @@
 import astropy.constants as c
 import numpy as np
 import time
-import radvel as rv
 
 import os
 import sys
