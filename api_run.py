@@ -241,7 +241,7 @@ def run(config_path=None, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/config_files/test1.py'
+    config_path = 'ethraid/example_config_files/config_191939.py'
     read_file_path = None
     
     grid_num=75

@@ -220,8 +220,8 @@ def save_raw(star_name, m_star, d_star,
         
          except Exception as err:
              # Only print message if user provided imaging data. If they did not, then irrelevant
-             print(err)
              if verbose and run_imag:
+                 print(err)
                  print("load_save.save_raw: vmag, imag_wavelength, or contrast_str not saved."
                        "                    post_imag cannot be reshaped to a new grid_num.")
          

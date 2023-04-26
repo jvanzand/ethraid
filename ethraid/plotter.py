@@ -3,6 +3,7 @@ import numpy as np
 from astropy.time import Time
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
+import warnings
 
 from ethraid import helper_functions_plotting as hlp_plot
 from ethraid.compiled import helper_functions_general as hlp
@@ -75,20 +76,24 @@ def joint_plot(star_name, m_star, d_star,
     alphas = [0.5, 0.5, 0.4]
     zorders = [20, 10, 0]
     
+    
     for i in range(3):
         dt = data_types[i]
         c = colors[i]
         alpha = alphas[i]
         z = zorders[i]
-        # First, check if run_rv, run_astro, and run_imag are True. If not, don't plot
+        # First, check if run_rv, run_astro, and run_imag are True. If any is not, don't plot that contour
         if eval("run_{}".format(dt)):
             exec("post_{0}_pad = np.pad(post_{0}, [(grid_pad, 0), (grid_pad, 0)])".format(dt))
             exec("t_contours_{0} = hlp.contour_levels(post_{0}, [1,2])".format(dt))
             
             # For imaging only, use contour instead of contourf to get a line instead of a filled region
             if dt == 'imag':
-                exec("post_{0}_cont = ax.contour(post_{0}_pad, t_contours_{0},\
-                             cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
+                # In the approximate case, the imaging posterior has 2 regions by design: uniformly 0 and uniformly some nonzero value. Suppress Matplotlib's warning that contour levels are undefined in this case.
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", message='No contour levels were found within the data range.')
+                    exec("post_{0}_cont = ax.contour(post_{0}_pad, t_contours_{0},\
+                                 cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
             else:
                 exec("post_{0}_cont = ax.contourf(post_{0}_pad, t_contours_{0},\
                              cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
@@ -177,14 +182,14 @@ def joint_plot(star_name, m_star, d_star,
     
     
     ######## Done with x and y axes. Now to add the top x axis, which is separation in arcseconds ########
-    raw_labels_sep = hlp_plot.tick_function_a(tick_labels_a, d_star)
-    tick_labels_sep = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_sep))
-
-    ax2 = ax.twiny()
-    plt.sca(ax2)
-    plt.xlim(0, grid_num+grid_pad-1)
-    plt.xticks(tick_positions_a, tick_labels_sep, size=tick_size*0.75)
-    plt.xlabel('Angular separation (arcsec)', size=label_size*0.75)
+    # raw_labels_sep = hlp_plot.tick_function_a(tick_labels_a, d_star)
+    # tick_labels_sep = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_sep))
+    #
+    # ax2 = ax.twiny()
+    # plt.sca(ax2)
+    # plt.xlim(0, grid_num+grid_pad-1)
+    # plt.xticks(tick_positions_a, tick_labels_sep, size=tick_size*0.75)
+    # plt.xlabel('Angular separation (arcsec)', size=label_size*0.75)
     
     ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:

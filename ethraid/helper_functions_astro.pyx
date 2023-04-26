@@ -178,11 +178,8 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
                       [hip_times[1], gaia_times[1]]]
 
     mean_motion = two_pi/per
-    #sqrt_eterm = sqrt((1+e)/(1-e))
     a_star = a*mass_ratio
-    #e_sq = e**2
     rot_matrix(i, om, rot_mtrx)
-    #r_star_num_fac = a*(1-e_sq)
     
     for l in range(2): # Hipparcos or Gaia
         start_time = time_endpoints[0][l] - time_endpoints[0][0] # The "start time" of Hip or Gaia relative to the start of Hip. For Hip, start_time is 0 by definition. For Gaia, it is the time between Hip_start and Gaia_start

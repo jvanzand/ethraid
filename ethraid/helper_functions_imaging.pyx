@@ -76,10 +76,6 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     cdef np.ndarray[double, ndim=1] ang_sep_list = np.ndarray(shape=(num_points,), dtype=np.float64)
     cdef np.ndarray[double, ndim=1] min_mass_list = np.ndarray(shape=(num_points,), dtype=np.float64)
     
-    # Function to map angular separations from a contrast curve to the companion masses ruled out at those separations. Intermediate step: convert delta_mag to mass using tables from Pecaut/Mamajek2013 and Baraffe03
-    # Use fill_value=np.inf so that for angular separations below OR above those given in the contrast curve, no companions can be ruled out.
-    angsep_to_mass = interp_fn(d_star, vmag, imag_wavelength, contrast_str=contrast_str, which='A2M',
-                               fill_value=np.inf)
     
     print('Running imaging models')
     for j in tqdm(range(num_points)):
@@ -95,14 +91,21 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
         # Angular separation in arcseconds added to list
         ang_sep_list[j] = ang_sep(a, m, e, i, om, M_anom_0, per, 
                                   m_star, d_star, imag_epoch)
-
-        
-    # min_mass_list contains the minimum mass that would be detectable at a given angular separation
-    min_mass_list = angsep_to_mass(ang_sep_list)
+                                  
+    ##########
+    # Interpolate a contrast curve to get a function that maps angular separation to delta_mag contrasts
+    angsep_to_dmag = interp_fn(d_star, vmag, imag_wavelength, 
+                               contrast_str=contrast_str, which='A2C')
     
-    # Compare those minimum masses to the model masses. If the model mass is larger, then the model companion is ruled out by imaging, so the model has p=0. All models with min_mass > modeled_mass are allowed, and equally probable (an approximation).
-    # prob_list contrains boolean (True or False) values based on the above criteria. These conveniently evaluate to 1 or 0 when summed.
-    lik_list = min_mass_list > m_list
+    # Next function is to map model companion masses to delta_mag contrasts based on stellar/Brown Dwarf mass-luminosity models form Pecaut/Mamajek2013 and Baraffe03.
+    # Must set fill_value for mass_to_dmag because sampled masses go well below masses listed in Brown Dwarf cooling model tables (m_min~2 M_J). For objects smaller than that, make contrast infinite (ie, we cannot image 2 M_J objects).
+    mass_to_dmag = interp_fn(d_star, vmag, imag_wavelength, which='M2C', fill_value=(np.inf, -np.inf))
+    #########
+    
+    max_dmag_list = angsep_to_dmag(ang_sep_list)
+    model_dmag_list = mass_to_dmag(m_list)
+    
+    lik_list = model_dmag_list > max_dmag_list
     lik_list = lik_list.astype(float)
     
     return lik_list
@@ -134,7 +137,7 @@ def ang_sep(double a, double m, double e, double i, double om, double M_anom_0,
                                  at the imaging epoch.
         
     """
-    cdef double mass_ratio, au_2_mas, mean_motion, a_star, M, E, ang_sep
+    cdef double mass_ratio, au_2_mas, mean_motion, M, E, ang_sep
     
     cdef double [:,:] rot_mtrx # This makes rot_mtrx a memview
     rot_mtrx = np.zeros((3,3),dtype=np.float64)
@@ -151,7 +154,6 @@ def ang_sep(double a, double m, double e, double i, double om, double M_anom_0,
     au_2_as = 1/d_star # Conversion factor btwn au and arcseconds, with d_star converted to pc
 
     mean_motion = two_pi/per
-    a_star = a*mass_ratio
     rot_matrix(i, om, rot_mtrx)
     
     # Advance initial mean anomaly from the beginning of the Hipparcos mission to the imaging epoch
@@ -159,11 +161,10 @@ def ang_sep(double a, double m, double e, double i, double om, double M_anom_0,
     
     E = kepler_single(M%two_pi, e)
     
-    # Position of the STAR (note the - sign) in au.
-    # vec points from barycenter to the average position of the star in the orbital plane
-    # Our sampled E describes the planet, so multiplying by -1 gives stellar direction
-    vec[0] = -a*(cos(E)-e)
-    vec[1] = -a*sqrt(1-e*e)*sin(E)
+    # Equations 2.41 in Murray & Dermott
+    # vec points from the star to the companion (note the pre-factor a is the full semi-major axis)
+    vec[0] = a*(cos(E)-e)
+    vec[1] = a*sqrt(1-e*e)*sin(E)
     vec[2] = 0
     
     # mat_mul() returns a vector describing stellar position in the observer's frame (in the sky plane, with the z-axis pointing to the observer)
@@ -348,7 +349,15 @@ def interp_fn(d_star, vmag, imag_wavelength, contrast_str=None, which='C2M', fil
         contrast_masses = dmag_to_mass(contrast_curve['delta_mag']) # Use dmag->mass fn to find masses for each angsep in your contrast curve
         
         interp_fn = interp1d(contrast_curve['ang_sep'], contrast_masses,
-                             bounds_error=False, fill_value=fill_value) # Finally, use angseps and corresponding masses to define a angsep->mass fn
+                             bounds_error=False, fill_value=fill_value) # Finally, use angseps and corresponding masses to define an angsep->mass fn
+    
+    elif which=='A2C': # Very basic function that just interpolates contrast curve
+        if contrast_str is None:
+            raise Exception('helper_functions_imaging.interp_fn: \n'
+                            '                                   contrast_str required to generate A2M function')
+        contrast_curve = pd.read_csv(contrast_str) # First get your angsep/dmag curve
+        
+        interp_fn = interp1d(contrast_curve['ang_sep'], contrast_curve['delta_mag'])
         
     return interp_fn
 
@@ -428,7 +437,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     if not set(['ang_sep', 'delta_mag']).issubset(contrast_curve.columns):
         raise Exception("The dataframe must contain columns 'ang_sep' and 'delta_mag'")
 
-    seps = contrast_curve['ang_sep']*(d_star/pc_in_au)
+    seps = contrast_curve['ang_sep']*(d_star/pc_in_au)#*0.79 #Correction factor to avg over i and E
     dmags = contrast_curve['delta_mag']
 
     ## Create an interpolation fn that takes delta mag contrast to companion mass
@@ -468,4 +477,27 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     np_imag_array = np.array(imag_array) / np.array(imag_array).sum()
 
     return np_imag_array
-    
+
+
+
+
+## These lines were removed from the bottom of the imag_list() function. imag_list() forward models the model (a,m) to (angular_separation, delta_mag), and then compares those model values to the provided contrast curve. This approach is consistent with RV and astrometry. You're comparing forward-modeled dmags to the measured dmags.
+
+## The lines below instead uses a to calculate angular separation, uses the contrast curve to determine what delta_mag would be detectable at that separation, and finally converts that delta_mag to a mass to compare directly to the model m. Here you're comparing a forward-modeled mass (which used the measured contrast curve) to the model mass.
+
+## The only reason I'm keeping these lines is that although the approach is less motivated, it is cleaner. This is because with this approach, you interpolate dmag-mass curves "forward," meaning you create an interpolation function that takes dmag and gives mass. This is good because those curves (Mamajek and Baraffe) pass the "vertical line test," so every dmag has a single companion mass. The first approach, however, demands the opposite: you must interpolate a mass-dmag curve. However, in some cases there are multiple dmags which correspond to the same companion mass. This creates instability in the interpolation. I have observed the magnitude of this error to be small, and it seems worth incurring for the sake of making imaging follow the same calculation procedure as both RVs and astrometry.
+
+    ### Function to map angular separations from a contrast curve to the companion masses ruled out at thoseseparations. Intermediate step: convert delta_mag to mass using tables from Pecaut/Mamajek2013 and Baraffe03
+    ### Use fill_value=np.inf so that for angular separations below OR above those given in the contrast curve, no companions can be ruled out.
+    #angsep_to_mass = interp_fn(d_star, vmag, imag_wavelength, contrast_str=contrast_str, which='A2M',
+    #                           fill_value=np.inf)
+    #
+    ## min_mass_list contains the minimum mass that would be detectable at a given angular separation
+    #min_mass_list = angsep_to_mass(ang_sep_list)
+    #
+    ## Compare those minimum masses to the model masses. If the model mass is larger, then the model companion is ruled out by imaging, so the model has p=0. All models with min_mass > modeled_mass are allowed, and equally probable (an approximation).
+    ## prob_list contrains boolean (True or False) values based on the above criteria. These conveniently evaluate to 1 or 0 when summed.
+    #lik_list = min_mass_list > m_list
+    #lik_list = lik_list.astype(float)
+    #
+    #return lik_list

@@ -591,7 +591,7 @@ def min_a_and_m(trend, curv, rv_baseline, min_per, m_star):
     try:
         import radvel as rv
     except ModuleNotFoundError as err:
-        raise Exception('helper_functions_general.min_a_and_m: Radvel must be installed to use this function.')
+        raise Exception('helper_functions_general.min_a_and_m: Radvel 1.3.8 must be installed to use this function.')
     
     # Start with the minimum RV semi-amplitude K.
     # The lowest K could be is 1/2 of the current observed RV variation

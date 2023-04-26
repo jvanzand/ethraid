@@ -22,7 +22,7 @@ Characterize long-period companions with partial orbits.
 ### Print 95\% mass and semi-major axis confidence intervals based on derived posterior
 - *\$ ethraid less -rfp results/test1/test1_raw.h5 -gn 100*
 
-## If downloading repo
+## Download repo from Github
 ### Install dependencies using requirements.txt 
 - *\$ pip install -r requirements.txt*
 
@@ -30,5 +30,5 @@ Characterize long-period companions with partial orbits.
 - *\$ cd trends/*
 - *\$ python setup.py build_ext --inplace*
 
-## Use api_run.py as a reference
+### Use api_run.py as a reference
 - *\$ python api_run.py*
