@@ -59,15 +59,18 @@ def run(config_path=None, read_file_path=None,
 
     # If no data to read in, calculate new arrays
     if read_file_path is None:
-        
-        ## First try loading params with default values. If they can't be loaded, use defaults
-        default_params = ['num_points', 'grid_num', 'min_a', 'min_m', 'max_a', 'max_m']
-        default_values = [int(1e6), int(1e2), 1, 1, 1e2, 1e3]
 
-        num_points, grid_num, min_a,\
-        min_m, max_a, max_m = driver.set_values(config_path, 
-                                                default_params, 
-                                                default_values)
+        ## First try loading optional params. If they can't be loaded, use defaults
+        optional_params = ['num_points', 'grid_num', 'save', 'min_a', 'max_a', 'min_m', 'max_m']
+        default_values = [int(1e6), int(1e2), ['proc'], 1, 1e2, 1, 1e3]
+
+        num_points, grid_num, save,\
+        min_a, max_a, min_m, max_m = driver.set_values(config_path, 
+                                                       optional_params, 
+                                                       default_values)
+        
+        num_points = int(num_points)
+        grid_num = int(grid_num)
         ######################################
         ## Next load in required params
         cm = driver.load_module_from_file(config_path)
@@ -188,11 +191,15 @@ def run(config_path=None, read_file_path=None,
         run_astro = cm.run_astro
         run_imag = cm.run_imag
         
+        
+        # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
+        scatter_plot, outdir = driver.set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
+        
         if 'proc' in cm.save:
             ls.save_processed(star_name, m_star, d_star,
                               run_rv, run_astro, run_imag, 
                               post_tot, post_rv, post_astro, post_imag,
-                              a_lim, m_lim, outdir=cm.outdir)
+                              a_lim, m_lim, outdir=outdir)
 
         if 'raw' in cm.save:
             if imag_calc=='approx':
@@ -205,13 +212,10 @@ def run(config_path=None, read_file_path=None,
                         rv_list, astro_list, imag_data,
                         vmag, imag_wavelength, contrast_str,
                         a_list, m_list, a_lim, m_lim, 
-                        imag_calc=imag_calc, outdir=cm.outdir, 
+                        imag_calc=imag_calc, outdir=outdir, 
                         verbose=False)
-    
-        scatter_plot = cm.scatter_plot
-        outdir=cm.outdir
 
-    # Otherwise, load in existing data:
+    # If read_file_path is NOT None, load in existing data:
     else:
         star_name, m_star, d_star,\
         run_rv, run_astro, run_imag,\

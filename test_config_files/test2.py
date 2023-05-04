@@ -10,10 +10,6 @@ num_points = 1e4
 # When using CLI, grid_num should be supplied at the command line rather than in the config file (default grid_num=100).
 # Include grid_num in config file for API usage.
 grid_num = 100
-# Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
-save = ['raw', 'proc']
-# Output directory. Destination of folder containing saved products
-outdir = ''
 # Minimum and maximum semi-major axes to sample (AU)
 min_a = 1.6489
 max_a = 1e2
@@ -74,6 +70,13 @@ imag_wavelength = 2.2
 contrast_str = 'ethraid/data/test_K_band.csv'
 # Epoch of imaging observations (BJD).
 imag_epoch = 24593300
+
+
+# SAVE PARAMS
+# Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
+save = ['raw', 'proc']
+# Output directory. Destination of folder containing saved products
+outdir = ''
 
 
 # PLOTTING PARAMS

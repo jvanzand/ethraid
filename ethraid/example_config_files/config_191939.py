@@ -13,16 +13,12 @@ Ms2Mj = M_sun/M_jup
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e6
+# num_points = 1e6
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
 # Include grid_num in config file for API usage.
 grid_num = 100
-# Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
-save = ['raw', 'proc']
-# Output directory. Destination of folder containing saved products
-outdir = ''
 # Minimum and maximum semi-major axes to sample (AU)
 min_a = 1.6489
 max_a = 1e2
@@ -85,6 +81,13 @@ contrast_str = os.path.join(_ROOT, 'data/test_K_band.csv')
 imag_epoch = 24593300
 
 
+# SAVE PARAMS
+# Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
+save = ['raw', 'proc']
+# Output directory. Destination of folder containing saved products
+# outdir = ''
+
+
 # PLOTTING PARAMS
 # Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-scatter_plot = [3.8, 3.0]
+# scatter_plot = [3.8, 3.0]

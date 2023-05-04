@@ -79,14 +79,17 @@ def run(args):
     
     config_path = args.config
     
-    ## First try loading params with default values. If they can't be loaded, use defaults
-    default_params = ['num_points', 'grid_num', 'min_a', 'min_m', 'max_a', 'max_m']
-    default_values = [int(1e6), int(1e2), 1, 1, 1e2, 1e3]
+    ## First try loading optional params. If they can't be loaded, use defaults
+    optional_params = ['num_points', 'grid_num', 'min_a', 'max_a', 'min_m', 'max_m', 'save', 'outdir']
+    default_values = [int(1e6), int(1e2), 1, 1e2, 1, 1e3, ['proc'], '']
 
-    num_points, grid_num, min_a,\
-    min_m, max_a, max_m = set_values(config_path, 
-                                     default_params, 
-                                     default_values)
+    num_points, grid_num,min_a, max_a,\
+    min_m, max_m, save, outdir = set_values(config_path, 
+                                            optional_params, 
+                                            default_values)
+    
+    num_points = int(num_points)
+    grid_num = int(grid_num)
     ######################################
     ## Next load in required params
     cm = load_module_from_file(config_path)
@@ -122,7 +125,7 @@ def run(args):
     #######################################################################################
     ## RVs
     #######################################################################################
-    if cm.run_rv:
+    if run_rv:
         gammadot = cm.gammadot
         gammadot_err = cm.gammadot_err
         gammaddot = cm.gammaddot
@@ -142,7 +145,7 @@ def run(args):
     #######################################################################################
     ## Astrometry
     #######################################################################################
-    if cm.run_astro:
+    if run_astro:
         delta_mu = cm.delta_mu
         delta_mu_err = cm.delta_mu_err
         hip_id = cm.hip_id
@@ -165,7 +168,7 @@ def run(args):
     #######################################################################################
     ## Imaging
     #######################################################################################
-    if cm.run_imag:
+    if run_imag:
         vmag = cm.vmag
         imag_wavelength = cm.imag_wavelength
         contrast_str = cm.contrast_str
@@ -195,7 +198,7 @@ def run(args):
     #######################################################################################
     ## Total
     #######################################################################################
-    if cm.run_imag and imag_calc=='exact':
+    if run_imag and imag_calc=='exact':
         post_tot = hlp.post_tot(rv_list, astro_list, imag_list, grid_num, a_inds, m_inds)
         
     else:
@@ -252,6 +255,9 @@ def plot(args):
     # Even though results are saved, config file still needed for a few parameters
     config_path = args.config
     cm = load_module_from_file(config_path)
+
+    # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
+    scatter_plot, outdir = set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
     
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
@@ -263,8 +269,8 @@ def plot(args):
                            cm.run_rv, cm.run_astro, cm.run_imag,
                            post_tot, post_rv, post_astro, post_imag, 
                            grid_num, a_lim, m_lim,
-                           scatter_plot=cm.scatter_plot, period_lines=False,
-                           outdir=cm.outdir, verbose=args.verbose)
+                           scatter_plot=scatter_plot, period_lines=False,
+                           outdir=outdir, verbose=args.verbose)
     
     if "1d" in args.type:
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir=cm.outdir)
@@ -345,6 +351,12 @@ def set_values(config_path, param_names, default_values):
     Arguments:
         config_path (str): Path to configuration file
         param_names (list of str): List of parameter names
+        defaults_values (list): Default values of params in param_names.
+                                Must have same length as param_names.
+    
+    Returns:
+        param_values (tuple): Parameter values, whether default or given
+                              in config file
     """
     
     if len(param_names) != len(default_values):
@@ -362,12 +374,12 @@ def set_values(config_path, param_names, default_values):
             param_value = eval('config_module.{}'.format(param_name))
     
         except Exception as err:
-            print(err)
             param_value = default_value
             
         param_values.append(param_value)
 
-    return tuple(param_values)
+    param_values = tuple(param_values)
+    return param_values
     
     
 
