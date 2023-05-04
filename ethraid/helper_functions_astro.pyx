@@ -13,6 +13,7 @@ cdef double two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, baseline_yrs
 cdef double hip_times[2]
 cdef double gaia_times[2]
 
+pi = 3.141592653589793
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
 
@@ -76,7 +77,7 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
         m = m_list[j]
         e = e_list[j]
         i = i_list[j]
-        om = om_list[j]
+        om = om_list[j] # Because om_list contains the *planet* \omegas, this om should technically by om_list[j]+pi. However, the dmu() function below is insensitive to this change, so we use om_list[j] itself for simplicity.
         M_anom_0 = M_anom_0_list[j]
         per = per_list[j]
 
@@ -206,10 +207,11 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         mat_mul(rot_mtrx, vec, vec)
 
         # Average angular position of the star relative to barycenter in milli-arcseconds.
+        # ang_pos is in the plane of the sky, so no need to use vec's third component, which points out of the sky
         ang_pos_avg[l][0] = vec[0]*au_2_mas
         ang_pos_avg[l][1] = vec[1]*au_2_mas
+        
         ################### Angular Velocities ########################
-
         # Only need Gaia velocities, so skip Hip velocities
         if l == 0:
             continue
@@ -329,20 +331,19 @@ cdef void rot_matrix(double i, double om, double [:,:] rot_mtrx):
     """
     This is P2*P1 from Murray & Dermott Eqs. 2.119. We omit P3 (2.120) because
     the longitude of the ascending node (Omega) can be set arbitrarily to 0 for
-    our purposes, saving some time.
+    our purposes, saving some calculations.
 
     This function doesn't return anything. Instead, declare a matrix in your 
-    function and this will update it, saving lots of time by not allocating memory 
-    to and returning a matrix.
+    function and this will update it, more time by not allocating memory to
+    and returning a matrix.
 
     Arguments:
         i (float, radians): orbital inclination (0 = face-on)
         om (float, radians): argument of periastron
-        Om (float, radians): longitude of the ascending node
         rot_mtrx (3x3 array of zeros): Initial array, modified in place
 
     Returns:
-        None (but populates rot_mtrx with values)
+        None (but populates rot_mtrx with new values)
     """
     cdef double sin_om, sin_i, cos_om, cos_i
 

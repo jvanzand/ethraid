@@ -3,8 +3,6 @@
 
 Characterize long-period companions with partial orbits.
 
-[![Powered by radvel](https://img.shields.io/badge/powered_by-radvel-EB5368.svg?style=flat)](https://radvel.readthedocs.io/en/latest/)
-
 ## Environment
 ### Create new environment with python 3.7
 - *\$ conda create --name trends_env python=3.7*

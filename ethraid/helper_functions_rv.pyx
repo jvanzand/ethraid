@@ -149,12 +149,12 @@ cdef (double, double) gamma(double a, double m, double e,
         gddot (float, m/s/day/day): Model quadratic curvature term
     """
 
-    cdef double     sqrt_eterm,\
-                    sqrt_e_sq_term,\
-                    cos_E, sin_E,\
-                    nu, nu_dot, nu_ddot,\
-                    cos_nu_om, sin_nu_om, sin_i,\
-                    pre_fac, gamma_dot, gamma_ddot
+    cdef double sqrt_eterm,\
+                sqrt_e_sq_term,\
+                cos_E, sin_E,\
+                nu, nu_dot, nu_ddot,\
+                cos_nu_om, sin_nu_om, sin_i,\
+                pre_fac, gamma_dot, gamma_ddot
              
     sqrt_eterm = sqrt((1+e)/(1-e))
     sqrt_e_sq_term = sqrt(1-e*e)

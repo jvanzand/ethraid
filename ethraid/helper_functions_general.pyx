@@ -405,7 +405,7 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
 
 def bounds_1D(prob_array, value_spaces, sig):
     """
-    Given a 2D probability array, this function collapses the array along each 
+    Given a normalized 2D probability array, this function collapses the array along each 
     axis to find the desired confidence interval.
 
     Arguments:
@@ -445,8 +445,8 @@ def bounds_1D(prob_array, value_spaces, sig):
 
 def CDF_indices(prob_list, sig_list):
     """
-    This function is the 1D analog of contour_levels(). Given a list of 
-    probabilities representing a probability density function (or
+    This function is the 1D analog of contour_levels(). Given a normalized
+    list of probabilities representing a probability density function (or
     probability mass function because it is discrete), it determines 
     the interval containing a specified fraction of the total probability.
     
@@ -472,11 +472,11 @@ def CDF_indices(prob_list, sig_list):
     CDF = np.cumsum(prob_list)
     # Insert 0 at the beginning of the cumulative sum (now the length matches ind).
     CDF = np.insert(CDF,0,0)
-    # Eg: ind = [0,1,2,3,4] ; CDF = [0, 0.15, 0.4, 0.9, 1.0]
-    # Matching this up with ind, we are saying that at the 0th index, we have 0 prob. At the 1st index (and after adding the 0th), we have the prob corresponding to the 1st probability sum, and so on. Depending on where the index is actually placed (I believe it's in the center of each grid block), this could incur a ~pixel-level error.
+    # Eg: PDF = [0.15, 0.25, 0.5, 0.1] ; ind = [0,1,2,3,4] ; CDF = [0, 0.15, 0.4, 0.9, 1.0]
+    # Matching this up with ind, we are saying that at the 0th index, we have 0 prob. At the 1st index (and after adding the 0th), we have the prob corresponding to the 1st probability sum, and so on. Depending on where the index is actually placed (I believe it's in the center of each grid block), this could incur a ~0.5 pixel-level error.
     
     # Now we have a list of indices, running from eg low mass to high mass, AND the cumulative sum at each index.
-    # I want to be able to put in a cumulative probability and get out the index where the CDF attains that value.
+    # Goal: to be able to put in a cumulative probability and get out the index where the CDF attains that value.
     f = sp.interpolate.interp1d(CDF, ind)
     
     # n_sig_inds will be a list of 2-tuples. Each 2-tuple contains the indices marking the nth-sigma interval.

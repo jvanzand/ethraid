@@ -385,7 +385,7 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
 
     if band_name not in mamajek_table.columns:
         raise Exception("There is no data for the imaging band in the Mamajek table.\
-                         Find imaging data in the V, R, I, J, H, K, or L' bands")
+                         Please provide imaging data in the V, R, I, J, H, K, or L' bands")
     else:
         # Linearly interpolate between Mamajek entries to estimate Vmag ==> Xmag conversion
         f = interp1d(mamajek_table['V'], mamajek_table[band_name])

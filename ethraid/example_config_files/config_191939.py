@@ -1,5 +1,5 @@
 import os
-from ethraid import _ROOT
+from ethraid import _ROOT#, Ms2Mj, pc_in_au
 
 # CONSTANTS
 # Mass of the Sun in grams
@@ -13,7 +13,7 @@ Ms2Mj = M_sun/M_jup
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e7
+num_points = 1e6
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
@@ -57,7 +57,7 @@ rv_epoch = 2458847.780463
 
 # ASTROMETRY PARAMS
 # Whether to use astrometry data. Assign run_astro=False to omit astrometry from the calculation entirely.
-run_astro = False
+run_astro = True
 # Difference between the average Gaia proper motion and the position-based average proper motion between the Hipparcos and Gaia missions (milli-arcseconds/year)
 # Set dmu/dmu_err to None to provide Hipparcos or Gaia ID instead
 delta_mu = None

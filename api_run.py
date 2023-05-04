@@ -59,23 +59,25 @@ def run(config_path=None, read_file_path=None,
 
     # If no data to read in, calculate new arrays
     if read_file_path is None:
+        
+        ## First try loading params with default values. If they can't be loaded, use defaults
+        default_params = ['num_points', 'grid_num', 'min_a', 'min_m', 'max_a', 'max_m']
+        default_values = [int(1e6), int(1e2), 1, 1, 1e2, 1e3]
 
+        num_points, grid_num, min_a,\
+        min_m, max_a, max_m = driver.set_values(config_path, 
+                                                default_params, 
+                                                default_values)
+        ######################################
+        ## Next load in required params
         cm = driver.load_module_from_file(config_path)
-    
     
         star_name = cm.star_name
         m_star = cm.m_star
         d_star = cm.d_star
-        min_a = cm.min_a
-        min_m = cm.min_m
-        num_points = int(cm.num_points)
-        grid_num = int(cm.grid_num)
+        ######################################
         
         ### General ###
-        # Arbitrary upper limits
-        max_a = 1e2
-        max_m = 1e3
-    
         a_lim = (min_a, max_a)
         m_lim = (min_m, max_m)
     

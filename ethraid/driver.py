@@ -78,27 +78,30 @@ def run(args):
     """
     
     config_path = args.config
+    
+    ## First try loading params with default values. If they can't be loaded, use defaults
+    default_params = ['num_points', 'grid_num', 'min_a', 'min_m', 'max_a', 'max_m']
+    default_values = [int(1e6), int(1e2), 1, 1, 1e2, 1e3]
+
+    num_points, grid_num, min_a,\
+    min_m, max_a, max_m = set_values(config_path, 
+                                     default_params, 
+                                     default_values)
+    ######################################
+    ## Next load in required params
     cm = load_module_from_file(config_path)
-    
-    
+
     star_name = cm.star_name
     m_star = cm.m_star
     d_star = cm.d_star
-    min_a = cm.min_a
-    min_m = cm.min_m
-    max_a = cm.max_a
-    max_m = cm.max_m
-    num_points = int(cm.num_points)
-    grid_num = int(args.grid_num) # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100). Include grid_num in config file for API usage.
     verbose = args.verbose
     
     run_rv = cm.run_rv
     run_astro = cm.run_astro
     run_imag = cm.run_imag
+    ######################################
     
     ### General ###
-    # Arbitrary upper limits
-    
     a_lim = (min_a, max_a)
     m_lim = (min_m, max_m)
     
@@ -333,8 +336,38 @@ def load_module_from_file(config_path):
     return module
     
     
+def set_values(config_path, param_names, default_values):
+    """
+    Check if each of a set of parameters is defined in the 
+    configuration file. If it is, return the defined value. If
+    it isn't, then return the provided default value.
+    
+    Arguments:
+        config_path (str): Path to configuration file
+        param_names (list of str): List of parameter names
+    """
+    
+    if len(param_names) != len(default_values):
+        raise Exception('Error: param_names and defaults_values must have the same length')
     
     
+    
+    config_module = load_module_from_file(config_path)
+    param_values = []
+    for i in range(len(param_names)):
+        param_name = param_names[i]
+        default_value = default_values[i]
+        
+        try:
+            param_value = eval('config_module.{}'.format(param_name))
+    
+        except Exception as err:
+            print(err)
+            param_value = default_value
+            
+        param_values.append(param_value)
+
+    return tuple(param_values)
     
     
 

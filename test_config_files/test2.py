@@ -1,21 +1,13 @@
 ## Test config file 2. Runs astrometry (using target ID) and imaging (approx)
 
-# CONSTANTS
-# Mass of the Sun in grams
-M_sun = 1.988409870698051e+33
-# Mass of Jupiter in grams
-M_jup = 1.8981245973360504e+30
-# 1 parsec in AU
-pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-# Conversion factor between solar masses and Jupiter masses
-Ms2Mj = M_sun/M_jup
+from ethraid import Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
 num_points = 1e4
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
-# When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
+# When using CLI, grid_num should be supplied at the command line rather than in the config file (default grid_num=100).
 # Include grid_num in config file for API usage.
 grid_num = 100
 # Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
