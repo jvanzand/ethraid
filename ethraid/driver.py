@@ -212,12 +212,12 @@ def run(args):
     if verbose:
         print('{:.0e} points ran for {} in {:.2f} seconds.'.format(num_points, star_name, end_time-start_time))
     
-    if 'proc' in cm.save:
+    if 'proc' in save:
         ls.save_processed(star_name, m_star, d_star,
                           run_rv, run_astro, run_imag, 
                           post_tot, post_rv, post_astro, post_imag,
-                          a_lim, m_lim, outdir=cm.outdir)
-    if 'raw' in cm.save:
+                          a_lim, m_lim, outdir=outdir)
+    if 'raw' in save:
         if imag_calc=='approx':
             imag_data = post_imag
         else: # If imag_calc='exact' or anything else
@@ -228,7 +228,7 @@ def run(args):
                     rv_list, astro_list, imag_data,
                     vmag, imag_wavelength, contrast_str,
                     a_list, m_list, a_lim, m_lim, 
-                    imag_calc=imag_calc, outdir=cm.outdir, 
+                    imag_calc=imag_calc, outdir=outdir, 
                     verbose=False)     
     return
     
@@ -273,7 +273,7 @@ def plot(args):
                            outdir=outdir, verbose=args.verbose)
     
     if "1d" in args.type:
-        plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir=cm.outdir)
+        plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir=outdir)
                        
     return
     

@@ -195,13 +195,13 @@ def run(config_path=None, read_file_path=None,
         # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
         scatter_plot, outdir = driver.set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
         
-        if 'proc' in cm.save:
+        if 'proc' in save:
             ls.save_processed(star_name, m_star, d_star,
                               run_rv, run_astro, run_imag, 
                               post_tot, post_rv, post_astro, post_imag,
                               a_lim, m_lim, outdir=outdir)
 
-        if 'raw' in cm.save:
+        if 'raw' in save:
             if imag_calc=='approx':
                 imag_data = post_imag
             else: # If cm.imag_calc='exact' or anything else

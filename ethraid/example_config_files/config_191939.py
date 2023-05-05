@@ -1,15 +1,5 @@
 import os
-from ethraid import _ROOT#, Ms2Mj, pc_in_au
-
-# CONSTANTS
-# Mass of the Sun in grams
-M_sun = 1.988409870698051e+33
-# Mass of Jupiter in grams
-M_jup = 1.8981245973360504e+30
-# 1 parsec in AU
-pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-# Conversion factor between solar masses and Jupiter masses
-Ms2Mj = M_sun/M_jup
+from ethraid import _ROOT, Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
@@ -85,9 +75,9 @@ imag_epoch = 24593300
 # Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
 save = ['raw', 'proc']
 # Output directory. Destination of folder containing saved products
-# outdir = ''
+outdir = ''
 
 
 # PLOTTING PARAMS
 # Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-# scatter_plot = [3.8, 3.0]
+scatter_plot = [3.8, 3.0]

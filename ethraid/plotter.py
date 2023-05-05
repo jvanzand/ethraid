@@ -180,7 +180,8 @@ def joint_plot(star_name, m_star, d_star,
     plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
     plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)
     
-    
+    ## Removed angular separation axis. Orbits are not face-on/circular in general, so 'a' does not correspond uniquely to angular separation.
+    ########
     ######## Done with x and y axes. Now to add the top x axis, which is separation in arcseconds ########
     # raw_labels_sep = hlp_plot.tick_function_a(tick_labels_a, d_star)
     # tick_labels_sep = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_sep))
