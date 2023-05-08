@@ -480,7 +480,7 @@ def CDF_indices(prob_list, sig_list):
     f = sp.interpolate.interp1d(CDF, ind)
     
     # n_sig_inds will be a list of 2-tuples. Each 2-tuple contains the indices marking the nth-sigma interval.
-    # Eg, the first element might be (38.3, 65.9), which are the indices which encompass 68% of the total probability.
+    # Eg, the first element might be (38.3, 65.9), which would be the indices which encompass 68% of the total probability.
     nsig_inds = []
     nsig_prob_list = [0.68, 0.95, 0.997]
     

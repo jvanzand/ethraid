@@ -93,16 +93,20 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
                                   m_star, d_star, imag_epoch)
                                   
     ##########
+    # This is the "data"
     # Interpolate a contrast curve to get a function that maps angular separation to delta_mag contrasts
     angsep_to_dmag = interp_fn(d_star, vmag, imag_wavelength, 
                                contrast_str=contrast_str, which='A2C')
     
-    # Next function is to map model companion masses to delta_mag contrasts based on stellar/Brown Dwarf mass-luminosity models form Pecaut/Mamajek2013 and Baraffe03.
+    # This is the "model"
+    # Next function is to map model companion masses to delta_mag contrasts based on stellar/Brown Dwarf mass-luminosity models from Pecaut/Mamajek2013 and Baraffe03.
     # Must set fill_value for mass_to_dmag because sampled masses go well below masses listed in Brown Dwarf cooling model tables (m_min~2 M_J). For objects smaller than that, make contrast infinite (ie, we cannot image 2 M_J objects).
     mass_to_dmag = interp_fn(d_star, vmag, imag_wavelength, which='M2C', fill_value=(np.inf, -np.inf))
     #########
     
+    # The "data" sets the dimmest detectable object at the model seps
     max_dmag_list = angsep_to_dmag(ang_sep_list)
+    # The "model" gives the brightness of the modeled companion
     model_dmag_list = mass_to_dmag(m_list)
     
     lik_list = model_dmag_list > max_dmag_list
