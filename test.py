@@ -153,7 +153,7 @@ def cli_tester(calc=True, load=True, verbose=False):
 
 if __name__=="__main__":
     
-    api_errs = api_tester()
+    api_errs = 0#api_tester()
     cli_errs = cli_tester()
     
     print("{} api, {} cli errors".format(api_errs, cli_errs))

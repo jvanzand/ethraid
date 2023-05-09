@@ -228,9 +228,9 @@ def joint_plot(star_name, m_star, d_star,
     fig.savefig(save_dir + star_name + '_2d.png')
     plt.close()
     
-    # bounds is the final answer: [range of 2σ a, range of 2σ m].
-    # twosig_inds contains the indices where the CDF reaches the upper and lower values associated with the 95% confidence interval.
-    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
+    # # bounds is the final answer: [range of 2σ a, range of 2σ m].
+    # # twosig_inds contains the indices where the CDF reaches the upper and lower values associated with the 95% confidence interval.
+    # bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
     
     return
 

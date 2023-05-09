@@ -47,11 +47,6 @@ def main():
                          required=True,
                          help='Relative path of configuration file.'
                          )
-    psr_run.add_argument('-gn', '--grid_num',
-                        type=int,
-                        required=False,
-                        default=100,
-                        help='Dimension of binned probability arrays')
 
     psr_run.set_defaults(func=ethraid.driver.run)
     
@@ -75,7 +70,7 @@ def main():
     psr_plot.add_argument('-t', '--type',
                           type=str, nargs='+',
                           required=True,
-                          choices=['2d', '1d'],
+                          choices=['1d', '2d'],
                           help='Generate either 2D or 1D posteriors'
                           )
     # grid_num not required for plot, but if you load *raw* arrays without it, you will get an error.
@@ -83,7 +78,7 @@ def main():
                           type=int,
                           required=False,
                           default=None,
-                          help='Dimension of binned probability array. Required for raw  input arrays.'
+                          help='Dimension of binned probability arrays. Required for raw  input arrays.'
                           )
     psr_plot.set_defaults(func=ethraid.driver.plot)
     
