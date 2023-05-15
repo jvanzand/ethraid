@@ -61,8 +61,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
                                     m_bins = np.ndarray(shape=(num_points,), dtype=np.float64)
 
     cdef long [:] a_inds, m_inds
-    
-    np.random.seed(10)
+
     tp = 0
     a_min = a_lim[0]
     a_max = a_lim[1]
