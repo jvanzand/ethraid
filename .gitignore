@@ -26,7 +26,6 @@ results/*
 /trends/__pycache__
 */__pycache__
 
-test_timer.py
 
 
 *.c
