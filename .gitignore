@@ -26,6 +26,8 @@ results/*
 /trends/__pycache__
 */__pycache__
 
+test_timer.py
+
 
 *.c
 !c_kepler/kepler.c

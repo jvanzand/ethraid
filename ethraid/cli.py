@@ -11,7 +11,7 @@ def main():
               description='Ethraid: Find distant companions with partial orbits', 
               prog='Ethraid'
                          )
-    psr.add_argument('--version',
+    psr.add_argument('-V', '--version',
                     action='version',
                     version="%(prog)s {}".format(ethraid.__version__),
                     help='Print version number and exit.'
@@ -20,7 +20,7 @@ def main():
     subpsr = psr.add_subparsers(title='subcommands', dest='subcommand')
     
     
-    ## Parent parser to define arguments common to multiple subcommands
+    ## Parent parser to define arguments common to all subcommands
     ###################################################################
     psr_parent = ArgumentParser(add_help=False)
     psr_parent.add_argument('-od', '--outdir', 

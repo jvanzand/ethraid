@@ -3,7 +3,7 @@ from ethraid import _ROOT, Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-# num_points = 1e6
+num_points = 1e6
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
@@ -30,11 +30,11 @@ d_star = 53.8*pc_in_au
 # Whether to use RV data. Assign run_rv=False to omit RVs from the calculation entirely.
 run_rv = True
 # Linear RV trend term (m/s/day).
-gammadot = 0.114
+gammadot = -0.114
 # Error on gammadot
 gammadot_err = 0.006
 # Quadratic RV curvature term (m/s/day/day)
-gammaddot = -6e-5
+gammaddot = +6e-5
 # Error on gammaddot
 gammaddot_err = 1.9e-5
 # Epoch at which gammadot and gammaddot are measured. Typically about 1/2 way through the observing baseline.
@@ -43,7 +43,7 @@ rv_epoch = 2458847.780463
 
 # ASTROMETRY PARAMS
 # Whether to use astrometry data. Assign run_astro=False to omit astrometry from the calculation entirely.
-run_astro = True
+run_astro = False
 # Difference between the average Gaia proper motion and the position-based average proper motion between the Hipparcos and Gaia missions (milli-arcseconds/year)
 # Set dmu/dmu_err to None to provide Hipparcos or Gaia ID instead
 delta_mu = None
@@ -60,7 +60,7 @@ gaia_id = None
 run_imag = True
 # How to calculate imaging posterior. If 'exact', forward model companions as with RVs and astrometry.
 # If 'approx', then for the imaging calculations only, approximate all orbits to be face-on and circular regardless of sampled parameters, and rule out any model with a mass/angular separation combo that was detectable by imaging.
-imag_calc = 'exact'
+imag_calc = 'approx'
 # Host star visual magnitude. Used to estimate the magnitude at the imaging wavelength
 vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)

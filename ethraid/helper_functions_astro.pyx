@@ -1,4 +1,4 @@
-from astropy.time import Time
+#from astropy.time import Time
 from tqdm import tqdm
 import numpy as np
 from astroquery.vizier import Vizier
@@ -7,24 +7,17 @@ import cython
 cimport numpy as np
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
+from ethraid import hip_times, gaia_times
 from ethraid.compiled._kepler import kepler_single
 
 cdef double two_pi, math_e, G, M_sun, M_jup, au, pc_in_cm, baseline_yrs
-cdef double hip_times[2]
-cdef double gaia_times[2]
 
 pi = 3.141592653589793
 two_pi = 6.283185307179586
 math_e = 2.718281828459045
 
-old_G = 6.674299999999999e-08
 # G in AU, M_Jup, day units.
 G = 2.824760877012879e-07 # (c.G.cgs*(1/c.au.cgs)**3 * (c.M_jup.cgs) * (24*3600)**2).value
-
-#https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
-hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] 
-#https://www.cosmos.esa.int/web/gaia/earlydr3
-gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd]
 
 baseline_yrs = ((gaia_times[1] + gaia_times[0])/2 - (hip_times[1] + hip_times[0])/2)/365.25
 

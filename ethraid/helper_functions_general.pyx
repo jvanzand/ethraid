@@ -61,7 +61,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
                                     m_bins = np.ndarray(shape=(num_points,), dtype=np.float64)
 
     cdef long [:] a_inds, m_inds
-
+    
     np.random.seed(10)
     tp = 0
     a_min = a_lim[0]
@@ -91,7 +91,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
     M_anom_0_list = np.random.uniform(0, two_pi, num_points)
 
-    # Arguments of peri, uniformly distributed
+    # Arguments of peri of the companion, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
 
     # Breaking up the (a, M) parameter space into grid_num x grid_num
@@ -473,7 +473,7 @@ def CDF_indices(prob_list, sig_list):
     # Insert 0 at the beginning of the cumulative sum (now the length matches ind).
     CDF = np.insert(CDF,0,0)
     # Eg: PDF = [0.15, 0.25, 0.5, 0.1] ; ind = [0,1,2,3,4] ; CDF = [0, 0.15, 0.4, 0.9, 1.0]
-    # Matching this up with ind, we are saying that at the 0th index, we have 0 prob. At the 1st index (and after adding the 0th), we have the prob corresponding to the 1st probability sum, and so on. Depending on where the index is actually placed (I believe it's in the center of each grid block), this could incur a ~0.5 pixel-level error.
+    # Matching this up with ind, we are saying that at the 0th index, we have 0 prob. At the 1st index (and after adding the 0th), we have the prob corresponding to the 1st probability sum, and so on.
     
     # Now we have a list of indices, running from eg low mass to high mass, AND the cumulative sum at each index.
     # Goal: to be able to put in a cumulative probability and get out the index where the CDF attains that value.

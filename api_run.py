@@ -25,7 +25,7 @@ M_earth = 5.972167867791379e+27
 
 
 def run(config_path=None, read_file_path=None, 
-        grid_num=None, plot=None, scatter_plot=None, outdir=None,verbose=False):
+        plot=None, verbose=False):
     
     """
     Example API function to run orbit modelling and
@@ -44,13 +44,7 @@ def run(config_path=None, read_file_path=None,
         provided in the config file will supersede parameters provided 
         directly).
         
-        grid_num (int): Shape of square posterior arrays.
         plot (bool): Plot results?
-        scatter_plot (list of floats): Optional [semi-major axis, mass] pair
-                                        specifying the location of a known
-                                        companion to plot. Sma in AU, mass in
-                                        M_jup.
-        outdir (str): Path of save directory
         verbose (bool): Verbose output?
     
     Returns:
@@ -87,17 +81,21 @@ def run(config_path=None, read_file_path=None,
         if verbose:
             print('Min sampling m is: ', min_m)
             print('Min sampling a is: ', min_a)
-
-        a_list, m_list, per_list, e_list, i_list,\
-        om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
-                                                                 grid_num, num_points)
-                                                                 
-        if verbose:
-            print('made arrays')
+            
         ## Time array calculations
         start_time = time.time()
         ##
-    
+        
+        start_time_arrays = time.time()
+        a_list, m_list, per_list, e_list, i_list,\
+        om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
+                                                                 grid_num, num_points)
+        end_time_arrays = time.time()
+                                                                 
+        if verbose:
+            print('made arrays')
+            
+        start_time_rv = time.time()
         #######################################################################################
         ## RVs
         #######################################################################################
@@ -116,10 +114,11 @@ def run(config_path=None, read_file_path=None,
         else:
             rv_list = np.ones(num_points)
             post_rv = np.ones((grid_num, grid_num))
-        
+        end_time_rv = time.time()
         #######################################################################################
         ## Astrometry
         #######################################################################################
+        start_time_astro = time.time()
         if cm.run_astro:
             delta_mu = cm.delta_mu
             delta_mu_err = cm.delta_mu_err
@@ -139,19 +138,21 @@ def run(config_path=None, read_file_path=None,
         else:
             astro_list = np.ones(num_points)
             post_astro = np.ones((grid_num, grid_num))
-        
+        end_time_astro = time.time()
         #######################################################################################
         ## Imaging
         #######################################################################################
+        start_time_imag = time.time()
         if cm.run_imag:
+            imag_calc = driver.set_values(config_path, ['imag_calc'], ['exact'])
             vmag = cm.vmag
             imag_wavelength = cm.imag_wavelength
             contrast_str = cm.contrast_str
-            imag_epoch = cm.imag_epoch
-            imag_calc = cm.imag_calc
         
         
             if imag_calc == 'exact':
+                imag_epoch = cm.imag_epoch
+                
                 imag_list = hlp_imag.imag_list(a_list, m_list, e_list, i_list, om_list, 
                                                M_anom_0_list, per_list, m_star, 
                                                d_star, vmag, imag_wavelength, 
@@ -169,24 +170,50 @@ def run(config_path=None, read_file_path=None,
             imag_wavelength=None
             contrast_str=None
             imag_calc=None
-            
+        end_time_imag = time.time()   
         #######################################################################################
         ## Total
         #######################################################################################
+        start_time_post_tot = time.time()
         if cm.run_imag and imag_calc=='exact':
             post_tot = hlp.post_tot(rv_list, astro_list, imag_list, grid_num, a_inds, m_inds)
         
         else:
             post_tot = hlp.post_tot_simplified(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
+        end_time_post_tot = time.time()
         #######################################################################################
         #######################################################################################
         
         ##
         end_time = time.time()
         ##
+        
         if verbose:
+            # print('Arrays {:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time_arrays-start_time_arrays))
+            #
+            # print('RV {:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time_rv-start_time_rv))
+            # print('Astro {:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time_astro-start_time_astro))
+            # print('Imag {:.0e} points ran in {:.2f} seconds.'.format(num_points, end_time_imag-start_time_imag))
+            
+            
+            
             print('{:.0e} points ran for {} in {:.2f} seconds.'.format(num_points, star_name, end_time-start_time))
         
+        #################################################
+        time_arrays = end_time_arrays-start_time_arrays
+        time_rv = end_time_rv-start_time_rv
+        time_astro = end_time_astro-start_time_astro
+        time_imag = end_time_imag-start_time_imag
+        time_post_tot = end_time_post_tot-start_time_post_tot
+        
+        print('IMAGING TOOK {} SECONDS'.format(time_imag))
+        
+        time_tot = time_arrays + time_rv + time_astro + time_imag + time_post_tot
+        t_types = ['Array', 'RV', 'Astro', 'Imag', 'Post_tot']
+        print('')
+        for i, t in enumerate([time_arrays, time_rv, time_astro, time_imag, time_post_tot]):
+            print("{}'s fraction of total time: {:.2f}".format(t_types[i], t/time_tot) )
+        ##################################################
         run_rv = cm.run_rv
         run_astro = cm.run_astro
         run_imag = cm.run_imag
@@ -242,7 +269,7 @@ def run(config_path=None, read_file_path=None,
         print('a_lim = ', bounds[0], ' AU')
         print('m_lim = ', bounds[1], ' M_J')
     
-    return
+    return time_arrays, time_rv, time_astro, time_imag, time_post_tot, time_tot
 
 
 if __name__ == "__main__":
@@ -250,16 +277,11 @@ if __name__ == "__main__":
     config_path = 'ethraid/example_config_files/config_191939.py'
     read_file_path = None
     
-    grid_num=75
     plot=True
-    scatter_plot=[15,15]
-    outdir=''
-    verbose = False
+    verbose = True
     
     run(config_path, read_file_path,
-        grid_num=grid_num, plot=plot, 
-        scatter_plot=scatter_plot, 
-        outdir=outdir, verbose=verbose)
+        plot=plot, verbose=verbose)
     
     
     

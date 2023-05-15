@@ -1,10 +1,10 @@
 import numpy as np
-from astropy.time import Time
 from tqdm import tqdm
 import cython
 cimport numpy as np
 from libc.math cimport sin, cos, tan, atan, sqrt, log
 
+from ethraid import hip_times
 from ethraid.compiled._kepler import kepler_single
 
 
@@ -20,7 +20,7 @@ G = 2.824760877012879e-07 # (c.G.cgs*(1/c.au.cgs)**3 * (c.M_jup.cgs) * (24*3600)
 auday2ms = 1731456.8368055555 # c.au.si.value/(24*3600)
 
 # Just need the "zero time" to evolve mean anomaly into the rv_epoch
-hip_beginning = Time(1989.85, format='decimalyear').jd
+hip_beginning = hip_times[0]
 
 def rv_list(double [:] a_list, double [:] m_list, double [:] e_list, 
             double [:] i_list, double [:] om_list, double [:] M_anom_0_list,

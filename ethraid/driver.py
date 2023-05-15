@@ -111,6 +111,10 @@ def run(args):
     if verbose:
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
+        
+    ## Time array calculations
+    start_time = time.time()
+    ##
 
     a_list, m_list, per_list, e_list, i_list,\
     om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
@@ -118,9 +122,6 @@ def run(args):
 
     if verbose:
         print('made arrays')
-    ## Time array calculations
-    start_time = time.time()
-    ##
     
     #######################################################################################
     ## RVs
@@ -169,14 +170,15 @@ def run(args):
     ## Imaging
     #######################################################################################
     if run_imag:
+        imag_calc = driver.set_values(config_path, ['imag_calc'], ['exact'])
         vmag = cm.vmag
         imag_wavelength = cm.imag_wavelength
         contrast_str = cm.contrast_str
-        imag_epoch = cm.imag_epoch
-        imag_calc = cm.imag_calc
         
         
         if imag_calc == 'exact':
+            imag_epoch = cm.imag_epoch
+            
             imag_list = hlp_imag.imag_list(a_list, m_list, e_list, i_list, om_list, 
                                            M_anom_0_list, per_list, m_star, 
                                            d_star, vmag, imag_wavelength, 
@@ -378,8 +380,13 @@ def set_values(config_path, param_names, default_values):
             
         param_values.append(param_value)
 
-    param_values = tuple(param_values)
-    return param_values
+    if len(param_values)==1:
+        return param_values[0]
+        
+    else:
+        param_values = tuple(param_values)
+        
+        return param_values
     
     
 
