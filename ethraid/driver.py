@@ -170,7 +170,7 @@ def run(args):
     ## Imaging
     #######################################################################################
     if run_imag:
-        imag_calc = driver.set_values(config_path, ['imag_calc'], ['exact'])
+        imag_calc = set_values(config_path, ['imag_calc'], ['exact'])
         vmag = cm.vmag
         imag_wavelength = cm.imag_wavelength
         contrast_str = cm.contrast_str

@@ -25,7 +25,7 @@ M_earth = 5.972167867791379e+27
 
 
 def run(config_path=None, read_file_path=None, 
-        plot=None, verbose=False):
+        grid_num=None, plot=None, scatter_plot=None, verbose=False):
     
     """
     Example API function to run orbit modelling and
@@ -44,7 +44,9 @@ def run(config_path=None, read_file_path=None,
         provided in the config file will supersede parameters provided 
         directly).
         
+        grid_num (int): 2D array shape
         plot (bool): Plot results?
+        scatter_plot (list): [AU, M_J] coords to scatter plot a companion
         verbose (bool): Verbose output?
     
     Returns:
@@ -244,6 +246,9 @@ def run(config_path=None, read_file_path=None,
 
     # If read_file_path is NOT None, load in existing data:
     else:
+        if grid_num == None:
+            grid_num = 100
+        
         star_name, m_star, d_star,\
         run_rv, run_astro, run_imag,\
         post_tot, post_rv, post_astro, post_imag,\
@@ -256,8 +261,8 @@ def run(config_path=None, read_file_path=None,
                            post_tot, post_rv, post_astro, post_imag, 
                            grid_num, a_lim, m_lim,
                            scatter_plot=scatter_plot, 
-                           period_lines = False, outdir=outdir, verbose=verbose)
-        plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir=outdir)
+                           period_lines = False, outdir='', verbose=verbose)
+        plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir='')
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.

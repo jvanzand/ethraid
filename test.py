@@ -59,10 +59,7 @@ def api_tester(calc=True, load=True, verbose=False):
             try:
                 # Note that I provide arguments after rfp, but they are only needed sometimes.
                 # If the loaded file has scatter_plot or outdir, eg, then the loaded values supersede those given here.
-                api_run.run(read_file_path=rfp,
-                            grid_num=grid_num, plot=plot, 
-                            scatter_plot=scatter_plot, 
-                            outdir=outdir, verbose=verbose)
+                api_run.run(read_file_path=rfp, plot=plot, verbose=verbose)
                 
                 if verbose:
                     print("test.api_tester: Successfully loaded file {}".format(rfp.split('/')[-1]))
@@ -153,7 +150,7 @@ def cli_tester(calc=True, load=True, verbose=False):
 
 if __name__=="__main__":
     
-    api_errs = 0#api_tester()
+    api_errs = api_tester()
     cli_errs = cli_tester()
     
     print("{} api, {} cli errors".format(api_errs, cli_errs))
