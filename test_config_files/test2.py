@@ -22,9 +22,9 @@ max_m = 1e3
 # Star name for file labeling. Need not be official.
 star_name = 'test2'
 # Mass of star in Jupiter masses
-m_star = 0.807*Ms2Mj
+m_star = 1.*Ms2Mj
 # Distance from Earth to star in AU
-d_star = 53.8*pc_in_au
+d_star = 15*pc_in_au
 
 
 # RV PARAMS

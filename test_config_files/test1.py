@@ -17,9 +17,9 @@ grid_num = 100
 # Star name for file labeling. Need not be official.
 star_name = 'test1'
 # Mass of star in Jupiter masses
-m_star = 0.807*Ms2Mj
+m_star = 0.5*Ms2Mj
 # Distance from Earth to star in AU
-d_star = 53.8*pc_in_au
+d_star = 5*pc_in_au
 
 
 # RV PARAMS

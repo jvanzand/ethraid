@@ -355,9 +355,10 @@ def interp_fn(d_star, vmag, imag_wavelength, contrast_str=None, which='C2M', fil
             raise Exception('helper_functions_imaging.interp_fn: \n'
                             '                                   contrast_str required to generate A2M function')
         contrast_curve = pd.read_csv(contrast_str) # First get your angsep/dmag curve
-        fill_value = (0, contrast_curve['delta_mag'][-1])
+        fill_value = (0, contrast_curve['delta_mag'][-1]) # Close sep: 0 contrast; distant sep: equal to last contrast
         
-        interp_fn = interp1d(contrast_curve['ang_sep'], contrast_curve['delta_mag'], fill_value=fill_value)
+        interp_fn = interp1d(contrast_curve['ang_sep'], contrast_curve['delta_mag'], 
+                            bounds_error=False, fill_value=fill_value)
         
     return interp_fn
 
