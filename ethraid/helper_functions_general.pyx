@@ -55,7 +55,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
                                     cosi_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     i_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     M_anom_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
-                                    T_anom_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     om_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     a_bins = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     m_bins = np.ndarray(shape=(num_points,), dtype=np.float64)
@@ -79,11 +78,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     per_list = P_list(a_list, m_list, m_star) # Use this line when we are sampling a_tot, not a_planet
     
     # Eccentricities drawn from a beta distribution.
-    #e_list = np.zeros(num_points)
-    #e_list = spst.beta(0.867, 3.03).rvs(num_points) # Beta distribution for planets+BDs together from Bowler+2020
-    #e_list = np.where(e_list > 0.99, 0.99, e_list) # Replace e > 0.99 with 0.99
-    
-    e_list = ecc_dist(per_list, num_points)
+    e_list = ecc_dist(m_list, per_list, num_points, dist='uniform')
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
@@ -291,7 +286,7 @@ cpdef P(double a, double m_planet, double m_star):
     return per
 
 
-def ecc_dist(double [:] per_list, int num_points):
+def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='kipping'):
     """
     Sample a random eccentricity whose distribution is based on a and m.
     Kipping(2013) advocates two distributions for P below and above 382.3 days.
@@ -311,29 +306,64 @@ def ecc_dist(double [:] per_list, int num_points):
     cdef double per, e
     
     cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64),\
-                                    kipping_short = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    kipping_long = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+                                    e_sample1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_sample2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
-          
-    # Note that I make lists that are each num_points long, so I only use part of each. I don't think this can be avoided while using pre-determined list lengths.                                
-    kipping_short = spst.beta(0.697, 3.27).rvs(size=int(num_points))
-    kipping_long = spst.beta(1.12, 3.09).rvs(size=int(num_points))
+    # Fix e=0
+    if dist=='zero':
+        e_list = np.zeros(num_points)
+        
+    # Draw e uniformly between 0 and 0.99
+    elif dist=='uniform':
+        e_list = spst.uniform(0,0.99).rvs(size=int(num_points))
+        
+    # Use Kipping (2013) distribution for all companions
+    elif dist=='kipping':
+        # Note that I make lists that are each num_points long, so I only use part of each. I don't think this can be avoided while using pre-determined list lengths.                                
+        e_sample1 = spst.beta(0.697, 3.27).rvs(size=int(num_points))
+        e_sample2 = spst.beta(1.12, 3.09).rvs(size=int(num_points))
 
     
-    for i in range(num_points):
-    
-        per = per_list[i]
+        for i in range(num_points):
+            per = per_list[i]
         
-        if per <= 382.3:
-            e = kipping_short[i]
+            if per <= 382.3:
+                e = e_sample1[i]
             
-        elif per >= 382.3:
-            e = kipping_long[i]
+            elif per >= 382.3:
+                e = e_sample2[i]
 
+            if e > 0.99:
+                e = 0.99
+            e_list[i] = e
+    
+    # Use Kipping for planetary masses and Bowler (2020) for BDs and stars
+    # Why not determine based on *separation* instead of mass? Preliminary CLS analysis suggests e depends more on mass than on a.
+    elif dist=='kipping_bowler':
+        e_sample1 = spst.beta(0.697, 3.27).rvs(size=int(num_points))
+        e_sample2 = spst.beta(1.12, 3.09).rvs(size=int(num_points))
+        e_sample3 = spst.beta(2.30, 1.65).rvs(size=int(num_points))
         
-        if e > 0.99:
-            e = 0.99
-        e_list[i] = e
+        for i in range(num_points):
+            m = m_list[i]
+            
+            if m <= 13:
+                per = per_list[i]
+                
+                if per <= 382.3:
+                    e = e_sample1[i]
+            
+                elif per >= 382.3:
+                    e = e_sample2[i]
+                    
+            elif m > 13:
+                e = e_sample3[i]
+            
+            if e > 0.99:
+                e = 0.99
+            e_list[i] = e
+    
     
     return e_list
     

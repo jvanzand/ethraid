@@ -229,7 +229,7 @@ def run(config_path=None, read_file_path=None,
                            grid_num, a_lim, m_lim,
                            scatter_plot=scatter_plot, 
                            period_lines = False, outdir='', verbose=verbose)
-        # plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir='')
+        plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir='')
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
