@@ -95,8 +95,8 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     
     # This is the "model"
     # Next function is to map model companion masses to delta_mag contrasts based on stellar/Brown Dwarf mass-luminosity models from Pecaut/Mamajek2013 and Baraffe03.
-    # Must set fill_value for mass_to_dmag because sampled masses go well below masses listed in Brown Dwarf cooling model tables (m_min~2 M_J). For objects smaller than that, make contrast infinite (ie, we cannot image 2 M_J objects).
-    mass_to_dmag = interp_fn(d_star, vmag, imag_wavelength, which='M2C', fill_value=(np.inf, -np.inf))
+    # Must set fill_value for mass_to_dmag because sampled masses go well below masses listed in Brown Dwarf cooling model tables (m_min~2 M_J). For objects smaller than that, make contrast very high (ie, we cannot image 2 M_J objects).
+    mass_to_dmag = interp_fn(d_star, vmag, imag_wavelength, which='M2C', fill_value=(10000, 0))
     #########
     
     # The "data" sets the dimmest detectable object at the model seps
@@ -106,6 +106,10 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     
     lik_list = model_dmag_list > max_dmag_list
     lik_list = lik_list.astype(float)
+    
+    #zips = list(zip(lik_list, ang_sep_list, m_list, model_dmag_list))
+    #prints = [zips[k] for k in range(len(lik_list)) if int(zips[k][0])==0 and zips[k][2]<90]
+    #print("rejected", prints)
     
     return lik_list
 

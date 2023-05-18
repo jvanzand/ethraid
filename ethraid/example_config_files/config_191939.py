@@ -60,7 +60,7 @@ gaia_id = None
 run_imag = True
 # How to calculate imaging posterior. If 'exact', forward model companions as with RVs and astrometry.
 # If 'approx', then for the imaging calculations only, approximate all orbits to be face-on and circular regardless of sampled parameters, and rule out any model with a mass/angular separation combo that was detectable by imaging.
-imag_calc = 'approx'
+imag_calc = 'exact'
 # Host star visual magnitude. Used to estimate the magnitude at the imaging wavelength
 vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)

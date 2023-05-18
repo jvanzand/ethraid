@@ -63,6 +63,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     cdef long [:] a_inds, m_inds
 
     tp = 0
+    np.random.seed(0)
     a_min = a_lim[0]
     a_max = a_lim[1]
     m_min = m_lim[0]
