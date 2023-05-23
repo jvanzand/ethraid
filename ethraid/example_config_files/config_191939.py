@@ -16,7 +16,7 @@ max_a = 1e2
 min_m = 0.769
 max_m = 1e3
 # Eccentricity distribution for sampled orbits
-e_dist = 'uniform'
+e_dist = 'piecewise'
 
 
 # STELLAR PARAMS
@@ -70,7 +70,7 @@ imag_wavelength = 2.2
 # Path to contrast curve
 contrast_str = os.path.join(_ROOT, 'data/test_K_band.csv')
 # Epoch of imaging observations (BJD).
-imag_epoch = 24593300
+imag_epoch = 2458795.5
 
 
 # SAVE PARAMS
