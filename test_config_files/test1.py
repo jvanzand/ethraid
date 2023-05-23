@@ -11,6 +11,8 @@ num_points = 1e4
 # Include grid_num in config file for API usage.
 grid_num = 100
 ## See below for min_a and min_m, calculated in terms of the RV data
+# Eccentricity distribution for sampled orbits
+e_dist = 'piecewise'
 
 
 # STELLAR PARAMS
@@ -56,7 +58,7 @@ max_m = 1e3
 run_astro = True
 # Difference between the average Gaia proper motion and the position-based average proper motion between the Hipparcos and Gaia missions (milli-arcseconds/year)
 # Set dmu/dmu_err to None to provide Hipparcos or Gaia ID instead
-delta_mu = 0.12767382507786398
+delta_mu = 0.22767382507786398
 # Error on delta_mu
 delta_mu_err = 0.034199052901953214
 # Target Hipparcos identifier. Alternative to supplying delta_mu

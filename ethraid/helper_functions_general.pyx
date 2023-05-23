@@ -21,7 +21,7 @@ M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 pc_in_cm = 3.086e18
 
-def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_points):
+def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_points, str e_dist):
     """
     Create the parameter arrays which will be used for the RV and astrometry posteriors.
     
@@ -32,6 +32,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
         grid_num (int): Dimensions of square (a,m) grid
         num_points (int): Number of random orbital models to simulate
+        e_dist (str): Which eccentricity distribution to draw from.
+                        See ecc_dist() function below.
     
     Returns:
         a_list, m_list, per_list, e_list, 
@@ -77,8 +79,8 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     # Calculate this now to avoid having to do it twice for RVs and astrometry.
     per_list = P_list(a_list, m_list, m_star) # Use this line when we are sampling a_tot, not a_planet
     
-    # Eccentricities drawn from a beta distribution.
-    e_list = ecc_dist(m_list, per_list, num_points, dist='uniform')
+    # Eccentricities drawn from specified distribution.
+    e_list = ecc_dist(m_list, per_list, num_points, dist=e_dist)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
@@ -89,9 +91,10 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     # Arguments of peri of the companion, uniformly distributed
     om_list = np.random.uniform(0, two_pi, num_points)
 
-    # Breaking up the (a, M) parameter space into grid_num x grid_num
-    a_bins = np.logspace(np.log10(a_min), np.log10(a_max), grid_num)
-    m_bins = np.logspace(np.log10(m_min), np.log10(m_max), grid_num)
+    # Breaking up the (a, M) parameter space into grid_num x grid_num.
+    # Note: grid_num+1 bin limits so there are grid_num bins.
+    a_bins = np.logspace(np.log10(a_min), np.log10(a_max), grid_num+1)
+    m_bins = np.logspace(np.log10(m_min), np.log10(m_max), grid_num+1)
 
     a_inds = np.digitize(a_list, bins = a_bins)
     m_inds = np.digitize(m_list, bins = m_bins)
@@ -136,9 +139,9 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list,
    num_points = rv_post_list.size
 
    for i in range(num_points):
-
-       a_i = a_inds[i]
-       m_i = m_inds[i]
+       # a_inds/m_inds generated from np.digitize, which 1-indexes. -1 to 0-index.
+       a_i = a_inds[i]-1
+       m_i = m_inds[i]-1
 
        prob = rv_post_list[i]*astro_post_list[i]*imag_post_list[i]
 
@@ -184,9 +187,9 @@ def post_tot_simplified(double [:] rv_post_list, double [:] astro_post_list,
     size = rv_post_list.size
 
     for i in range(size):
-
-        a_i = a_inds[i]
-        m_i = m_inds[i]
+        # a_inds/m_inds generated from np.digitize, which 1-indexes. -1 to 0-index.
+        a_i = a_inds[i]-1
+        m_i = m_inds[i]-1
 
         prob = rv_post_list[i]*astro_post_list[i]
 
@@ -230,9 +233,9 @@ def post_single(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid
     size = prob_list.shape[0]
 
     for i in range(size):
-
-        a_i = a_inds[i]
-        m_i = m_inds[i]
+        # a_inds/m_inds generated from np.digitize, which 1-indexes. -1 to 0-index.
+        a_i = a_inds[i]-1
+        m_i = m_inds[i]-1
 
         prob_array[m_i, a_i] += prob_list[i]
         
@@ -286,7 +289,7 @@ cpdef P(double a, double m_planet, double m_star):
     return per
 
 
-def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='kipping'):
+def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piecewise'):
     """
     Sample a random eccentricity whose distribution is based on a and m.
     Kipping(2013) advocates two distributions for P below and above 382.3 days.
@@ -303,12 +306,13 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='kippi
         e_list (list of floats): List of randomly sampled eccentricities
     """
     cdef int i
-    cdef double per, e
+    cdef double m, per, e
     
     cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64),\
                                     e_sample1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+                                    e_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_sample4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
     # Fix e=0
     if dist=='zero':
@@ -316,7 +320,7 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='kippi
         
     # Draw e uniformly between 0 and 0.99
     elif dist=='uniform':
-        e_list = spst.uniform(0,0.99).rvs(size=int(num_points))
+        e_list = spst.uniform(0, 0.99).rvs(size=int(num_points))
         
     # Use Kipping (2013) distribution for all companions
     elif dist=='kipping':
@@ -331,19 +335,20 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='kippi
             if per <= 382.3:
                 e = e_sample1[i]
             
-            elif per >= 382.3:
+            elif per > 382.3:
                 e = e_sample2[i]
 
             if e > 0.99:
                 e = 0.99
             e_list[i] = e
     
-    # Use Kipping for planetary masses and Bowler (2020) for BDs and stars
+    # Use Kipping for planetary masses, Bowler (2020) for BDs, and Raghavan (2010) for stars
     # Why not determine based on *separation* instead of mass? Preliminary CLS analysis suggests e depends more on mass than on a.
-    elif dist=='kipping_bowler':
+    elif dist=='piecewise':
         e_sample1 = spst.beta(0.697, 3.27).rvs(size=int(num_points))
         e_sample2 = spst.beta(1.12, 3.09).rvs(size=int(num_points))
         e_sample3 = spst.beta(2.30, 1.65).rvs(size=int(num_points))
+        e_sample4 = np.random.uniform(0.1, 0.8, size=int(num_points))
         
         for i in range(num_points):
             m = m_list[i]
@@ -354,15 +359,21 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='kippi
                 if per <= 382.3:
                     e = e_sample1[i]
             
-                elif per >= 382.3:
+                elif per > 382.3:
                     e = e_sample2[i]
                     
-            elif m > 13:
+            elif m > 13 and m <= 80:
                 e = e_sample3[i]
+            
+            elif m > 80:
+                e = e_sample4[i]
             
             if e > 0.99:
                 e = 0.99
             e_list[i] = e
+            
+    else:
+        raise Exception('Error: e_dist must be one of the options supported by the ecc_dist function.')
     
     
     return e_list

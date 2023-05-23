@@ -16,6 +16,8 @@ max_a = 1e2
 # Minimum and maximum masses to sample (M_Jup)
 min_m = 0.769
 max_m = 1e3
+# Eccentricity distribution for sampled orbits
+e_dist = 'kipping'
 
 
 # STELLAR PARAMS

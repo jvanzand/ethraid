@@ -68,8 +68,11 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     cdef double a, m, e, i, om, M_anom_0, per
     
     num_points = a_list.shape[0]
-    cdef np.ndarray[double, ndim=1] ang_sep_list = np.ndarray(shape=(num_points,), dtype=np.float64)
-    cdef np.ndarray[double, ndim=1] min_mass_list = np.ndarray(shape=(num_points,), dtype=np.float64)
+    cdef np.ndarray[double, ndim=1] ang_sep_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
+                                    max_dmag_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
+                                    model_dmag_list = np.ndarray(shape=(num_points,), dtype=np.float64)
+    #cdef np.ndarray[bool_c, ndim=1] lik_list = np.ndarray(shape=(num_points,), dtype=bool_c)
+                                    
     
     
     print('Running imaging models')
@@ -108,7 +111,7 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     lik_list = lik_list.astype(float)
     
     #zips = list(zip(lik_list, ang_sep_list, m_list, model_dmag_list))
-    #prints = [zips[k] for k in range(len(lik_list)) if int(zips[k][0])==0 and zips[k][2]<90]
+    #prints = [zips[k] for k in range(len(lik_list)) if int(zips[k][0])==0 and zips[k][2]<20]
     #print("rejected", prints)
     
     return lik_list
@@ -392,8 +395,11 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
         raise Exception("There is no data for the imaging band in the Mamajek table.\
                          Please provide imaging data in the V, R, I, J, H, K, or L' bands")
     else:
-        # Linearly interpolate between Mamajek entries to estimate Vmag ==> Xmag conversion
-        f = interp1d(mamajek_table['V'], mamajek_table[band_name])
+        try:
+            # Linearly interpolate between Mamajek entries to estimate Vmag ==> Xmag conversion
+            f = interp1d(mamajek_table['V'], mamajek_table[band_name])
+        except ValueError:
+            print('helper_functions_imaging.abs_Xmag: Host Vmag must be between -3 and 19.4')
 
     host_abs_Xmag = f(host_abs_vmag)
 
@@ -442,11 +448,12 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
     if not set(['ang_sep', 'delta_mag']).issubset(contrast_curve.columns):
         raise Exception("The dataframe must contain columns 'ang_sep' and 'delta_mag'")
 
-    seps = contrast_curve['ang_sep']*(d_star/pc_in_au)*0.79 #Correction factor to avg over i and E
+    seps = contrast_curve['ang_sep']*(d_star/pc_in_au)*two_pi/8 # π/4 correction factor to avg over i and E
     dmags = contrast_curve['delta_mag']
 
     ## Create an interpolation fn that takes delta mag contrast to companion mass
-    dmag_to_mass = interp_fn(d_star, vmag, imag_wavelength, which='C2M')
+    ## Fill value: if dmag is extremely small, mass is large. If too large, then mass -> 0
+    dmag_to_mass = interp_fn(d_star, vmag, imag_wavelength, which='C2M', fill_value=(np.inf,0))
     companion_masses = dmag_to_mass(dmags)
 
     # Discrete correspondence between separation and mass. We get a continuous correspondence below

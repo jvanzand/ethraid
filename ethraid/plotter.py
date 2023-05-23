@@ -85,16 +85,20 @@ def joint_plot(star_name, m_star, d_star,
         # First, check if run_rv, run_astro, and run_imag are True. If any is not, don't plot that contour
         if eval("run_{}".format(dt)):
             exec("post_{0}_pad = np.pad(post_{0}, [(grid_pad, 0), (grid_pad, 0)])".format(dt))
-            exec("t_contours_{0} = hlp.contour_levels(post_{0}, [1,2])".format(dt))
             
-            # For imaging only, use contour instead of contourf to get a line instead of a filled region
+            # For imaging only, plot 2sig contour and use contour instead of contourf to get a line instead of a filled region
             if dt == 'imag':
+                exec("t_contours_{0} = hlp.contour_levels(post_{0}, [1,2])".format(dt))
+                
                 # In the approximate case, the imaging posterior has 2 regions by design: uniformly 0 and uniformly some nonzero value. Suppress Matplotlib's warning that contour levels are undefined in this case.
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", message='No contour levels were found within the data range.')
                     exec("post_{0}_cont = ax.contour(post_{0}_pad, t_contours_{0},\
                                  cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
+                                 
             else:
+                exec("t_contours_{0} = hlp.contour_levels(post_{0}, [1,2])".format(dt))
+
                 exec("post_{0}_cont = ax.contourf(post_{0}_pad, t_contours_{0},\
                              cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
             
@@ -138,10 +142,10 @@ def joint_plot(star_name, m_star, d_star,
     region_label_size = 50
     restricted_region_label_size = 40
 
-    plt.text((5/16)*grid_num_ext, (1/8)*(grid_pad/2), 'Ruled out by RVs', 
-              size=restricted_region_label_size, zorder=101)
-    plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_ext, 'Ruled out by minimum period', 
-              size=restricted_region_label_size, rotation=90, zorder=101)
+    # plt.text((5/16)*grid_num_ext, (1/8)*(grid_pad/2), 'Ruled out by RVs',
+    #           size=restricted_region_label_size, zorder=101)
+    # plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_ext, 'Ruled out by minimum period',
+    #           size=restricted_region_label_size, rotation=90, zorder=101)
 
 
     ax.set_xlabel('Semi-major axis (au)', size=label_size)

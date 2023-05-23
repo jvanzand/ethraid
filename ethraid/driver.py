@@ -80,11 +80,11 @@ def run(args):
     config_path = args.config
     
     ## First try loading optional params. If they can't be loaded, use defaults
-    optional_params = ['num_points', 'grid_num', 'min_a', 'max_a', 'min_m', 'max_m', 'save', 'outdir']
-    default_values = [int(1e6), int(1e2), 1, 1e2, 1, 1e3, ['proc'], '']
+    optional_params = ['num_points', 'grid_num', 'min_a', 'max_a', 'e_dist', 'min_m', 'max_m', 'save', 'outdir']
+    default_values = [int(1e6), int(1e2), 1, 1e2, 'piecewise', 1, 1e3, ['proc'], '']
 
-    num_points, grid_num,min_a, max_a,\
-    min_m, max_m, save, outdir = set_values(config_path, 
+    num_points, grid_num, min_a, max_a,\
+    e_dist, min_m, max_m, save, outdir = set_values(config_path, 
                                             optional_params, 
                                             default_values)
     
@@ -118,7 +118,7 @@ def run(args):
 
     a_list, m_list, per_list, e_list, i_list,\
     om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
-                                                             grid_num, num_points)
+                                                             grid_num, num_points, e_dist)
 
     if verbose:
         print('made arrays')
