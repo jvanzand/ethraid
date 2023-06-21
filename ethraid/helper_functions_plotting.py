@@ -139,7 +139,7 @@ def constant_per_a(m, per, m_star):
     return a
         
 def marginalized_1d(star_name, post_tot, twosig_inds, a_lim, m_lim, 
-                    tick_labels_a, tick_labels_m, outdir=''):
+                    tick_labels_a, tick_labels_m, which=['cdf'], outdir=''):
     """
     Plots and saves 2 marginalized posterior cumulative distribution function (CDF).
     The first is marginalized over mass, so it gives the semi-major axis CDF. The
@@ -158,6 +158,8 @@ def marginalized_1d(star_name, post_tot, twosig_inds, a_lim, m_lim,
                                             labels
         tick_labels_m (list of floats, M_jup): Mass values to use as 
                                                axis labels
+        which (list of str): 'cdf' to plot/save CDFs, and 
+                             'pdf to plot/save PDFs
         outdir (str): Path to save plot
     
     Returns:
@@ -169,43 +171,63 @@ def marginalized_1d(star_name, post_tot, twosig_inds, a_lim, m_lim,
     tick_num = 6
     tick_size = 25
     
-    fig, ax = plt.subplots(1,2, figsize=(12,8))
     sma_1d = post_tot.sum(axis=0)
     mass_1d = post_tot.sum(axis=1)
     
     grid_num = np.shape(post_tot)[0]
     tick_positions_a1D = hlp.value2index(tick_labels_a, (0, grid_num-1), a_lim)
     tick_positions_m1D = hlp.value2index(tick_labels_m, (0, grid_num-1), m_lim)
-
-    ax[0].plot(range(grid_num+1), np.insert(np.cumsum(sma_1d), 0, 0))
-    plt.sca(ax[0])
-    plt.xticks(tick_positions_a1D, tick_labels_a, size=tick_size)
-    plt.yticks(size=tick_size)
-    plt.title('Semi-major axis CDF', size=title_size)
-    plt.xlabel('Companion semi-major axis (AU)', size = label_size)
-
-    ax[0].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
-    ax[0].vlines(twosig_inds[0][0], 0, 1, colors='r', linestyles='dashed')
-    ax[0].vlines(twosig_inds[0][1], 0, 1, colors='r', linestyles='dashed')
-
-    ax[1].plot(range(grid_num+1), np.insert(np.cumsum(mass_1d), 0, 0))
-    plt.sca(ax[1])
-    plt.xticks(tick_positions_m1D, tick_labels_m, size=tick_size)
-    plt.yticks(size=tick_size)
-    plt.xlabel(r'Companion mass ($M_{Jup}$)', size = label_size)
-    plt.title('Mass CDF', size=title_size)
-
-    ax[1].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
-    ax[1].vlines(twosig_inds[1][0], 0, 1, colors='r', linestyles='dashed')
-    ax[1].vlines(twosig_inds[1][1], 0, 1, colors='r', linestyles='dashed')
     
-    save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
-    os.makedirs(save_dir, exist_ok = True)
-    # if not os.path.isdir(save_dir):
-    #     os.makedirs(save_dir)
+    for plot_type in which:
+        fig, ax = plt.subplots(1,2, figsize=(12,8))
+        
+        if plot_type == 'cdf':
+            plot_dist_a = np.cumsum(sma_1d)
+            plot_dist_m = np.cumsum(mass_1d)
+            
+            max_ylim_a = 1
+            max_ylim_m = 1
+            
+            save_name_suffix = '_cdf_1d.png'
+            
+        elif plot_type == 'pdf':
+            plot_dist_a = sma_1d
+            plot_dist_m = mass_1d
+            
+            max_ylim_a = np.max(sma_1d)
+            max_ylim_m = np.max(mass_1d)
+            
+            save_name_suffix = '_pdf_1d.png'
+
+        ax[0].plot(range(grid_num+1), np.insert(plot_dist_a, 0, 0))
+        plt.sca(ax[0])
+        plt.xticks(tick_positions_a1D, tick_labels_a, size=tick_size)
+        plt.yticks(size=tick_size)
+        plt.title('Semi-major axis {}'.format(plot_type.upper()), size=title_size)
+        plt.xlabel('Companion semi-major axis (AU)', size = label_size)
+
+        ax[0].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
+        ax[0].vlines(twosig_inds[0][0], 0, max_ylim_a, colors='r', linestyles='dashed')
+        ax[0].vlines(twosig_inds[0][1], 0, max_ylim_a, colors='r', linestyles='dashed')
+
+        ax[1].plot(range(grid_num+1), np.insert(plot_dist_m, 0, 0))
+        plt.sca(ax[1])
+        plt.xticks(tick_positions_m1D, tick_labels_m, size=tick_size)
+        plt.yticks(size=tick_size)
+        plt.xlabel(r'Companion mass ($M_{Jup}$)', size = label_size)
+        plt.title('Mass {}'.format(plot_type.upper()), size=title_size)
+
+        ax[1].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
+        ax[1].vlines(twosig_inds[1][0], 0, max_ylim_m, colors='r', linestyles='dashed')
+        ax[1].vlines(twosig_inds[1][1], 0, max_ylim_m, colors='r', linestyles='dashed')
     
-    fig.tight_layout()
-    fig.savefig(save_dir + star_name + '_1d.png')
+        save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
+        os.makedirs(save_dir, exist_ok = True)
+        # if not os.path.isdir(save_dir):
+        #     os.makedirs(save_dir)
+    
+        fig.tight_layout()
+        fig.savefig(save_dir + star_name + save_name_suffix)
     
     return
 

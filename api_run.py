@@ -244,6 +244,9 @@ def run(config_path=None, read_file_path=None,
         
         
     if plot==True:
+        # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
+        scatter_plot, outdir = driver.set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
+        
         plotter.joint_plot(star_name, m_star, d_star,
                            run_rv, run_astro, run_imag,
                            post_tot, post_rv, post_astro, post_imag, 
@@ -252,15 +255,13 @@ def run(config_path=None, read_file_path=None,
                            period_lines = False, outdir='', verbose=verbose)
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir='')
     
-    # bounds is the final answer: [range of 2σ a, range of 2σ m].
-    # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
-    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior
     # twosig_levels is a list of 2 floats: the 2sigma probs for a and m such that 95% of the prob is contained within the interval twosig_inds[i]
     if verbose:
-        print('a_lim = ', bounds[0], ' AU')
-        print('m_lim = ', bounds[1], ' M_J')
+        # bounds is the final answer: [range of 2σ a, range of 2σ m].
+        # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
+        bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
     
     return
 
@@ -268,7 +269,7 @@ def run(config_path=None, read_file_path=None,
 if __name__ == "__main__":
     
     config_path = 'ethraid/example_config_files/config_191939.py'
-    read_file_path = None
+    read_file_path = 'results/191939/191939_processed.h5'
     
     plot=True
     verbose = True

@@ -64,7 +64,6 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     cdef long [:] a_inds, m_inds
 
     tp = 0
-    np.random.seed(0)
     a_min = a_lim[0]
     a_max = a_lim[1]
     m_min = m_lim[0]
@@ -294,13 +293,13 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
     Sample a random eccentricity whose distribution is based on a and m.
     Kipping(2013) advocates two distributions for P below and above 382.3 days.
     
-    It might make more sense to use a third (Bowler) distribution 
-    for much longer periods (bc Kipping only used 400 exoplanet 
-    eccentricities back in 2013, and no BDs).
-    
     Arguments:
+        m (list of floats, M_jup): List of companion masses to choose
+                                   ecc sub-distribution
         per_list (list of floats, days): List of companion periods
         num_points (int): Number of random eccentricities to generate
+        dist (str): Desired eccentricity distribution
+                    Options: ['zero', 'uniform', 'kipping', 'piecewise']
     
     Returns:
         e_list (list of floats): List of randomly sampled eccentricities
@@ -441,6 +440,7 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
           t_contours[i] = t_contours[i-1]*1.001
           
     # Return t_countours, which looks like eg [0.0004, 0.0015, 0.0062]. It will be passed to matplotlib's contourf() function.
+
     return t_contours
 
 

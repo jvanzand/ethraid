@@ -238,10 +238,10 @@ def run(args):
 def plot(args):
     """
     Plot the content of loaded arrays
-    
+
     Arguments:
         args: Command line arguments, including:
-        
+
         read_file_path (str): Path to file containing data to plot
         type (str): Either '2d' or '1d'
         grid_num (int): Dimensions of 2D probability array
@@ -249,34 +249,33 @@ def plot(args):
                         read_file_path points to processed arrays
                         rather than raw arrays.
         outdir (str): Path to which plots should be saved
-    
+
     Returns:
         None
     """
-    
     # Even though results are saved, config file still needed for a few parameters
     config_path = args.config
     cm = load_module_from_file(config_path)
 
     # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
     scatter_plot, outdir = set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
-    
+
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
     post_tot, post_rv, post_astro, post_imag,\
     grid_num, a_lim, m_lim = ls.load(args.read_file_path, args.grid_num, args.verbose)
-    
+
     if "2d" in args.type:
         plotter.joint_plot(star_name, m_star, d_star,
                            cm.run_rv, cm.run_astro, cm.run_imag,
-                           post_tot, post_rv, post_astro, post_imag, 
+                           post_tot, post_rv, post_astro, post_imag,
                            grid_num, a_lim, m_lim,
                            scatter_plot=scatter_plot, period_lines=False,
                            outdir=outdir, verbose=args.verbose)
-    
+
     if "1d" in args.type:
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir=outdir)
-                       
+
     return
     
     
@@ -364,29 +363,32 @@ def set_values(config_path, param_names, default_values):
     if len(param_names) != len(default_values):
         raise Exception('Error: param_names and defaults_values must have the same length')
     
+    if config_path == None: # If no config provided, then return default values
+        param_values = default_values
     
-    
-    config_module = load_module_from_file(config_path)
-    param_values = []
-    for i in range(len(param_names)):
-        param_name = param_names[i]
-        default_value = default_values[i]
-        
-        try:
-            param_value = eval('config_module.{}'.format(param_name))
-    
-        except Exception as err:
-            param_value = default_value
-            
-        param_values.append(param_value)
-
-    if len(param_values)==1:
-        return param_values[0]
-        
     else:
-        param_values = tuple(param_values)
+    
+        config_module = load_module_from_file(config_path)
+        param_values = []
+        for i in range(len(param_names)): # For each parameter name given
+            param_name = param_names[i]
+            default_value = default_values[i]
         
-        return param_values
+            try: # Try assigning the parameter value to a variable
+                param_value = eval('config_module.{}'.format(param_name))
+    
+            except Exception as err: # If there is no such value, use the default instead
+                param_value = default_value
+            
+            param_values.append(param_value)
+
+        if len(param_values)==1:
+            return param_values[0]
+        
+        else:
+            param_values = tuple(param_values)
+        
+    return param_values
     
     
 

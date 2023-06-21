@@ -2,8 +2,8 @@
 /build
 /cython_practice
 
-# Exclude my custom params file
-/ethraid/system_params_local.py
+# Exclude my local config files
+/ethraid/local_configs
 
 /ethraid/data/*
 !/ethraid/data/mamajek.csv

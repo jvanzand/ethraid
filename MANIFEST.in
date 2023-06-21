@@ -8,3 +8,4 @@ global-include *.so
 include ethraid/example_config_files/*
 include ethraid/data/*
 recursive-exclude ethraid/data/clean_curves
+recursive-exclude ethraid/data/local_configs

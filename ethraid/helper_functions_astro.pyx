@@ -186,10 +186,10 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         E1 = kepler_single(M1, e)
         E2 = kepler_single(M2, e)
         
-        # Get position of the STAR (note the - sign) in au.
+        # Get position of the companion in au. We get stellar position below.
         x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
-        # vec points from barycenter to the average position of the *star*, not the companion, in the orbital plane.
+        # vec points from barycenter to the average position of the *star*, not the companion (note the - sign), in the orbital plane.
         # Since we're using the E_anom of the companion, the star is located in the opposite direction.
         vec[0] = -x_pos_avg
         vec[1] = -y_pos_avg
@@ -435,8 +435,7 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
         dmu_err (float, mas/yr): Error on dmu
     """
     if hip_id is None and gaia_id is None:
-        print("helper_functions_astro.HGCA_retrieval:\n"
-              "                                      No HGCA identifier given.")
+        print("helper_functions_astro.HGCA_retrieval: No HGCA identifier given.")
         dmu = 0
         dmu_err = 1e8
         return dmu, dmu_err

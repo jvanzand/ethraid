@@ -10,11 +10,11 @@ num_points = 1e7
 # Include grid_num in config file for API usage.
 grid_num = 100
 # Minimum and maximum semi-major axes to sample (AU)
-min_a = 1.6489
-max_a = 1e2
+min_a = 2.62
+max_a = 50
 # Minimum and maximum masses to sample (M_Jup)
-min_m = 0.769
-max_m = 1e3
+min_m = 2.05
+max_m = 1e2
 # Eccentricity distribution for sampled orbits
 e_dist = 'piecewise'
 
@@ -23,29 +23,29 @@ e_dist = 'piecewise'
 # Star name for file labeling. Need not be official.
 star_name = '191939'
 # Mass of star in Jupiter masses
-m_star = 0.807*Ms2Mj
+m_star = 0.81*Ms2Mj
 # Distance from Earth to star in AU
-d_star = 53.8*pc_in_au
+d_star = 53.45*pc_in_au
 
 
 # RV PARAMS
 # Whether to use RV data. Assign run_rv=False to omit RVs from the calculation entirely.
 run_rv = True
 # Linear RV trend term (m/s/day).
-gammadot = -0.114
+gammadot = 0.1308
 # Error on gammadot
-gammadot_err = 0.006
+gammadot_err = 0.0032
 # Quadratic RV curvature term (m/s/day/day)
-gammaddot = +6e-5
+gammaddot = -6.55e-5
 # Error on gammaddot
-gammaddot_err = 1.9e-5
+gammaddot_err = 3.3e-6
 # Epoch at which gammadot and gammaddot are measured. Typically about 1/2 way through the observing baseline.
-rv_epoch = 2458847.780463
+rv_epoch = 2459353
 
 
 # ASTROMETRY PARAMS
 # Whether to use astrometry data. Assign run_astro=False to omit astrometry from the calculation entirely.
-run_astro = False
+run_astro = True
 # Difference between the average Gaia proper motion and the position-based average proper motion between the Hipparcos and Gaia missions (milli-arcseconds/year)
 # Set dmu/dmu_err to None to provide Hipparcos or Gaia ID instead
 delta_mu = None
@@ -65,6 +65,7 @@ run_imag = True
 imag_calc = 'exact'
 # Host star visual magnitude. Used to estimate the magnitude at the imaging wavelength
 vmag = 8.97
+# vmag = 3
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
 # Path to contrast curve
@@ -82,4 +83,5 @@ outdir = ''
 
 # PLOTTING PARAMS
 # Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-scatter_plot = [3.8, 3.0]
+# scatter_plot = [3.8, 3.0]
+# scatter_plot = [3.71, 2.93]
