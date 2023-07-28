@@ -232,7 +232,7 @@ def post_single(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid
     size = prob_list.shape[0]
 
     for i in range(size):
-        # a_inds/m_inds generated from np.digitize, which 1-indexes. -1 to 0-index.
+        # a_inds/m_inds generated from np.digitize, which 1-indexes. Subtract 1 to 0-index instead.
         a_i = a_inds[i]-1
         m_i = m_inds[i]-1
 

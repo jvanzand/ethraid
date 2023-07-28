@@ -110,10 +110,6 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     lik_list = model_dmag_list > max_dmag_list
     lik_list = lik_list.astype(float)
     
-    #zips = list(zip(lik_list, ang_sep_list, m_list, model_dmag_list))
-    #prints = [zips[k] for k in range(len(lik_list)) if int(zips[k][0])==0 and zips[k][2]<20]
-    #print("rejected", prints)
-    
     return lik_list
 
 

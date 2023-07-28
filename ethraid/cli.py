@@ -8,8 +8,8 @@ import ethraid.driver
 
 def main():
     psr = ArgumentParser(
-              description='Ethraid: Find distant companions with partial orbits', 
-              prog='Ethraid'
+              description='ethraid: Find distant companions with partial orbits', 
+              prog='ethraid'
                          )
     psr.add_argument('-V', '--version',
                     action='version',

@@ -151,6 +151,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     cdef double [:,:] rot_mtrx # This makes rot_mtrx a memview
     rot_mtrx = np.zeros((3,3),dtype=np.float64)
     
+    # vec_list is a temporary variable to define vec
     # vec holds various values throughout dmu(). After each value
     # has served its purpose, it is overwritten so that only one
     # vector needs to be allocated, saving time.
@@ -163,16 +164,17 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     cdef double mu_gaia[2]
     cdef double mu_hg[2]
     
-    mass_ratio = m/(m_star + m)
     d_star = d_star/206264.80624548031 # Divide by (c.pc.cgs/c.au.cgs).value to get units of pc
     au_2_mas = 1e3/d_star # Conversion factor btwn au and milli-arcseconds, with d_star converted to pc
-    aud_2_masyr = au_2_mas * 365.25 # au/day to milli-arcseconds/year
+    aud_2_masyr = au_2_mas * 365.25 # au/day to milli-arcseconds/year conversion factor
 
     time_endpoints = [[hip_times[0], gaia_times[0]], 
                       [hip_times[1], gaia_times[1]]]
 
-    mean_motion = two_pi/per
+    mass_ratio = m/(m_star + m)
     a_star = a*mass_ratio
+    mean_motion = two_pi/per
+    
     rot_matrix(i, om, rot_mtrx)
     
     for l in range(2): # Hipparcos or Gaia
@@ -186,11 +188,10 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         E1 = kepler_single(M1, e)
         E2 = kepler_single(M2, e)
         
-        # Get position of the companion in au. We get stellar position below.
+        # Get avg. separation of the star in au, but pointing in the wrong direction. E1 and E2 correspond to companion direction, so we need a factor of -1 to flip direction (and multiplying the tuple by -1 in this line gives an empty tuple).
         x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
-        # vec points from barycenter to the average position of the *star*, not the companion (note the - sign), in the orbital plane.
-        # Since we're using the E_anom of the companion, the star is located in the opposite direction.
+        # vec points from barycenter to the average position of the *star*, not the companion, in the orbital plane (note the -1).
         vec[0] = -x_pos_avg
         vec[1] = -y_pos_avg
         vec[2] = 0
