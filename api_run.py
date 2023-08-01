@@ -17,6 +17,8 @@ from ethraid.compiled import helper_functions_astro as hlp_astro
 from ethraid.compiled import helper_functions_imaging as hlp_imag
 #########################
 
+from astropy.time import Time
+
 
 ## Constants ##
 M_sun = 1.988409870698051e+33
@@ -135,7 +137,14 @@ def run(config_path=None, read_file_path=None,
     
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
-                                              m_star, d_star, delta_mu, delta_mu_err)                     
+                                              m_star, d_star, delta_mu, delta_mu_err,
+                                              
+                                              np.array([
+                                                        [Time(1991.300936, format='decimalyear').jd, 
+                                                         Time(1991.339055, format='decimalyear').jd],
+                                                        [Time(2015.932983, format='decimalyear').jd, 
+                                                         Time(2016.179077, format='decimalyear').jd]
+                                                       ]))                     
 
             post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
 
@@ -252,7 +261,7 @@ def run(config_path=None, read_file_path=None,
                            post_tot, post_rv, post_astro, post_imag, 
                            grid_num, a_lim, m_lim,
                            scatter_plot=scatter_plot, 
-                           period_lines = False, outdir='', verbose=verbose)
+                           period_lines=False, outdir='', verbose=verbose)
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir='')
     
         
@@ -262,7 +271,8 @@ def run(config_path=None, read_file_path=None,
         # bounds is the final answer: [range of 2σ a, range of 2σ m].
         # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
         bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
-    
+        print("a_lim = ", bounds[0])
+        print("m_lim = ", bounds[1])
     return
 
 
