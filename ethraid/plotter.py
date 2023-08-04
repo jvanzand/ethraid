@@ -148,7 +148,7 @@ def joint_plot(star_name, m_star, d_star,
 
 
     ax.set_xlabel('Semi-major axis (au)', size=label_size)
-    ax.set_ylabel(r'$M_p$ ($M_{Jup}$)', size=label_size)
+    ax.set_ylabel(r'$M_c$ ($M_{Jup}$)', size=label_size)
 
     ###################################################
     ############ Axis ticks and labels ################
