@@ -6,7 +6,7 @@ from ethraid.compiled import helper_functions_general as hlp
 from ethraid.compiled import helper_functions_imaging as hlp_imag
 
 
-def load(read_file_path, grid_num=None, verbose=False):
+def load(read_file_path, grid_num=100, verbose=False):
     """
     Loads probability arrays from a specified h5py file.
     

@@ -80,18 +80,22 @@ def api_tester(calc=True, load=True, verbose=False):
     
     return calc_error_count, load_error_count
 
-def cli_tester(calc=True, load=True, verbose=False):
+def cli_tester(calc=True, load=True, all_=True):
     """
     This function tests the command line interface.
     First it accesses two different configuration files
     and calculates their posteriors using the CLI framework.
     Then it accesses the resulting saved files and runs
-    the plot and less functions.
+    the plot and lims functions.
     
     Note that if this function is first run with
     calc=False and load=True, the necessary files
     will not yet exist to load.
     """
+    calc_error_count = None
+    load_error_count = None
+    all_error_count = None
+    
     if calc:
         # Tests of full calculations
         # Two separate config files testing different options
@@ -129,14 +133,17 @@ def cli_tester(calc=True, load=True, verbose=False):
                 test_name = rfp.split('/')[-1].split('_')[0] # Eg 'test1'
                 config_name = 'test_config_files/{}.py'.format(test_name)
                 
-                func="plot"
+                # Run plot function
+                func = "plot"
                 subprocess.run(["python", "ethraid/cli.py", func, "-cf", config_name,
                                 "-t", "1d", "2d", "-rfp", rfp, "-gn", "100"], check=True)
-                func="less"
+                # Run lims function
+                func = "lims"
                 subprocess.run(["python", "ethraid/cli.py", func,
                                 "-rfp", rfp, "-gn", "100"])
                                 
             except Exception as err:
+                print(err)
                 load_error_count+=1
                 print('')
                 rfp_short = rfp.split('/')[-1] # Eg 'test_2_raw.h5'
@@ -144,13 +151,37 @@ def cli_tester(calc=True, load=True, verbose=False):
                       .format(func, rfp_short))
     
         print("{} errors encountered while loading/running saved arrays from CLI.".format(load_error_count))
+        
+       
+    if all_:  
+        print("Running all")
+        all_error_count = 0
+        for test_num in ['1','2','3']:
+            for file_type in ['raw', 'processed']:
+            
+                try:
+                    config_name = 'test_config_files/test{}.py'.format(test_num) # Eg test1
+                    rfp = 'results/test{0}/test{0}_{1}.h5'.format(test_num, file_type) # Eg test3_processed.h5
+                    # Run all function
+                    subprocess.run(["python", "ethraid/cli.py", "all", "-cf", config_name,
+                                    "-t", "1d", "2d", "-rfp", rfp, "-gn", "100"], check=True)
+            
+                except Exception as err:
+                   all_error_count+=1
+                   print('')
+                   rfp_short = rfp.split('/')[-1] # Eg 'test_2_raw.h5'
+                   print('test.cli_tester: Error executing "all" on arrays in file {}.'\
+                         .format(rfp_short))
+        
     
     
-    return calc_error_count, load_error_count
+    return calc_error_count, load_error_count, all_error_count
 
 if __name__=="__main__":
     
-    api_errs = api_tester()
+    api_errs = None
+    cli_errs = None
+    # api_errs = api_tester()
     cli_errs = cli_tester()
     
     print("{} api, {} cli errors".format(api_errs, cli_errs))

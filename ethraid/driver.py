@@ -241,7 +241,8 @@ def plot(args):
 
     Arguments:
         args: Command line arguments, including:
-
+    
+        config_path (str): Path to configuration file
         read_file_path (str): Path to file containing data to plot
         type (str): Either '2d' or '1d'
         grid_num (int): Dimensions of 2D probability array
@@ -279,7 +280,7 @@ def plot(args):
     return
     
     
-def less(args):
+def lims(args):
     """
     Load in saved arrays and calculate 1D a and m bounds.
     Print out and return these bounds.
@@ -310,6 +311,18 @@ def less(args):
     print('m_lim = ', bounds[1], ' M_J')
     
     return bounds
+    
+def all(args):
+    """
+    Run the run, plot, and lims commands sequentially.
+    """
+    
+    run(args)
+    plot(args)
+    lims(args)
+    
+    return
+    
     
     
 def load_module_from_file(config_path):
