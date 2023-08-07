@@ -137,14 +137,7 @@ def run(config_path=None, read_file_path=None,
     
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
-                                              m_star, d_star, delta_mu, delta_mu_err,
-                                              
-                                              np.array([
-                                                        [Time(1991.300936, format='decimalyear').jd, 
-                                                         Time(1991.339055, format='decimalyear').jd],
-                                                        [Time(2015.932983, format='decimalyear').jd, 
-                                                         Time(2016.179077, format='decimalyear').jd]
-                                                       ]))                     
+                                              m_star, d_star, delta_mu, delta_mu_err)                     
 
             post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
 
@@ -279,7 +272,7 @@ def run(config_path=None, read_file_path=None,
 if __name__ == "__main__":
     
     config_path = 'ethraid/example_config_files/config_191939.py'
-    read_file_path = 'results/191939/191939_processed.h5'
+    read_file_path = None#'results/191939/191939_processed.h5'
     
     plot=True
     verbose = True
