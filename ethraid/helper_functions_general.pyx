@@ -106,7 +106,7 @@ def post_tot(double [:] rv_post_list, double [:] astro_post_list,
             long [:] a_inds, long [:] m_inds):
 
    """
-   Start with 2 1D lists and multiply them element-wise, THEN form 
+   Start with 3 1D lists and multiply them element-wise, THEN form 
    the result into a 2D array. This function is for the total posterior;
    the individual RV, astrometry, and imaging posteriors are handled by the 
    post_single() function below.

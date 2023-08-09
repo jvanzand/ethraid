@@ -17,6 +17,9 @@ Ms2Mj = M_sun/M_jup
 
 # Astrometry times
 #https://www.cosmos.esa.int/web/hipparcos/catalogue-summary
-hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd] 
+hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd]
+hip_epoch = 1991.25
+
 #https://www.cosmos.esa.int/web/gaia/earlydr3
 gaia_times = [Time('2014-07-25', format='isot').jd, Time('2017-05-28', format='isot').jd]
+gaia_epoch = 2016.0

@@ -87,6 +87,8 @@ def cli_tester(calc=True, load=True, all_=True):
     and calculates their posteriors using the CLI framework.
     Then it accesses the resulting saved files and runs
     the plot and lims functions.
+    Finally, it repeats the above by running the "all"
+    command on each config file/output file pair.
     
     Note that if this function is first run with
     calc=False and load=True, the necessary files
