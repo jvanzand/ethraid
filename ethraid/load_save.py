@@ -75,6 +75,7 @@ def load(read_file_path, grid_num=100, verbose=False):
 
         assert grid_num is not None, "To load raw arrays, grid_num must be provided"
         
+        tot_list = np.array(post_file.get('tot_list')) # Probability list associated with RV/astro and possibly models
         rv_list = np.array(post_file.get('rv_list')) # Probability list associated with RV models
         astro_list = np.array(post_file.get('astro_list')) # Probability list of astro models
         # imag_list = np.array(post_file.get('imag_list')) # Probability list of imaging models
@@ -112,7 +113,7 @@ def load(read_file_path, grid_num=100, verbose=False):
                 imag_list = np.array(post_file.get('imag_list')) # Probability list of imaging models
                 post_imag = hlp.post_single(imag_list, a_inds, m_inds, grid_num)
             
-                post_tot = hlp.post_tot(rv_list, astro_list, imag_list, grid_num, a_inds, m_inds)
+                post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
             
             elif imag_calc=='approx':
                 post_imag = np.array(post_file.get('post_imag'))
@@ -121,20 +122,20 @@ def load(read_file_path, grid_num=100, verbose=False):
                     post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                                     contrast_str, a_lim, m_lim, grid_num)
             
-                post_tot = hlp.post_tot_simplified(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
+                post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
         
         else:
             # If run_imag=False, then imag_list was saved as an array of 1s. Load it and reshape as needed.
             imag_list = np.array(post_file.get('imag_list'))
             post_imag = hlp.post_single(imag_list, a_inds, m_inds, grid_num)
-            post_tot = hlp.post_tot(rv_list, astro_list, imag_list, grid_num, a_inds, m_inds)
+            post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
         
     return star_name, m_star, d_star, run_rv, run_astro, run_imag, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim
 
 
 def save_raw(star_name, m_star, d_star,
              run_rv, run_astro, run_imag, 
-             rv_list, astro_list, imag_data,
+             tot_list, rv_list, astro_list, imag_data,
              vmag, imag_wavelength, contrast_str,
              a_list, m_list, a_lim, m_lim, 
              imag_calc='exact', outdir='', verbose=False):
@@ -200,6 +201,7 @@ def save_raw(star_name, m_star, d_star,
          post_file.create_dataset('run_imag', data=run_imag)
          
          # Save the un-binned values and arrays in case you want to use a different grid_num later
+         post_file.create_dataset('tot_list', data=tot_list)
          post_file.create_dataset('rv_list', data=rv_list)
          post_file.create_dataset('astro_list', data=astro_list)
          

@@ -186,6 +186,7 @@ def run(args):
             post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
     
         elif imag_calc == 'approx':
+            imag_list = np.array([]) # Dummy list to pass to tot_list() function
             post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                             contrast_str, a_lim, m_lim, grid_num)
     
@@ -200,11 +201,13 @@ def run(args):
     #######################################################################################
     ## Total
     #######################################################################################
+    tot_list = hlp.tot_list(rv_list, astro_list, imag_list, num_points)
+    
     if run_imag and imag_calc=='exact':
-        post_tot = hlp.post_tot(rv_list, astro_list, imag_list, grid_num, a_inds, m_inds)
+        post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
         
     else:
-        post_tot = hlp.post_tot_simplified(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
+        post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
     #######################################################################################
     #######################################################################################
     
@@ -225,9 +228,9 @@ def run(args):
         else: # If imag_calc='exact' or anything else
             imag_data = imag_list
         
-        ls.save_raw(star_name, m_star, d_star, 
+        ls.save_raw(star_name, m_star, d_star,
                     run_rv, run_astro, run_imag,
-                    rv_list, astro_list, imag_data,
+                    tot_list, rv_list, astro_list, imag_data,
                     vmag, imag_wavelength, contrast_str,
                     a_list, m_list, a_lim, m_lim, 
                     imag_calc=imag_calc, outdir=outdir, 

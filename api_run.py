@@ -166,6 +166,7 @@ def run(config_path=None, read_file_path=None,
                 post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
     
             elif imag_calc == 'approx':
+                imag_list = np.array([]) # Dummy list to pass to tot_list() function
                 post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                                 contrast_str, a_lim, m_lim, grid_num)
     
@@ -177,23 +178,30 @@ def run(config_path=None, read_file_path=None,
             contrast_str=None
             imag_calc=None
         end_imag_time = time.time()#######################################################
-        #######################################################################################
+        ##################################################################################
         ## Total
-        #######################################################################################
+        ###################################################################################
         start_tot_time = time.time()#######################################################
+        
+        tot_list = np.array(hlp.tot_list(rv_list, astro_list, imag_list, num_points))
+        
         if cm.run_imag and imag_calc=='exact':
-            post_tot = hlp.post_tot(rv_list, astro_list, imag_list, grid_num, a_inds, m_inds)
+            # post_tot = hlp.post_tot(rv_list, astro_list, imag_list, a_inds, m_inds, grid_num)
+            
+            post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
         
         else:
-            post_tot = hlp.post_tot_simplified(rv_list, astro_list, post_imag, grid_num, a_inds, m_inds)
+            # post_tot = hlp.post_tot_simplified(rv_list, astro_list, post_imag, a_inds, m_inds, grid_num)
+            post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
         end_tot_time = time.time()#######################################################
         #######################################################################################
         #######################################################################################
-        
+
         ##
         end_time = time.time()
         ##
         tot = end_time-start_time
+        
         
         if verbose:
             
@@ -228,7 +236,7 @@ def run(config_path=None, read_file_path=None,
             
             ls.save_raw(star_name, m_star, d_star, 
                         run_rv, run_astro, run_imag,
-                        rv_list, astro_list, imag_data,
+                        tot_list, rv_list, astro_list, imag_data,
                         vmag, imag_wavelength, contrast_str,
                         a_list, m_list, a_lim, m_lim, 
                         imag_calc=imag_calc, outdir=outdir, 
@@ -246,6 +254,7 @@ def run(config_path=None, read_file_path=None,
         
         
     if plot==True:
+        
         # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
         scatter_plot, outdir = driver.set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
         
@@ -272,7 +281,8 @@ def run(config_path=None, read_file_path=None,
 if __name__ == "__main__":
     
     config_path = 'ethraid/example_config_files/config_191939.py'
-    read_file_path = None#'results/191939/191939_processed.h5'
+    # config_path = 'test_config_files/test1.py'
+    read_file_path = None#'results/191939/191939_raw.h5'
     
     plot=True
     verbose = True

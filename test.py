@@ -183,7 +183,7 @@ if __name__=="__main__":
     
     api_errs = None
     cli_errs = None
-    # api_errs = api_tester()
+    api_errs = api_tester()
     cli_errs = cli_tester()
     
     print("{} api, {} cli errors".format(api_errs, cli_errs))

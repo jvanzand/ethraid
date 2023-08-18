@@ -148,9 +148,6 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     cdef double x_pos_avg, y_pos_avg, x_vel_avg, y_vel_avg
     cdef double cos_om, sin_om, cos_i
     
-    #cdef double [:,:] rot_mtrx # This makes rot_mtrx a memview
-    #rot_mtrx = np.zeros((3,3),dtype=np.float64)
-    
     # vec_list is a temporary variable to define vec
     # vec holds various values throughout dmu(). After each value
     # has served its purpose, it is overwritten so that only one
@@ -194,14 +191,12 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         # Get avg. separation of the star in au, but pointing in the wrong direction. E1 and E2 correspond to companion direction, so we need a factor of -1 to flip direction (and multiplying the tuple by -1 in this line gives an empty tuple).
         x_pos_avg, y_pos_avg = pos_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
-        # vec points from barycenter to the average position of the *star*, not the companion, in the orbital plane (note the -1).
+        
+        # Two transformations are performed in this step. First, x_pos_abg and y_pos_avg are rotated into the sky plane using the components of the rotation matrix from Murray and Dermott Eqs. 2.119-2.121      
+        # Second, the leading negative signs point vec toward the *star*, not the companion.
         vec[0] = -(x_pos_avg*cos_om - y_pos_avg*sin_om)
         vec[1] = -(x_pos_avg*cos_i*sin_om + y_pos_avg*cos_i*cos_om)
         vec[2] = 0
-        
-        # vec is overwritten and replaced by the rotated version. The rotated version points from barycenter to the star's average position, but in coordinates where the xy-plane is the sky plane and the z-axis points toward Earth.
-        # Note that vec is both the input and the output vector. Overwriting vec saves a lot of time vs. defining a new object
-        #mat_mul(rot_mtrx, vec, vec)
 
         # Average angular position of the star relative to barycenter in milli-arcseconds.
         # ang_pos is in the plane of the sky, so no need to use vec's third component, which points out of the sky
@@ -217,14 +212,10 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
         x_vel_avg, y_vel_avg = vel_avg(a_star, mean_motion, e, 
                                        E1, E2, start_time, end_time)
         
-        # vec is overwritten again to store the stellar velocity instead of position.
-        # Since we're using the E_anom for the companion, the star is moving in the opposite direction (- sign)
+        # Like position, rotate the velocity components and flip them to point to the star.
         vec[0] = -(x_vel_avg*cos_om - y_vel_avg*sin_om)
         vec[1] = -(x_vel_avg*cos_i*sin_om + y_vel_avg*cos_i*cos_om)
         vec[2] = 0
-
-        # vec takes its final definition as the rotated average stellar velocity.
-        #mat_mul(rot_mtrx, vec, vec)
 
 
         # mu_avg is a 2x2 array. The top row stays empty because we skip Hip. (The l==0 case is never executed
