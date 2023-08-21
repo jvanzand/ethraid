@@ -1,31 +1,22 @@
-# CONSTANTS
-# Mass of the Sun in grams
-M_sun = 1.988409870698051e+33
-# Mass of Jupiter in grams
-M_jup = 1.8981245973360504e+30
-# 1 parsec in AU
-pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-# Conversion factor between solar masses and Jupiter masses
-Ms2Mj = M_sun/M_jup
+import os
+from ethraid import _ROOT, Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e6
+num_points = 1e8
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
 # Include grid_num in config file for API usage.
 grid_num = 100
-# Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
-save = ['raw', 'proc']
-# Output directory. Destination of folder containing saved products
-outdir = ''
 # Minimum and maximum semi-major axes to sample (AU)
-min_a = 1.6489
+min_a = 2
 max_a = 1e2
 # Minimum and maximum masses to sample (M_Jup)
-min_m = 0.769
+min_m = 1
 max_m = 1e3
+# Eccentricity distribution for sampled orbits
+e_dist = 'piecewise'
 
 
 # STELLAR PARAMS
@@ -41,15 +32,15 @@ d_star = 65.9*pc_in_au
 # Whether to use RV data. Assign run_rv=False to omit RVs from the calculation entirely.
 run_rv = True
 # Linear RV trend term (m/s/day).
-gammadot = -0.0608
+gammadot = -0.0599
 # Error on gammadot
-gammadot_err = 0.0042
+gammadot_err = 0.0037
 # Quadratic RV curvature term (m/s/day/day)
-gammaddot = 5e-8
+gammaddot = 2.2e-6
 # Error on gammaddot
-gammaddot_err = 6e-6
+gammaddot_err = 4.9e-6
 # Epoch at which gammadot and gammaddot are measured. Typically about 1/2 way through the observing baseline.
-rv_epoch = 2459320
+rv_epoch = 2458991.236308
 
 
 # ASTROMETRY PARAMS
@@ -57,29 +48,35 @@ rv_epoch = 2459320
 run_astro = True
 # Difference between the average Gaia proper motion and the position-based average proper motion between the Hipparcos and Gaia missions (milli-arcseconds/year)
 # Set dmu/dmu_err to None to provide Hipparcos or Gaia ID instead
-delta_mu = 0.0748781
+delta_mu = None
 # Error on delta_mu
-delta_mu_err = 0.0451
+delta_mu_err = None
 # Target Hipparcos identifier. Alternative to supplying delta_mu
-hip_id = None
+hip_id = '9618'
 # Target Gaia DR3 identifier. Alternative to supplying delta_mu
 gaia_id = None
 
 
 # IMAGING PARAMS
 # Whether to use imaging data. Assign run_imag=False to omit imaging from the calculation entirely.
-run_imag = False
+run_imag = True
 # How to calculate imaging posterior. If 'exact', forward model companions as with RVs and astrometry.
 # If 'approx', then for the imaging calculations only, approximate all orbits to be face-on and circular regardless of sampled parameters, and rule out any model with a mass/angular separation combo that was detectable by imaging.
-imag_calc = None
+imag_calc = 'approx'
 # Host star visual magnitude. Used to estimate the magnitude at the imaging wavelength
-vmag = None
+vmag = 9.2
 # Wavelength at which contrast curve was acquired (micrometers)
-imag_wavelength = None
+imag_wavelength = 2.2
 # Path to contrast curve
-contrast_str = None
+contrast_str = os.path.join(_ROOT, 'data/clean_curves/TOI1471_Brgamma.csv')
 # Epoch of imaging observations (BJD).
-imag_epoch = None
+imag_epoch = 2458991.236308
+
+# SAVE PARAMS
+# Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
+save = ['raw', 'proc']
+# Output directory. Destination of folder containing saved products
+outdir = ''
 
 
 # PLOTTING PARAMS

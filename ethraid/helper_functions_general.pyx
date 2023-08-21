@@ -37,12 +37,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     
     Returns:
         a_list, m_list, per_list, e_list, 
-        i_list, om_list, M_anom_0_list (numpy arrays, len = num_points):
+        i_list, om_list, M_anom_0_list (1D numpy arrays, len = num_points):
                                         Lists of randomly sampled semi-major axis, mass,
                                         eccentricity, inclination, argument of
                                         periastron, and initial mean anomaly. Do not
                                         sample directly in period.
-        a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
+        a_inds, m_inds (1D numpy arrays of ints, len = num_points): Grid position where each 
                                         (a, m, per, e, i, om, M_anom_0) model 
                                         will be placed, based on the model's 
                                         a and m values
@@ -105,6 +105,21 @@ def tot_list(double [:] rv_post_list, double [:] astro_post_list,
              double [:] imag_post_list, int num_points):
     """
     Start with 3 1D lists and multiply them element-wise.
+    
+    Arguments:
+        rv_post_list, astro_post_list, 
+        imag_post_list (1D numpy arrays, len=num_points):
+            Lists of likelihoods of the rv/astrometry/imaging data
+            conditioned on a given model. Then ith likelihood in each
+            list corresponds to the same model.
+        num_points (int): Length of above lists. Also equal to the
+                          total number of models run.
+    
+    Returns:
+        tot_list (1D numpy array, len=num_points):
+            The likelihoods of all data sets, conditioned on a given
+            model. The ith element is the product of the ith elements
+            of the three above lists.
     """
     cdef int i
     cdef double prob

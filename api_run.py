@@ -169,6 +169,9 @@ def run(config_path=None, read_file_path=None,
                 imag_list = np.array([]) # Dummy list to pass to tot_list() function
                 post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                                 contrast_str, a_lim, m_lim, grid_num)
+            
+            else:
+                raise Exception("api_run.run: 'imag_calc' must be either 'exact' or 'approx'")
     
         else:
             imag_list = np.ones(num_points)
@@ -280,9 +283,9 @@ def run(config_path=None, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/example_config_files/config_191939.py'
+    config_path = 'ethraid/local_configs/config_12572.py'
     # config_path = 'test_config_files/test1.py'
-    read_file_path = None#'results/191939/191939_raw.h5'
+    read_file_path = None#'results/12572/12572_processed.h5'
     
     plot=True
     verbose = True

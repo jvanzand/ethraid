@@ -3,7 +3,7 @@ from ethraid import _ROOT, Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e6
+num_points = 1e7
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
@@ -32,15 +32,15 @@ d_star = 53.45*pc_in_au
 # Whether to use RV data. Assign run_rv=False to omit RVs from the calculation entirely.
 run_rv = True
 # Linear RV trend term (m/s/day).
-gammadot = 0.1308
+gammadot = 0.1383
 # Error on gammadot
-gammadot_err = 0.0032
+gammadot_err = 0.029
 # Quadratic RV curvature term (m/s/day/day)
-gammaddot = -6.55e-5
+gammaddot = -7.44e-5
 # Error on gammaddot
-gammaddot_err = 3.3e-6
+gammaddot_err = 2.7e-5
 # Epoch at which gammadot and gammaddot are measured. Typically about 1/2 way through the observing baseline.
-rv_epoch = 2459353
+rv_epoch = 2458847.780463
 
 
 # ASTROMETRY PARAMS

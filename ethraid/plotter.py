@@ -59,7 +59,7 @@ def joint_plot(star_name, m_star, d_star,
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
     
     ######## Padding arrays #########
-    ## Companions of low mass and close separation are ruled out based on the RV trend alone. To illustrate this, expand the grid slightly on the left and bottom.
+    ## Include some blank space of the left and bottom of the figure. This space can be used to label the regions ruled out by some prior knowledge (eg, a trend measured over 3 years can't be due to a 400-day planet).
     
     grid_pad = int(np.round(grid_num/15)) # grid_pad is the number of index blocks by which the grid is padded
     
@@ -141,6 +141,7 @@ def joint_plot(star_name, m_star, d_star,
     region_label_size = 50
     restricted_region_label_size = 40
 
+    ## Removed "ruled out" labels because users can define their own lower lims. Not necessarily ruled out by anything.
     # plt.text((5/16)*grid_num_ext, (1/8)*(grid_pad/2), 'Ruled out by RVs',
     #           size=restricted_region_label_size, zorder=101)
     # plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_ext, 'Ruled out by minimum period',
@@ -152,7 +153,7 @@ def joint_plot(star_name, m_star, d_star,
 
     ###################################################
     ############ Axis ticks and labels ################
-    tick_num = 6
+    tick_num = 8
     tick_size = 40
     # List of round numbers to use as labels for both a and m
     # tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
@@ -160,7 +161,7 @@ def joint_plot(star_name, m_star, d_star,
     max_exp = 13
     n = max_exp-min_exp+1
     # tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
-    tick_labels = np.logspace(min_exp, max_exp, n, base=4)
+    tick_labels = np.logspace(min_exp, max_exp, n, base=2)
 
     # Chop out any labels outside the a or m bounds
     raw_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
@@ -178,7 +179,6 @@ def joint_plot(star_name, m_star, d_star,
     
     tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num_ext-1), a_lim_plot)
     tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num_ext-1), m_lim_plot)
-
     
     plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
     plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)

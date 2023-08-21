@@ -69,7 +69,7 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
         m = m_list[j]
         e = e_list[j]
         i = i_list[j]
-        om = om_list[j] # Because om_list contains the *planet* \omegas, this om should technically by om_list[j]+pi. However, the dmu() function below is insensitive to this change, so we use om_list[j] itself for simplicity.
+        om = om_list[j] # Because om_list contains the *planet* \omegas, this om should technically be om_list[j]+pi. However, the dmu() function below is insensitive to this change, so we use om_list[j] itself for simplicity.
         M_anom_0 = M_anom_0_list[j]
         per = per_list[j]
 
@@ -104,6 +104,7 @@ def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom
                                   between measured Gaia pm and 
                                   positional average pm between 
                                   Gaia and Hipparcos.
+        dmu_data_err (float, mas/yr): Error on dmu_data
     
     Returns:
         log_likelihood (float): Natural logarithm of the
@@ -240,7 +241,7 @@ def dmu(double a, double m, double e, double i, double om, double M_anom_0,
     return dmu_model
 
 cdef pos_avg(double a, double n, double e, double E1, double E2, 
-                  double t1, double t2):
+             double t1, double t2):
     """
     Calculate the average x/y positions of an object on an elliptical orbit, 
     where (0,0) is the focus and E = 0 points to +x. Equations for average

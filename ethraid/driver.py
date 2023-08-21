@@ -189,6 +189,9 @@ def run(args):
             imag_list = np.array([]) # Dummy list to pass to tot_list() function
             post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                             contrast_str, a_lim, m_lim, grid_num)
+        
+        else:
+            raise Exception("driver.run: 'imag_calc' must be either 'exact' or 'approx'")
     
     else:
         imag_list = np.ones(num_points)
