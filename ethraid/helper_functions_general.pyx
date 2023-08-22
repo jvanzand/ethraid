@@ -91,7 +91,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     om_list = np.random.uniform(0, two_pi, num_points)
 
     # Breaking up the (a, M) parameter space into grid_num x grid_num.
-    # Note: grid_num+1 bin limits so there are grid_num bins.
+    # Note: grid_num+1 bin dividers means grid_num+2 bins (including below/above min/max), but the first/last bins are never used because we sample between the min and max values. So if grid_num=100, there are bins 0 up to 101. But only bins 1 to 100 have values in them.
     a_bins = np.logspace(np.log10(a_min), np.log10(a_max), grid_num+1)
     m_bins = np.logspace(np.log10(m_min), np.log10(m_max), grid_num+1)
 
@@ -129,7 +129,7 @@ def tot_list(double [:] rv_post_list, double [:] astro_post_list,
 
     for i in range(num_points):
 
-       prob = rv_post_list[i]*astro_post_list[i]
+       prob = rv_post_list[i]*astro_post_list[i]*imag_post_list[i]
 
        tot_list[i] += prob
     
@@ -227,16 +227,20 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
     
     rv_ast_array = post_single(tot_list, a_inds, m_inds, grid_num)
     
+    #print('indiddddd', rv_ast_array[57,6])
+    
     # Not cdef because then I can't change it from memview to np array
     tot_prob_array = np.zeros((grid_num, grid_num))
     
     # post_imag is not a list like RVs and astrometry above. It is input to this function as a 2D array. This is because it's a lot easier to calculate. It would take way longer if we calculated a length-1e6 (or 1e8) list instead of a 100x100 array.
     for i in range(grid_num):
         for j in range(grid_num):
-            tot_prob_array[i,j] = rv_ast_array[i,j]*post_imag[i,j]
+            tot_prob_array[i,j] += rv_ast_array[i,j]*post_imag[i,j]
     
     
     tot_prob_array = np.array(tot_prob_array)
+    
+    #print('indiddddd___', tot_prob_array[57,6])
 
     return tot_prob_array/tot_prob_array.sum()
 
@@ -263,14 +267,13 @@ def post_single(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid
     cdef double [:,:] prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
 
     size = prob_list.shape[0]
-
     for i in range(size):
-        # a_inds/m_inds generated from np.digitize, which 1-indexes. Subtract 1 to 0-index instead.
+        # The lowest index in a_inds or m_inds is 1 because the lower limit of the sampling range (a_min or m_min) is also the smallest bin divider. So no sampled values are small enough to get an index of 0. Still, we want the bin between a_min and the next divider to be the 0th bin, so subtract 1 off of each bin value.
         a_i = a_inds[i]-1
         m_i = m_inds[i]-1
 
         prob_array[m_i, a_i] += prob_list[i]
-        
+    
     np_prob_array = np.array(prob_array)/np.array(prob_array).sum()
     
     return np_prob_array

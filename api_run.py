@@ -166,7 +166,7 @@ def run(config_path=None, read_file_path=None,
                 post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
     
             elif imag_calc == 'approx':
-                imag_list = np.array([]) # Dummy list to pass to tot_list() function
+                imag_list = np.ones(num_points) # Dummy list to pass to tot_list() function
                 post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                                 contrast_str, a_lim, m_lim, grid_num)
             
@@ -175,7 +175,7 @@ def run(config_path=None, read_file_path=None,
     
         else:
             imag_list = np.ones(num_points)
-            post_imag = np.ones((grid_num, grid_num))
+            post_imag = np.ones((grid_num, grid_num)) #/ np.ones((grid_num, grid_num)).sum()
             vmag=None
             imag_wavelength=None
             contrast_str=None
@@ -189,13 +189,13 @@ def run(config_path=None, read_file_path=None,
         tot_list = np.array(hlp.tot_list(rv_list, astro_list, imag_list, num_points))
         
         if cm.run_imag and imag_calc=='exact':
-            # post_tot = hlp.post_tot(rv_list, astro_list, imag_list, a_inds, m_inds, grid_num)
-            
             post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
         
         else:
-            # post_tot = hlp.post_tot_simplified(rv_list, astro_list, post_imag, a_inds, m_inds, grid_num)
+            # Need to multiply by post_imag in approx imaging case
             post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
+            
+            
         end_tot_time = time.time()#######################################################
         #######################################################################################
         #######################################################################################
@@ -241,7 +241,7 @@ def run(config_path=None, read_file_path=None,
                         run_rv, run_astro, run_imag,
                         tot_list, rv_list, astro_list, imag_data,
                         vmag, imag_wavelength, contrast_str,
-                        a_list, m_list, a_lim, m_lim, 
+                        a_list, m_list, a_inds, m_inds, a_lim, m_lim, 
                         imag_calc=imag_calc, outdir=outdir, 
                         verbose=False)
 
@@ -283,7 +283,7 @@ def run(config_path=None, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_12572.py'
+    config_path = 'ethraid/local_configs/config_191939.py'
     # config_path = 'test_config_files/test1.py'
     read_file_path = None#'results/12572/12572_processed.h5'
     
