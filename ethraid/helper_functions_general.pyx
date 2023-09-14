@@ -68,7 +68,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     a_max = a_lim[1]
     m_min = m_lim[0]
     m_max = m_lim[1]
-
+    np.random.seed(0)
 
     # These are the "full" semi-major axes of the orbit, ie the sma of the ellipse traced by the 1-body solution to the 2-body problem. a = a_planet+a_star
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
@@ -227,7 +227,6 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
     
     rv_ast_array = post_single(tot_list, a_inds, m_inds, grid_num)
     
-    #print('indiddddd', rv_ast_array[57,6])
     
     # Not cdef because then I can't change it from memview to np array
     tot_prob_array = np.zeros((grid_num, grid_num))
@@ -240,7 +239,6 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
     
     tot_prob_array = np.array(tot_prob_array)
     
-    #print('indiddddd___', tot_prob_array[57,6])
 
     return tot_prob_array/tot_prob_array.sum()
 
@@ -306,15 +304,15 @@ def P_list(double [:] a_list, double [:] m_list, double m_star):
 cpdef P(double a, double m_planet, double m_star):
     """
     Uses Kepler's third law to find the period of a planet (in days) given its
-    semimajor axis, planet mass, and stellar mass.
+    semimajor axis, planet mass, and the host star mass.
     
     Arguments:
         a (float, au): Semi-major axis
-        m_planet (float, M_jup): Planet mass
+        m_planet (float, M_jup): Companion mass
         m_star (float, M_jup): Stellar mass
     
     Returns:
-        per (float, days): Companion orbital period
+        per (float, days): Orbital period
     """
     
     cdef double per

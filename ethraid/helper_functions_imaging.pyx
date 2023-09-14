@@ -107,7 +107,7 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     # The "model" gives the brightness of the modeled companion
     model_dmag_list = mass_to_dmag(m_list)
     
-    lik_list = model_dmag_list > max_dmag_list
+    lik_list = model_dmag_list > max_dmag_list # lik_list is a list of booleans. If target is too dim, False
     lik_list = lik_list.astype(float)
     
     return lik_list

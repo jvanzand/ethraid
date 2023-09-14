@@ -16,7 +16,7 @@ Characterize long-period companions with partial orbits.
 ### Run orbit fits using parameters in configuration file
 - *\$ ethraid run -cf path/to/ethraid/example_config_files/config_191939.py*
 ### Load and plot saved results
-- *\$ ethraid plot -cf ethraid/config_files/test1.py -rfp results/test1/test1_raw.h5 -gn 100*
+- *\$ ethraid plot -cf ethraid/config_files/test1.py -rfp results/test1/test1_raw.h5 -gn 100 -t 1d 2d*
 ### Print 95\% mass and semi-major axis confidence intervals based on derived posterior
 - *\$ ethraid less -rfp results/test1/test1_raw.h5 -gn 100*
 

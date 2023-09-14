@@ -283,7 +283,7 @@ def run(config_path=None, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_191939.py'
+    config_path = 'ethraid/local_configs/config_12572.py'
     # config_path = 'test_config_files/test1.py'
     read_file_path = None#'results/12572/12572_processed.h5'
     
