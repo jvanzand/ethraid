@@ -13,7 +13,7 @@ Characterize long-period companions with partial orbits.
 - If the installation fails, try upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
 ## Example CLI usage
-### Run orbit fits, plot results, and print 95\% confidence intervals
+### Run orbit fits, plot results, and print 95\% confidence intervals all at once
 - *\$ ethraid all -cf path/to/ethraid/example_config_files/config_191939.py* -rfp results/test1/test1_processed.h5 -t 1d 2d
 
 ### Or run each command separately:
