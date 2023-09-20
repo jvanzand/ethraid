@@ -72,7 +72,7 @@ def run(config_path=None, read_file_path=None,
         num_points = int(num_points)
         grid_num = int(grid_num)
         ######################################
-        ## Next load in required params
+        ## Next load required params from config module
         cm = driver.load_module_from_file(config_path)
     
         star_name = cm.star_name
@@ -111,6 +111,10 @@ def run(config_path=None, read_file_path=None,
             gammaddot = cm.gammaddot
             gammaddot_err = cm.gammaddot_err
             rv_epoch = cm.rv_epoch
+            
+            if (gammaddot is None) or (gammaddot_err is None):
+                gammaddot, gammaddot_err = 0, 1e8
+                
         
             rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
                                     per_list, cm.m_star, rv_epoch,
@@ -131,7 +135,7 @@ def run(config_path=None, read_file_path=None,
             hip_id = cm.hip_id
             gaia_id = cm.gaia_id
         
-            # If delta_mu is not provided directly, use provided name
+            # If delta_mu is not provided directly, use target name
             if any([val is None for val in [delta_mu, delta_mu_err]]):
                 delta_mu, delta_mu_err = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
     

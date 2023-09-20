@@ -37,7 +37,7 @@ gammadot = 0.114
 # Error on gammadot
 gammadot_err = 0.006
 # Quadratic RV curvature term (m/s/day/day)
-gammaddot = -6e-5
+gammaddot = None # No curvature provided
 # Error on gammaddot
 gammaddot_err = 1.9e-5
 # Epoch at which gammadot and gammaddot are measured. Typically about 1/2 way through the observing baseline.

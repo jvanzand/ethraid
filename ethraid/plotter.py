@@ -153,15 +153,13 @@ def joint_plot(star_name, m_star, d_star,
 
     ###################################################
     ############ Axis ticks and labels ################
-    tick_num = 8
+    tick_num = 6
     tick_size = 40
     # List of round numbers to use as labels for both a and m
-    # tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
     min_exp = -4
     max_exp = 13
     n = max_exp-min_exp+1
-    # tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
-    tick_labels = np.logspace(min_exp, max_exp, n, base=2)
+    tick_labels = np.logspace(min_exp, max_exp, n, base=4)
 
     # Chop out any labels outside the a or m bounds
     raw_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
@@ -169,8 +167,9 @@ def joint_plot(star_name, m_star, d_star,
 
 
     # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
-    tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_a))
-    tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_m))
+    rounding_function = lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2)
+    tick_labels_a = list(map(rounding_function, raw_labels_a))
+    tick_labels_m = list(map(rounding_function, raw_labels_m))
     
     
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"

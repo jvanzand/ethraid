@@ -91,7 +91,7 @@ def run(args):
     num_points = int(num_points)
     grid_num = int(grid_num)
     ######################################
-    ## Next load in required params
+    ## Next load required params from config module
     cm = load_module_from_file(config_path)
 
     star_name = cm.star_name
@@ -126,12 +126,15 @@ def run(args):
     #######################################################################################
     ## RVs
     #######################################################################################
-    if run_rv:
+    if cm.run_rv:
         gammadot = cm.gammadot
         gammadot_err = cm.gammadot_err
         gammaddot = cm.gammaddot
         gammaddot_err = cm.gammaddot_err
         rv_epoch = cm.rv_epoch
+        
+        if (gammaddot is None) or (gammaddot_err is None):
+            gammaddot, gammaddot_err = 0, 1e8
         
         rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
                                 per_list, cm.m_star, rv_epoch,
@@ -351,10 +354,12 @@ def load_module_from_file(config_path):
         spec = importlib.util.spec_from_file_location(config_path, abs_path)
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
+        
     elif sys.version_info[0] == 3 and sys.version_info[1] < 5:
         import importlib.machinery
         loader = importlib.machinery.SourceFileLoader(config_path, abs_path)
         module = loader.load_module()
+        
     elif sys.version_info[0] == 2:
         import imp
         module = imp.load_source(config_path, abs_path)

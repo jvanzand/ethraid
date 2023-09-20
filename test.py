@@ -155,7 +155,7 @@ def cli_tester(calc=True, load=True, all_=True):
         print("{} errors encountered while loading/running saved arrays from CLI.".format(load_error_count))
         
        
-    if all_:  
+    if all_: # Run the run, plot, and lims functions sequentially
         print("Running all")
         all_error_count = 0
         for test_num in ['1','2','3']:
@@ -186,7 +186,13 @@ if __name__=="__main__":
     api_errs = api_tester()
     cli_errs = cli_tester()
     
-    print("{} api, {} cli errors".format(api_errs, cli_errs))
+    if api_errs==0 and cli_errs==0:
+        print("Tests for API and CLI ran with no errors")
+    else:
+        print("Some errors detected")
+        print("API: {} errors calculating arrays and {} errors loading them.".format(api_errs[0], api_errs[1]))
+        print("CLI: {} errors calculating arrays, {} errors loading them, and {} errors running 'all' function."\
+                    .format(cli_errs[0], cli_errs[1], cli_errs[2]))
     
     
     
