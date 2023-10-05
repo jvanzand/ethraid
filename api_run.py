@@ -135,9 +135,11 @@ def run(config_path=None, read_file_path=None,
             hip_id = cm.hip_id
             gaia_id = cm.gaia_id
         
-            # If delta_mu is not provided directly, use target name
+            # If delta_mu is not provided directly, use provided name
             if any([val is None for val in [delta_mu, delta_mu_err]]):
-                delta_mu, delta_mu_err = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
+                astro_data = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
+        
+                delta_mu, delta_mu_err, epoch_ra_g, epoch_dec_g, epoch_ra_h, epoch_dec_h = astro_data
     
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
@@ -287,9 +289,9 @@ def run(config_path=None, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_12572.py'
+    config_path = 'ethraid/local_configs/config_191939.py'
     # config_path = 'test_config_files/test1.py'
-    read_file_path = None#'results/12572/12572_processed.h5'
+    read_file_path = 'results/191939/191939_processed.h5'
     
     plot=True
     verbose = True
