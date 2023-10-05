@@ -91,7 +91,7 @@ def run(config_path=None, read_file_path=None,
         ## Time array calculations
         start_time = time.time()
         ##
-        
+
         start_list_time = time.time()#######################################################
         a_list, m_list, per_list, e_list, i_list,\
         om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
