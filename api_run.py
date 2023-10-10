@@ -26,8 +26,8 @@ M_jup = 1.8981245973360504e+30
 M_earth = 5.972167867791379e+27
 
 
-def run(config_path=None, read_file_path=None, 
-        grid_num=None, plot=None, scatter_plot=None, verbose=False):
+def run(config_path, read_file_path=None, 
+        plot=None, verbose=False):
     
     """
     Example API function to run orbit modelling and
@@ -46,9 +46,7 @@ def run(config_path=None, read_file_path=None,
         provided in the config file will supersede parameters provided 
         directly).
         
-        grid_num (int): 2D array shape
         plot (bool): Plot results?
-        scatter_plot (list): [AU, M_J] coords to scatter plot a companion
         verbose (bool): Verbose output?
     
     Returns:
@@ -59,18 +57,17 @@ def run(config_path=None, read_file_path=None,
     if read_file_path is None:
 
         ## First try loading optional params. If they can't be loaded, use defaults
-        optional_params = ['num_points', 'grid_num', 'min_a', 'max_a', 
+        optional_params = ['num_points', 'min_a', 'max_a', 
                            'e_dist', 'min_m', 'max_m', 'save', 'outdir']
-        default_values = [int(1e6), int(1e2), 1, 1e2, 
+        default_values = [int(1e6), 1, 1e2, 
                           'piecewise', 1, 1e3, ['proc'], '']
 
-        num_points, grid_num, min_a, max_a,\
+        num_points, min_a, max_a,\
         e_dist, min_m, max_m, save, outdir = driver.set_values(config_path, 
                                                 optional_params, 
                                                 default_values)
         
         num_points = int(num_points)
-        grid_num = int(grid_num)
         ######################################
         ## Next load required params from config module
         cm = driver.load_module_from_file(config_path)
@@ -78,6 +75,9 @@ def run(config_path=None, read_file_path=None,
         star_name = cm.star_name
         m_star = cm.m_star
         d_star = cm.d_star
+        grid_num = cm.grid_num
+        
+        grid_num = int(grid_num)
         ######################################
         
         ### General ###
@@ -135,9 +135,11 @@ def run(config_path=None, read_file_path=None,
             hip_id = cm.hip_id
             gaia_id = cm.gaia_id
         
-            # If delta_mu is not provided directly, use target name
+            # If delta_mu is not provided directly, use provided name
             if any([val is None for val in [delta_mu, delta_mu_err]]):
-                delta_mu, delta_mu_err = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
+                astro_data = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
+        
+                delta_mu, delta_mu_err = astro_data
     
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
@@ -251,13 +253,13 @@ def run(config_path=None, read_file_path=None,
 
     # If read_file_path is NOT None, load in existing data:
     else:
-        if grid_num == None:
-            grid_num = 100
+        # Load grid_num from config file
+        cm = driver.load_module_from_file(config_path)
         
         star_name, m_star, d_star,\
         run_rv, run_astro, run_imag,\
         post_tot, post_rv, post_astro, post_imag,\
-        grid_num, a_lim, m_lim = ls.load(read_file_path, grid_num, verbose)
+        a_lim, m_lim = ls.load(read_file_path, grid_num=cm.grid_num, verbose=verbose)
         
         
     if plot==True:
@@ -268,7 +270,7 @@ def run(config_path=None, read_file_path=None,
         plotter.joint_plot(star_name, m_star, d_star,
                            run_rv, run_astro, run_imag,
                            post_tot, post_rv, post_astro, post_imag, 
-                           grid_num, a_lim, m_lim,
+                           a_lim, m_lim,
                            scatter_plot=scatter_plot, 
                            period_lines=False, outdir='', verbose=verbose)
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir='')
@@ -287,9 +289,8 @@ def run(config_path=None, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_12572.py'
-    # config_path = 'test_config_files/test1.py'
-    read_file_path = None#'results/12572/12572_processed.h5'
+    config_path = 'ethraid/local_configs/config_191939.py'
+    # read_file_path = 'results/191939/191939_raw.h5'
     
     plot=True
     verbose = True

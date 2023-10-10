@@ -443,10 +443,11 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
     elif gaia_id is not None:
         filter_dict = {'Gaia':gaia_id}
 
-
+    # pmRA and pmDE are the Gaia proper motions 
     include_cols = ['HIP', 'Gaia',
                     'pmRA',  'pmDE',   'pmRAhg',   'pmDEhg', 
-                    'e_pmRA','e_pmDE', 'e_pmRAhg', 'e_pmDEhg']
+                    'e_pmRA','e_pmDE', 'e_pmRAhg', 'e_pmDEhg',
+                    'EpochRAgaia', 'EpochDEgaia', 'EpochRAhip', 'EpochDEhip']
 
     # Query Vizier for HGCA entry. 'J/ApJS/254/42' is the name of the
     # HGCA EDR3.
@@ -475,6 +476,7 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
     pmra_hg_error = table['e_pmRAhg']
     pmdec_gaia_error = table['e_pmDE']
     pmdec_hg_error = table['e_pmDEhg']
+
 
     dmu = float(calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
     dmu_err = float(calc_dmu_error(pmra_gaia_error, pmra_hg_error,\
@@ -510,8 +512,7 @@ def calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
 def calc_dmu_error(pmra_gaia_err, pmra_hg_err, pmdec_gaia_err, pmdec_hg_err, pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
     """
     Error on proper motion magnitude using error propagation formula.
-    This simplified formula assumes independent variables (see Wiki page on
-    Propagation of Uncertainty).
+    This simplified formula assumes independent variables.
     
     Arguments:
         pmra_gaia_err (float, mas/yr): Error on pmra_gaia

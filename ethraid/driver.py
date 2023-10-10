@@ -52,9 +52,13 @@ def run(args):
                         Hipparcos and Gaia epochs.
         delta_mu_err: Error on delta_mu
         hip_id (string): Hipparcos identifier to retrieve astrometry data;
-                         alternative to providing delta_mu/delta_mu_err
+                         alternative to providing delta_mu/delta_mu_err.
+                         If hip_id and gaia_id are both provided, they
+                         must correspond to the same target.
         gaia_id (string): Gaia identifier to retrieve astrometry data;
-                          alternative to providing delta_mu/delta_mu_err
+                          alternative to providing delta_mu/delta_mu_err.
+                          If hip_id and gaia_id are both provided, they
+                          must correspond to the same target.
     
         vmag (mag): Apparent V-band magnitude of host star
         imag_wavelength (μm): Wavelength of imaging observations
@@ -71,7 +75,9 @@ def run(args):
                      should be saved. With the CLI, only processed 
                      arrays will be saved by default.
         outdir (str): Path to save outputs to
-        verbose (bool): Optionally print out extra information
+        scatter_plot (list): Optional list of (sep, mass) tuples to scatter plot 
+                             the parameters of 1 or more companions. Sma in AU,
+                             mass in M_jup.
     
     Returns:
         None
@@ -80,16 +86,17 @@ def run(args):
     config_path = args.config
     
     ## First try loading optional params. If they can't be loaded, use defaults
-    optional_params = ['num_points', 'grid_num', 'min_a', 'max_a', 'e_dist', 'min_m', 'max_m', 'save', 'outdir']
-    default_values = [int(1e6), int(1e2), 1, 1e2, 'piecewise', 1, 1e3, ['proc'], '']
+    optional_params = ['num_points', 'min_a', 'max_a', 
+                       'e_dist', 'min_m', 'max_m', 'save', 'outdir']
+    default_values = [1e6, 1, 1e2, 
+                      'piecewise', 1, 1e3, ['proc'], '']
 
-    num_points, grid_num, min_a, max_a,\
+    num_points, min_a, max_a,\
     e_dist, min_m, max_m, save, outdir = set_values(config_path, 
                                             optional_params, 
                                             default_values)
     
     num_points = int(num_points)
-    grid_num = int(grid_num)
     ######################################
     ## Next load required params from config module
     cm = load_module_from_file(config_path)
@@ -97,11 +104,15 @@ def run(args):
     star_name = cm.star_name
     m_star = cm.m_star
     d_star = cm.d_star
+    grid_num = cm.grid_num
     verbose = args.verbose
+    
     
     run_rv = cm.run_rv
     run_astro = cm.run_astro
     run_imag = cm.run_imag
+    
+    grid_num = int(grid_num)
     ######################################
     
     ### General ###
@@ -273,13 +284,13 @@ def plot(args):
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
     post_tot, post_rv, post_astro, post_imag,\
-    grid_num, a_lim, m_lim = ls.load(args.read_file_path, args.grid_num, args.verbose)
+    a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
 
     if "2d" in args.type:
         plotter.joint_plot(star_name, m_star, d_star,
                            cm.run_rv, cm.run_astro, cm.run_imag,
                            post_tot, post_rv, post_astro, post_imag,
-                           grid_num, a_lim, m_lim,
+                           a_lim, m_lim,
                            scatter_plot=scatter_plot, period_lines=False,
                            outdir=outdir, verbose=args.verbose)
 
@@ -303,12 +314,14 @@ def lims(args):
     Returns:
         bounds (list of tuples): [(a1, a2),(m1, m2)] giving 95%
                                  confidence intervals
-    """ 
+    """
+    config_path = args.config
+    cm = load_module_from_file(config_path)
 
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
     post_tot, post_rv, post_astro, post_imag,\
-    grid_num, a_lim, m_lim = ls.load(args.read_file_path, args.grid_num, args.verbose)
+    a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
