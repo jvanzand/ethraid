@@ -11,7 +11,7 @@ from ethraid.compiled import helper_functions_general as hlp
 def joint_plot(star_name, m_star, d_star, 
                run_rv, run_astro, run_imag, 
                post_tot, post_rv, post_astro, post_imag, 
-               grid_num, a_lim, m_lim,
+               a_lim, m_lim,
                scatter_plot=None, period_lines=False, 
                outdir='', verbose=False):
     
@@ -40,18 +40,18 @@ def joint_plot(star_name, m_star, d_star,
         run_rv, run_astro, run_imag (bool): True/False values indicating whether
                                             each data type was considered. Omitted
                                             data types are not plotted.
-        scatter_plot (list of floats): Optional (semi-major axis, mass) pair
-                                        specifying the location of a known
-                                        companion to plot. Sma in AU, mass in
-                                        M_jup.
-         period_lines (bool): Optionally plot lines of constant period
+        scatter_plot (list): Optional list of (sep, mass) tuples to scatter plot 
+                             the parameters of 1 or more companions. Sma in AU, 
+                             mass in M_jup.
+        period_lines (bool): Optionally plot lines of constant period
                               at periods equal to harmonics of the Gaia and 
                               HG baselines
-         out_dir (str): Path to save generated plot
+        out_dir (str): Path to save generated plot
 
     Returns:
          None (plots 2D joint posterior)
     """
+    grid_num = np.shape(post_tot)[0] # grid_num is the shape of the posterior(s). This handles raw and processed posterior arrays.
     
     a_min, m_min = a_lim[0], m_lim[0]
     a_max, m_max = a_lim[1], m_lim[1]
@@ -197,9 +197,10 @@ def joint_plot(star_name, m_star, d_star,
     ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:
 
-        sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot)
+        for scatter_pair in scatter_plot:
+            sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num_ext, a_lim_plot, m_lim_plot)
 
-        plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
+            plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
     if period_lines:

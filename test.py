@@ -55,11 +55,14 @@ def api_tester(calc=True, load=True, verbose=False):
 
         load_error_count = 0
         for rfp in read_file_paths:
+            
+            test_num = rfp.split('_')[0][-1] # Get number 1, 2, or 3
+            config_path = 'test_config_files/test{}.py'.format(test_num) # Get config path. A little ad hoc
     
             try:
                 # Note that I provide arguments after rfp, but they are only needed sometimes.
                 # If the loaded file has scatter_plot or outdir, eg, then the loaded values supersede those given here.
-                api_run.run(read_file_path=rfp, plot=plot, verbose=verbose)
+                api_run.run(config_path, read_file_path=rfp, plot=plot, verbose=verbose)
                 
                 if verbose:
                     print("test.api_tester: Successfully loaded file {}".format(rfp.split('/')[-1]))
@@ -138,11 +141,11 @@ def cli_tester(calc=True, load=True, all_=True):
                 # Run plot function
                 func = "plot"
                 subprocess.run(["python", "ethraid/cli.py", func, "-cf", config_name,
-                                "-t", "1d", "2d", "-rfp", rfp, "-gn", "100"], check=True)
+                                "-t", "1d", "2d", "-rfp", rfp], check=True)
                 # Run lims function
                 func = "lims"
                 subprocess.run(["python", "ethraid/cli.py", func,
-                                "-rfp", rfp, "-gn", "100"])
+                                "-cf", config_name, "-rfp", rfp])
                                 
             except Exception as err:
                 print(err)
@@ -166,7 +169,7 @@ def cli_tester(calc=True, load=True, all_=True):
                     rfp = 'results/test{0}/test{0}_{1}.h5'.format(test_num, file_type) # Eg test3_processed.h5
                     # Run all function
                     subprocess.run(["python", "ethraid/cli.py", "all", "-cf", config_name,
-                                    "-t", "1d", "2d", "-rfp", rfp, "-gn", "100"], check=True)
+                                    "-t", "1d", "2d", "-rfp", rfp], check=True)
             
                 except Exception as err:
                    all_error_count+=1
@@ -181,8 +184,9 @@ def cli_tester(calc=True, load=True, all_=True):
 
 if __name__=="__main__":
     
-    api_errs = None
-    cli_errs = None
+    api_errs = (None, None)
+    cli_errs = (None, None)
+    
     api_errs = api_tester()
     cli_errs = cli_tester()
     

@@ -18,6 +18,9 @@ def load(read_file_path, grid_num=100, verbose=False):
         star_name (str): Name of star (does not need to be official)
         m_star (float, M_jup): Mass of host star
         d_star (float, AU): Distance from Earth to host star
+        run_rv (bool): Whether to simulate RV data
+        run_astro (bool): Whether to simulate astrometry data
+        run_imag (bool): Whether to simulate imaging data
         post_tot (array of floats): Total posterior array, shape=(grid_num,grid_num)
         post_rv (array of floats): Model probabilities given RV data only, marginalized
                                    over all orbital parameters except a and m
@@ -54,7 +57,6 @@ def load(read_file_path, grid_num=100, verbose=False):
         
         if verbose:
             print('Searching for processed arrays')
-            
             if grid_num is not None:
                 print("load_save.load: Argument 'grid_num' has no effect when loading processed arrays.\n"
                       "                Only raw arrays can be reshaped.")
@@ -65,7 +67,7 @@ def load(read_file_path, grid_num=100, verbose=False):
         
         post_tot = np.array(post_file.get('post_tot')) # Marginalized probabity array associated with RV/astro models
         
-        grid_num = np.shape(post_tot)[0]
+        # grid_num = np.shape(post_tot)[0]
         
         
     elif data_type=='raw':
@@ -82,17 +84,14 @@ def load(read_file_path, grid_num=100, verbose=False):
         a_list = np.array(post_file.get('a_list')) # Semi-major axis values
         m_list = np.array(post_file.get('m_list')) # Companion mass values
         
-        a_inds = np.array(post_file.get('a_inds')) # Semi-major axis indices
-        m_inds = np.array(post_file.get('m_inds')) # Companion mass indices
-    
-        # # Calculate indices using provided grid_num
-        # a_bins = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num)
-        # m_bins = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num)
-        #
-        # a_inds = np.digitize(a_list, bins = a_bins)
-        # m_inds = np.digitize(m_list, bins = m_bins)
-        #
-        # print('BINZZ', len(a_bins), len(m_bins))
+        # Recalculate a and m indices.
+        #####################################################################
+        a_bins = np.logspace(np.log10(a_lim[0]), np.log10(a_lim[1]), grid_num+1)
+        m_bins = np.logspace(np.log10(m_lim[0]), np.log10(m_lim[1]), grid_num+1)
+
+        a_inds = np.digitize(a_list, bins = a_bins)
+        m_inds = np.digitize(m_list, bins = m_bins)
+        #####################################################################
             
         post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
         post_astro = hlp.post_single(astro_list, a_inds, m_inds, grid_num)
@@ -136,7 +135,7 @@ def load(read_file_path, grid_num=100, verbose=False):
             post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num) # run_imag == False, so do not include post_imag in calculation
 
         
-    return star_name, m_star, d_star, run_rv, run_astro, run_imag, post_tot, post_rv, post_astro, post_imag, grid_num, a_lim, m_lim
+    return star_name, m_star, d_star, run_rv, run_astro, run_imag, post_tot, post_rv, post_astro, post_imag, a_lim, m_lim
 
 
 def save_raw(star_name, m_star, d_star,
@@ -236,8 +235,8 @@ def save_raw(star_name, m_star, d_star,
          post_file.create_dataset('a_list', data=a_list)
          post_file.create_dataset('m_list', data=m_list)
          
-         post_file.create_dataset('a_inds', data=a_inds)
-         post_file.create_dataset('m_inds', data=m_inds)
+         # post_file.create_dataset('a_inds', data=a_inds)
+         # post_file.create_dataset('m_inds', data=m_inds)
          
          post_file.create_dataset('a_lim', data=a_lim)
          post_file.create_dataset('m_lim', data=m_lim)

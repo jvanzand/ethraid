@@ -476,11 +476,6 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
     pmra_hg_error = table['e_pmRAhg']
     pmdec_gaia_error = table['e_pmDE']
     pmdec_hg_error = table['e_pmDEhg']
-    
-    epoch_ra_g = table['EpochRAgaia']
-    epoch_dec_g = table['EpochDEgaia']
-    epoch_ra_h = table['EpochRAhip']
-    epoch_dec_h = table['EpochDEhip']
 
 
     dmu = float(calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
@@ -488,7 +483,7 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
                                    pmdec_gaia_error, pmdec_hg_error,\
                                    pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
     
-    return dmu, dmu_err, epoch_ra_g, epoch_dec_g, epoch_ra_h, epoch_dec_h
+    return dmu, dmu_err
     
 
 def calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):

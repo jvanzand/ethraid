@@ -9,7 +9,7 @@ num_points = 1e4
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than in the config file (default grid_num=100).
 # Include grid_num in config file for API usage.
-grid_num = 100
+grid_num = 50
 # Minimum and maximum semi-major axes to sample (AU)
 min_a = 1.6489
 max_a = 1e2
@@ -83,4 +83,4 @@ outdir = ''
 
 # PLOTTING PARAMS
 # Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-scatter_plot = [3.8, 3.0]
+scatter_plot = [(3.8, 3.0), (5., 7.)]
