@@ -43,7 +43,7 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
     if __name__ == "__main__":
     
         config_path = 'path/to/my_config.py
-        read_file_path = 'results/\{star_name\}/\{star_name\}_processed.h5'
+        read_file_path = 'results/{star_name}/{star_name}_processed.h5'
     
     
         plot=True
