@@ -3,20 +3,20 @@ from ethraid import _ROOT, Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e7
+num_points = 1e8
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
 # Include grid_num in config file for API usage.
-grid_num = 100
+grid_num = 70
 # Minimum and maximum semi-major axes to sample (AU)
-min_a = 2.62
-max_a = 50
+min_a = 2
+max_a = 100
 # Minimum and maximum masses to sample (M_Jup)
-min_m = 2.05
-max_m = 1e2
+min_m = 1
+max_m = 1e3
 # Eccentricity distribution for sampled orbits
-e_dist = 'kipping'
+e_dist = 'piecewise'
 
 
 # STELLAR PARAMS
@@ -34,7 +34,7 @@ run_rv = True
 # Linear RV trend term (m/s/day).
 gammadot = 0.1383
 # Error on gammadot
-gammadot_err = 0.029
+gammadot_err = 0.0029
 # Quadratic RV curvature term (m/s/day/day)
 gammaddot = -7.44e-5
 # Error on gammaddot
@@ -83,5 +83,5 @@ outdir = ''
 
 # PLOTTING PARAMS
 # Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-# scatter_plot = [3.8, 3.0]
-# scatter_plot = [3.71, 2.93]
+# scatter_plot = [(3.8, 3.0)]
+# scatter_plot = [(3.71, 2.93)]

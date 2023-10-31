@@ -289,8 +289,8 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_T001174.py'
-    read_file_path = None#'results/T001174/T001174_raw.h5'
+    config_path = 'ethraid/local_configs/config_191939.py'
+    read_file_path = 'results/191939/191939_raw.h5'
     
     
     plot=True
