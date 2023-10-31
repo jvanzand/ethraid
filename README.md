@@ -26,7 +26,7 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 - *\$ ethraid all -cf path/to/my_config.py* -rfp results/\{star_name\}/\{star_name\}_processed.h5 -t 1d 2d
     - Note that the *-rfp* (read file path) flag requires the path to the output directory where the fit results are stored. On a first run, this path *does not exist yet,* but it will be created after the fit and before plotting.
 
-### Alternative run each command separately:
+### Alternative: run each command separately
 
 #### Run orbit fits using parameters in configuration file
 - *\$ ethraid run -cf path/to/my_config.py*

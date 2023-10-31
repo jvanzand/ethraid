@@ -34,9 +34,9 @@ results/*
 *.pyc
 *.so
 *.png
-!ethraid/191939/191939_cdf_1d.png
-!ethraid/191939/191939_pdf_1d.png
-!ethraid/191939/191939_2d.png
+!ethraid/example/191939/191939_cdf_1d.png
+!ethraid/example/191939/191939_pdf_1d.png
+!ethraid/example/191939/191939_2d.png
 
 # Output of kern profiler
 *.lprof
