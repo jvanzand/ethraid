@@ -53,6 +53,13 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
             plot=plot, verbose=verbose)
     ```
 
+## Results
+#### Running ethraid from scratch will generate a directory called *results/\{star_name\}/*, which contains up to three plots: 1D PDFs of the total posterior for mass and separation, the corresponding 1D CDFs, and a joint 2D posterior.
+
+![1d_pdf](ethraid/example/191939/191939_pdf_1d.png)
+![1d_cdf](ethraid/example/191939/191939_cdf_1d.png)
+![2d_pdf](ethraid/example/191939/191939_2d.png)
+
 ## Download repo from Github
 ### Install dependencies using requirements.txt 
 - *\$ pip install -r requirements.txt*
