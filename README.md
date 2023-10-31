@@ -1,7 +1,7 @@
 # Ethraid
 
-Characterize long-period companions with partial orbits.
-Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's functionality
+Characterize long-period companions with partial orbits.  
+Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's functionality.
 
 ## Environment
 ### Create new environment with python 3.7
