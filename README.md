@@ -1,7 +1,7 @@
-
 # Ethraid
 
 Characterize long-period companions with partial orbits.
+Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's functionality
 
 ## Environment
 ### Create new environment with python 3.7
@@ -16,15 +16,15 @@ Characterize long-period companions with partial orbits.
 - *\$ cp template_config.py my_config.py*
 - NOTE: ethraid uses AU for all distances and M_Jup for all masses. Access helpful conversion factors using, e.g., 
 
-```
-from ethraid import Ms2Mj, pc_in_au
-```
-in your config file.
+    ```
+    from ethraid import Ms2Mj, pc_in_au
+    ```
+    in your config file.
 
 ## Example CLI usage
 ### Run orbit fits, plot results, and print 95\% confidence intervals all at once
 - *\$ ethraid all -cf path/to/my_config.py* -rfp results/\{star_name\}/\{star_name\}_processed.h5 -t 1d 2d
-- Note that the *-rfp* (read file path) flag requires the path to the output directory where the fit results are stored. On a first run, this path *does not exist yet,* but it will be created after the fit and before plotting.
+    - Note that the *-rfp* (read file path) flag requires the path to the output directory where the fit results are stored. On a first run, this path *does not exist yet,* but it will be created after the fit and before plotting.
 
 ### Or run each command separately:
 
