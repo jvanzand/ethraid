@@ -14,7 +14,7 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 
 ## Create a configuration file from the template provided and provide the required parameters and desired data
 - *\$ cp template_config.py my_config.py*
-- NOTE: ethraid uses AU for all distances and M_Jup for all masses. Access helpful conversion factors using, e.g.
+- NOTE: ethraid uses AU for all distances and M_Jup for all masses. Access helpful conversion factors using e.g.
 
     ```
     from ethraid import Ms2Mj, pc_in_au
