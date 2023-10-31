@@ -5,16 +5,26 @@ Characterize long-period companions with partial orbits.
 
 ## Environment
 ### Create new environment with python 3.7
-- *\$ conda create --name trends_env python=3.7*
-- *\$ conda activate trends_env*
+- *\$ conda create --name ethraid_env python=3.7*
+- *\$ conda activate ethraid_env*
 
 ## Download using pip
 - *\$ pip install ethraid*
 - If the installation fails, try upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
+## Create a configuration file from the template provided and provide the desired data and parameters
+- *\$ cp template_config.py my_config.py*
+- NOTE: ethraid uses AU for all distances and M_Jup for all masses. Access helpful conversion factors using, e.g., 
+
+```
+from ethraid import Ms2Mj, pc_in_au
+```
+in your config file.
+
 ## Example CLI usage
 ### Run orbit fits, plot results, and print 95\% confidence intervals all at once
-- *\$ ethraid all -cf path/to/ethraid/example_config_files/config_191939.py* -rfp results/test1/test1_processed.h5 -t 1d 2d
+- *\$ ethraid all -cf path/to/my_config.py* -rfp results/\{star_name\}/\{star_name\}_processed.h5 -t 1d 2d
+- Note that the *-rfp* (read file path) flag requires the path to the output directory where the fit results are stored. On a first run, this path *does not exist yet,* but it will be created after the fit and before plotting.
 
 ### Or run each command separately:
 

@@ -1,58 +1,62 @@
-import os
-from ethraid import _ROOT, Ms2Mj, pc_in_au
+## Template config file
+
+from ethraid import Ms2Mj, pc_in_au
+import ethraid.compiled.helper_functions_general as hlp
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e8
+num_points = 1e4
+
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
-# When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
-# Include grid_num in config file for API usage.
-grid_num = 70
-# Minimum and maximum semi-major axes to sample (AU)
+grid_num = 100
+## Limits of parameter space to search. a = separation (AU), m = mass (M_Jup)
 min_a = 2
+min_m = 2
+
 max_a = 1e2
-# Minimum and maximum masses to sample (M_Jup)
-min_m = 1
 max_m = 1e3
+
 # Eccentricity distribution for sampled orbits
 e_dist = 'piecewise'
 
 
 # STELLAR PARAMS
-# Star name for file labeling. Need not be official.
-star_name = '12572'
-# Mass of star in Jupiter masses
-m_star = 0.91*Ms2Mj
+# Star name for file labeling. Not used for catalog cross-matching
+star_name = 'template_star'
+# Mass of star in Jupiter masses. Ms2Mj converts M_Sun to M_Jup.
+m_star = 0.5*Ms2Mj
 # Distance from Earth to star in AU
-d_star = 65.9*pc_in_au
+d_star = 5*pc_in_au
 
 
 # RV PARAMS
 # Whether to use RV data. Assign run_rv=False to omit RVs from the calculation entirely.
 run_rv = True
+
 # Linear RV trend term (m/s/day).
-gammadot = -0.0599
+gammadot = 0.114
 # Error on gammadot
-gammadot_err = 0.0037
+gammadot_err = 0.006
 # Quadratic RV curvature term (m/s/day/day)
-gammaddot = 2.2e-6
+gammaddot = -6e-5
 # Error on gammaddot
-gammaddot_err = 4.9e-6
+gammaddot_err = 1.9e-5
 # Epoch at which gammadot and gammaddot are measured. Typically about 1/2 way through the observing baseline.
-rv_epoch = 2458991.236308
+rv_epoch = 2458847.780463
 
 
 # ASTROMETRY PARAMS
 # Whether to use astrometry data. Assign run_astro=False to omit astrometry from the calculation entirely.
 run_astro = True
+
 # Difference between the average Gaia proper motion and the position-based average proper motion between the Hipparcos and Gaia missions (milli-arcseconds/year)
 # Set dmu/dmu_err to None to provide Hipparcos or Gaia ID instead
-delta_mu = None
+delta_mu = 0.22767382507786398
 # Error on delta_mu
-delta_mu_err = None
+delta_mu_err = 0.034199052901953214
 # Target Hipparcos identifier. Alternative to supplying delta_mu
-hip_id = '9618'
+hip_id = None
 # Target Gaia DR3 identifier. Alternative to supplying delta_mu
 gaia_id = None
 
@@ -60,17 +64,18 @@ gaia_id = None
 # IMAGING PARAMS
 # Whether to use imaging data. Assign run_imag=False to omit imaging from the calculation entirely.
 run_imag = True
+
 # How to calculate imaging posterior. If 'exact', forward model companions as with RVs and astrometry.
 # If 'approx', then for the imaging calculations only, approximate all orbits to be face-on and circular regardless of sampled parameters, and rule out any model with a mass/angular separation combo that was detectable by imaging.
-imag_calc = 'exact'
+imag_calc = 'approx'
 # Host star visual magnitude. Used to estimate the magnitude at the imaging wavelength
-vmag = 9.2
+vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
 # Path to contrast curve
-contrast_str = os.path.join(_ROOT, 'data/clean_curves/TOI1471_Brgamma.csv')
-# Epoch of imaging observations (BJD).
-imag_epoch = 2458991.236308
+contrast_str = 'ethraid/data/test_K_band.csv'
+# Epoch at which imaging observations were acquired (BJD)
+imag_epoch = 24593300
 
 # SAVE PARAMS
 # Whether to save raw arrays (1d, unbinned), processed arrays (2d, binned), or both
@@ -80,5 +85,5 @@ outdir = ''
 
 
 # PLOTTING PARAMS
-# Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-scatter_plot = None
+# Coordinates at which to plot a gold star (AU, M_Jup). Usually corresponds to a known companion which could be the source of an observed trend.
+scatter_plot = [(5, 5)]

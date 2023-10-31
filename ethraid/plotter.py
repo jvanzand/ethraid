@@ -58,6 +58,7 @@ def joint_plot(star_name, m_star, d_star,
     
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
     
+    
     ######## Padding arrays #########
     ## Include some blank space of the left and bottom of the figure. This space can be used to label the regions ruled out by some prior knowledge (eg, a trend measured over 3 years can't be due to a 400-day planet).
     
@@ -222,13 +223,13 @@ def joint_plot(star_name, m_star, d_star,
         for i in range(num_lines):
             plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5)
             
-
-
+    
     fig.tight_layout()
     save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
     # Try to make directory. If it exists, just continue. Parallel code was bugging out here, so exist_ok is great.
     os.makedirs(save_dir, exist_ok = True)
     fig.savefig(save_dir + star_name + '_2d.png')
+    
     plt.close()
     
     # # bounds is the final answer: [range of 2σ a, range of 2σ m].
