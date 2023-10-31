@@ -12,14 +12,14 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 - *\$ pip install ethraid*
 - If the installation fails, try upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
-## Create a configuration file from the template provided and provide the desired data and parameters
+## Create a configuration file from the template provided and provide the required parameters and desired data
 - *\$ cp template_config.py my_config.py*
-- NOTE: ethraid uses AU for all distances and M_Jup for all masses. Access helpful conversion factors using, e.g., 
+- NOTE: ethraid uses AU for all distances and M_Jup for all masses. Access helpful conversion factors using, e.g.
 
     ```
     from ethraid import Ms2Mj, pc_in_au
     ```
-    in your config file.
+    which respectively convert solar masses to Jupiter masses and parsecs to AU, in your config file.
 
 ## Example CLI usage
 ### Run orbit fits, plot results, and print 95\% confidence intervals all at once
