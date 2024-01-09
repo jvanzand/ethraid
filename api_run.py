@@ -289,8 +289,8 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_191939.py'
-    read_file_path = 'results/191939/191939_raw.h5'
+    config_path = 'ethraid/local_configs/appendix_synthetic.py'
+    read_file_path = None#'results/synthetic/synthetic_RV.h5'
     
     
     plot=True

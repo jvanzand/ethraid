@@ -123,8 +123,6 @@ def tot_list(double [:] rv_post_list, double [:] astro_post_list,
     cdef int i
     cdef double prob
     cdef double [:] tot_list = np.zeros(shape=(num_points), dtype=np.float64)
-    
-    #tot_list = np.zeros(grid_num)
 
     for i in range(num_points):
 

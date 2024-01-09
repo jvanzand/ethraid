@@ -76,6 +76,9 @@ def joint_plot(star_name, m_star, d_star,
     colors = ['Greens', 'Blues', 'gray']
     alphas = [0.5, 0.5, 0.4]
     zorders = [20, 10, 0]
+
+    # data_types=['astro']
+    # colors = ['Blues']
     
     for i in range(len(data_types)):
         dt = data_types[i]
@@ -103,11 +106,12 @@ def joint_plot(star_name, m_star, d_star,
                              cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
             
         
-    post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
-    t_contours_tot = hlp.contour_levels(post_tot, [1,2])
-    post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
-       cmap='Reds', extend='max', alpha=0.75, zorder=30)
+    # post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
+    # t_contours_tot = hlp.contour_levels(post_tot, [1,2])
+    # post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
+    #    cmap='Reds', extend='max', alpha=0.75, zorder=30)
     ################################
+    
     
     
     # ########
@@ -150,21 +154,22 @@ def joint_plot(star_name, m_star, d_star,
 
 
     ax.set_xlabel('Semi-major axis (au)', size=label_size)
-    ax.set_ylabel(r'$M_c$ ($M_{Jup}$)', size=label_size)
+    ax.set_ylabel(r'$m_c$ ($M_{Jup}$)', size=label_size)
 
     ###################################################
     ############ Axis ticks and labels ################
-    tick_num = 6
+    tick_num = 10
     tick_size = 40
     # List of round numbers to use as labels for both a and m
     min_exp = -4
     max_exp = 13
     n = max_exp-min_exp+1
-    tick_labels = np.logspace(min_exp, max_exp, n, base=4)
+    tick_pre_labels_a = np.logspace(min_exp, max_exp, n, base=2)
+    tick_pre_labels_m = np.logspace(min_exp, max_exp, n, base=4)
 
     # Chop out any labels outside the a or m bounds
-    raw_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
-    raw_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])][:tick_num]
+    raw_labels_a = tick_pre_labels_a[(a_lim[0] < tick_pre_labels_a) & (tick_pre_labels_a < a_lim[1])][:tick_num]
+    raw_labels_m = tick_pre_labels_m[(m_lim[0] < tick_pre_labels_m) & (tick_pre_labels_m < m_lim[1])][:tick_num]
 
 
     # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
@@ -195,6 +200,72 @@ def joint_plot(star_name, m_star, d_star,
     # plt.xticks(tick_positions_a, tick_labels_sep, size=tick_size*0.75)
     # plt.xlabel('Angular separation (arcsec)', size=label_size*0.75)
     
+    ## TEMPORARY: Making appendix plots for ethraid
+    ################
+    # ## Trend line
+    # x0 = 8**0.5
+    # y0 = 2
+    #
+    # x = np.linspace(3, 60, 10)
+    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
+    #
+    # trend_y = y0 * (x/x0)**2
+    # pl_trend_y = hlp.value2index(trend_y, (0, grid_num_ext-1), m_lim_plot)
+    #
+    # plt.plot(pl_x, pl_trend_y, zorder=100, c='royalblue', linewidth=4, label=r'$m_{c} \propto a^{2}$')
+    #
+    # ## Curv line
+    # x0 = 1*8**0.5
+    # y0 = 4
+    #
+    # x = np.linspace(2.5, 12, 10)
+    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
+    #
+    # curv_y = y0 * (x/x0)**(7/2)
+    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
+    #
+    # plt.plot(pl_x, pl_curv_y, zorder=100, c='firebrick', linewidth=4, label=r'$m_{c} \propto a^{7/2}$')
+
+    # ## High-mass curv
+    # x0 = x[-1]
+    # y0 = curv_y[-1]
+    #
+    # x = np.linspace(x0, 60, 10)
+    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
+    #
+    # curv_y = y0 * (x/x0)**(7/3)
+    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
+    #
+    # plt.plot(pl_x, pl_curv_y, zorder=100, c='firebrick', linewidth=4, \
+    #                           label=r'$m_{c} \propto a^{7/3}$', linestyle='dashed')
+    
+    # ## Astro short-period
+    # x0 = 0.5
+    # y0 = 24
+    #
+    # x = np.linspace(0.5, 4, 10)
+    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
+    #
+    # curv_y = y0 * (x/x0)**(-1)
+    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
+    #
+    # plt.plot(pl_x, pl_curv_y, zorder=100, c='orangered', linewidth=4, label=r'$m_{c} \propto a^{-1}$')
+    #
+    # ## Astro long-period
+    # x0 = 16
+    # y0 = 4
+    #
+    # x = np.linspace(20, 190, 10)
+    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
+    #
+    # curv_y = y0 * (x/x0)**(2)
+    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
+    #
+    # plt.plot(pl_x, pl_curv_y, zorder=100, c='lawngreen', linewidth=4, label=r'$m_{c} \propto a^{2}$')
+    
+    # plt.legend(fontsize=28, loc='lower left', bbox_to_anchor=(0.6, 0.1))
+    ################
+    
     ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:
 
@@ -204,12 +275,12 @@ def joint_plot(star_name, m_star, d_star,
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
-    if period_lines:
+    if True:#period_lines:
         ## Plot harmonics of total baseline
         const_per_a_inds_list, const_per_m_inds_list, fmt =\
                                 hlp_plot.period_lines(m_star, a_lim, m_lim, 
                                                       a_lim_plot, m_lim_plot, 
-                                                      grid_num_ext, 3, how='tot')
+                                                      grid_num_ext, 0, how='tot')
         num_lines = len(const_per_a_inds_list)
         for i in range(num_lines):
             plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5)
@@ -219,9 +290,10 @@ def joint_plot(star_name, m_star, d_star,
         const_per_a_inds_list, const_per_m_inds_list, fmt =\
                                 hlp_plot.period_lines(m_star, a_lim, m_lim,
                                                       a_lim_plot, m_lim_plot,
-                                                      grid_num_ext, 3, how='gaia')
+                                                      grid_num_ext, 5, how='gaia')
+        num_lines = len(const_per_a_inds_list)
         for i in range(num_lines):
-            plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5)
+            plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5, linewidth=3)
             
     
     fig.tight_layout()
