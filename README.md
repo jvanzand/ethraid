@@ -31,9 +31,9 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 #### Run orbit fits using parameters in configuration file
 - *\$ ethraid run -cf path/to/my_config.py*
 #### Load and plot saved results
-- *\$ ethraid plot -cf path/to/my_config.py -rfp results/\{star_name\}/\{star_name\}_raw.h5 -gn 75 -t 1d 2d*
+- *\$ ethraid plot -cf path/to/my_config.py -rfp results/\{star_name\}/\{star_name\}_raw.h5 -t 1d 2d*
 #### Print 95\% mass and semi-major axis confidence intervals based on derived posterior
-- *\$ ethraid lims -rfp results/\{star_name\}/\{star_name\}_raw.h5 -gn 100*
+- *\$ ethraid lims -rfp results/\{star_name\}/\{star_name\}_raw.h5*
 
 ### Another alternative: use the api_run.py module to interface easily with the API
 
