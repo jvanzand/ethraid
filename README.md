@@ -88,7 +88,7 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 ### Why does the astrometry posterior overlap with the RVs? It's not helping to rule out any models!
 - Check the range of orbital separations you're probing. Beyond ~25 years (~8.5 AU for a Sun-like star), the RV and astrometry posteriors have the same m-a relation, and thus give the same information.
 
-### How do I check the &Delta;&mu; &Delta; &mu; value of my desired target?
+### How do I check the &Delta;&mu; value of my desired target in the *Hipparcos-Gaia* Catalog of Accelerations?
 
     ```
     from ethraid.compiled import helper_functions_astro as help_astro
