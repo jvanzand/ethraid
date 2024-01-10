@@ -12,6 +12,17 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 - *\$ pip install ethraid*
 - If the installation fails, try upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
+## Download repo from Github
+### Install dependencies using requirements.txt 
+- *\$ pip install -r requirements.txt*
+
+### Build code from top level of repo
+- *\$ cd trends/*
+- *\$ python setup.py build_ext --inplace*
+
+### Use api_run.py as a reference
+- *\$ python api_run.py*
+
 ## Create a configuration file from the template provided and provide the required parameters and desired data
 - *\$ cp template_config.py my_config.py*
 - NOTE: ethraid uses AU for all distances and M_Jup for all masses. Access helpful conversion factors using e.g.
@@ -65,13 +76,21 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 - 1D CDFs
     ![1d_cdf](ethraid/example/191939/191939_cdf_1d.png)
 
-## Download repo from Github
-### Install dependencies using requirements.txt 
-- *\$ pip install -r requirements.txt*
 
-### Build code from top level of repo
-- *\$ cd trends/*
-- *\$ python setup.py build_ext --inplace*
+## Troubleshooting
 
-### Use api_run.py as a reference
-- *\$ python api_run.py*
+### Why are my posteriors splotchy?
+- Try decreasing the *\ grid_num /* argument. This will lower the resolution of the grid and help smooth over stochastic variation.
+
+### Why does my RV/astrometry posterior extend down to the low-mass/high-separation regime? It's not helping to rule out any models!
+- The measured data may be consistent with 0, meaning that companions producing negligible signals are permissible.
+
+### Why does the astrometry posterior overlap with the RVs? It's not helping to rule out any models!
+- Check the range of orbital separations you're probing. Beyond ~25 years (~8.5 AU for a Sun-like star), the RV and astrometry posteriors have the same m-a relation, and thus give the same information.
+
+### How do I check the \Delta \mu value of my desired target?
+    ```
+    from ethraid.compiled import helper_functions_astro as help_astro
+    
+    help_astro.HGCA_retrieval(hip_id="99175")
+    ```
