@@ -103,3 +103,5 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
     ```
     (0.12684636376342961, 0.03385628059095324)
     ```
+    
+    This target has &Delta;&mu; = 0.127 +/- 0.034 mas/yr, a 3.7 &sigma; measurement.
