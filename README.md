@@ -90,14 +90,16 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 
 ### How do I check the &Delta;&mu; value of my desired target in the *Hipparcos-Gaia* Catalog of Accelerations?
 
-```
-from ethraid.compiled import helper_functions_astro as help_astro
+- Use the built-in API function:
+
+    ```
+    from ethraid.compiled import helper_functions_astro as help_astro
     
-help_astro.HGCA_retrieval(hip_id="99175")
-```
+    help_astro.HGCA_retrieval(hip_id="99175")
+    ```
 
-Output:
+    Output:
 
-```
-(0.12684636376342961, 0.03385628059095324)
-```
+    ```
+    (0.12684636376342961, 0.03385628059095324)
+    ```
