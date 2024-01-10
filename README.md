@@ -80,15 +80,15 @@ Please refer to Van Zandt \& Petigura (2023, in prep.) for details on ethraid's 
 ## Troubleshooting
 
 ### Why are my posteriors splotchy?
-- Try decreasing the *\ grid_num /* argument. This will lower the resolution of the grid and help smooth over stochastic variation.
+- Try decreasing the *grid_num* argument. This will lower the resolution of the grid and help smooth over stochastic variation.
 
 ### Why does my RV/astrometry posterior extend down to the low-mass/high-separation regime? It's not helping to rule out any models!
-- The measured data may be consistent with 0, meaning that companions producing negligible signals are permissible.
+- Check your input data values. They may be consistent with 0, meaning that companions producing negligible signals are permissible.
 
 ### Why does the astrometry posterior overlap with the RVs? It's not helping to rule out any models!
 - Check the range of orbital separations you're probing. Beyond ~25 years (~8.5 AU for a Sun-like star), the RV and astrometry posteriors have the same m-a relation, and thus give the same information.
 
-### How do I check the \Delta \mu value of my desired target?
+### How do I check the &Delta&mu &U+0394&U+03BC value of my desired target?
     ```
     from ethraid.compiled import helper_functions_astro as help_astro
     
