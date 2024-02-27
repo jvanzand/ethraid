@@ -30,7 +30,7 @@ def run(config_path, read_file_path=None,
         plot=None, verbose=False):
     
     """
-    Example API function to run orbit modelling and
+    Example API function to run orbit modeling and
     save and plot results.
         
     Arguments:
