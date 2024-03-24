@@ -73,12 +73,10 @@ Please cite the Van Zandt \& Petigura (2024, Accepted) and the following DOI if 
     <img src="ethraid/example/191939/191939_2d.png" width="450" height="450">
 
 - 1D PDFs  
-    ![1d_pdf](ethraid/example/191939/191939_pdf_1d.png width="50" height="50")
-    <img src="ethraid/example/191939/191939_pdf_1d.png" width="400" height="400">
+    <img src="ethraid/example/191939/191939_pdf_1d.png" width="600" height="400">
 
 - 1D CDFs  
-    ![1d_cdf](ethraid/example/191939/191939_cdf_1d.png width='75' height='75')
-    <img src="ethraid/example/191939/191939_cdf_1d.png" width="350" height="350">
+    <img src="ethraid/example/191939/191939_cdf_1d.png" width="550" height="350">
 
 
 ## Troubleshooting
