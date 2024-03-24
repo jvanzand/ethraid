@@ -69,14 +69,14 @@ Please cite the Van Zandt \& Petigura (2024, Accepted) and the following DOI if 
 ## Results
 #### Running ethraid from scratch will generate a directory called *results/\{star_name\}/* containing the raw (large, reshapeable) posterior arrays and/or their processed (small, non-reshapeable) counterparts. After plotting, the directory will contain up to three plots: a joint 2D posterior in mass-separation space, as well as the marginalized 1D PDFs and CDFs. Samples of these plots are below.
 
-- 2D joint posterior
+- 2D joint posterior  
     <img src="ethraid/example/191939/191939_2d.png" width="450" height="450">
 
-- 1D PDFs
+- 1D PDFs  
     ![1d_pdf](ethraid/example/191939/191939_pdf_1d.png width="50" height="50")
     <img src="ethraid/example/191939/191939_pdf_1d.png" width="400" height="400">
 
-- 1D CDFs
+- 1D CDFs  
     ![1d_cdf](ethraid/example/191939/191939_cdf_1d.png width='75' height='75')
     <img src="ethraid/example/191939/191939_cdf_1d.png" width="350" height="350">
 
