@@ -2,8 +2,21 @@
 
 Characterize long-period companions with partial orbits.
 
-Please cite the Van Zandt \& Petigura (2024, in review) and the following DOI if you make use of this software in your research.
-[![DOI](https://zenodo.org/badge/355760029.svg)](https://zenodo.org/doi/10.5281/zenodo.10841606)
+Please cite Van Zandt \& Petigura (2024, Accepted) and the code if you make use of ```ethraid``` in your research.
+
+Code citation:
+    ```
+    @misc{ethraidDOI,
+    author       = {ethraid},
+    title        = {{ethraid v2.4.3: Characterize long-period companions with partial orbits.}},
+    month        = Mar,
+    year         = 2024,
+    doi          = {10.5281/zenodo.10841630},
+    version      = {2.4.3},
+    publisher    = {Zenodo},
+    url          = {https://doi.org/10.5281/zenodo.10841630}
+    } 
+    ```
 
 ## Environment
 ### Create new environment with python 3.7
