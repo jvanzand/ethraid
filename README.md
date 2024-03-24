@@ -4,7 +4,7 @@ Characterize long-period companions with partial orbits.
 
 Please cite Van Zandt \& Petigura (2024, Accepted) and the code if you make use of ```ethraid``` in your research.
 
-Code citation:
+Code citation: :
     ```
     @misc{ethraidDOI,
     author       = {ethraid},
