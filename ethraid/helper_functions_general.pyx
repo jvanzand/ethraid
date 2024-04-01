@@ -69,6 +69,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     m_min = m_lim[0]
     m_max = m_lim[1]
 
+    np.random.seed(101)
     # These are the "full" semi-major axes of the orbit, ie the sma of the ellipse traced by the 1-body solution to the 2-body problem. a = a_planet+a_star
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)

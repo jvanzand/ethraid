@@ -106,10 +106,10 @@ def joint_plot(star_name, m_star, d_star,
                              cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
             
         
-    # post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
-    # t_contours_tot = hlp.contour_levels(post_tot, [1,2])
-    # post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
-    #    cmap='Reds', extend='max', alpha=0.75, zorder=30)
+    post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
+    t_contours_tot = hlp.contour_levels(post_tot, [1,2])
+    post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
+       cmap='Reds', extend='max', alpha=0.75, zorder=30)
     ################################
     
     

@@ -114,12 +114,10 @@ def log_lik_gamma(double a, double m, double e, double i, double om, double M_an
 
     gdot_model, gddot_model = gamma(a, m, e, i, om, E, per, m_star)
 
-    # Log of the prefactor minus the log of the exponential
-    log_likelihood_gdot  = log(1/(sqrt(two_pi)*gdot_err))\
-                         - (gdot-gdot_model)**2/(2*gdot_err**2)
+    # Log of the exponential. Omit prefactor because it has no effect on shape of likelihood surface.
+    log_likelihood_gdot = -(gdot-gdot_model)**2/(2*gdot_err**2)
                          
-    log_likelihood_gddot = log(1/(sqrt(two_pi)*gddot_err))\
-                         - (gddot-gddot_model)**2/(2*gddot_err**2)
+    log_likelihood_gddot = -(gddot-gddot_model)**2/(2*gddot_err**2)
                  
     log_likelihood_total = log_likelihood_gdot + log_likelihood_gddot
 

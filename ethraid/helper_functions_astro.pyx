@@ -114,7 +114,8 @@ def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom
     
     dmu_model = dmu(a, m, e, i, om, M_anom_0, per, m_star, d_star)
     
-    log_likelihood = log(1/(sqrt(two_pi)*dmu_data_err)) - (dmu_data - dmu_model)**2/(2*dmu_data_err**2)
+    # Log of the exponential. Omit prefactor because it has no effect on shape of likelihood surface.
+    log_likelihood = -(dmu_data - dmu_model)**2/(2*dmu_data_err**2)
     
     return log_likelihood
 

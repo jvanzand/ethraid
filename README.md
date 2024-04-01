@@ -2,7 +2,7 @@
 
 Characterize long-period companions with partial orbits.
 
-Please cite the Van Zandt \& Petigura (2024, Accepted) and the following DOI if you make use of this software in your research.
+Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you make use of this software in your research.
 [![DOI](https://zenodo.org/badge/355760029.svg)](https://zenodo.org/doi/10.5281/zenodo.10841606)
 
 ## Environment
