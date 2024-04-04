@@ -25,7 +25,7 @@ M_earth = 5.972167867791379e+27
 def run(args):
         
     """
-    Primary function to run code.
+    Primary function to run orbit fitting code.
         
     Arguments:
         args: Command line arguments, especially config,
@@ -123,7 +123,7 @@ def run(args):
         print('Min sampling m is: ', min_m)
         print('Min sampling a is: ', min_a)
         
-    ## Time array calculations
+    ## Time the array calculations
     start_time = time.time()
     ##
 
@@ -154,7 +154,7 @@ def run(args):
     
     # If run_rv is False, populate arrays with 1s
     else:
-        rv_list = np.ones(num_points)
+        rv_list = np.zeros(num_points)
         post_rv = np.ones((grid_num, grid_num))
     
     #######################################################################################
@@ -177,7 +177,7 @@ def run(args):
         post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
     
     else:
-        astro_list = np.ones(num_points)
+        astro_list = np.zeros(num_points)
         post_astro = np.ones((grid_num, grid_num))
     
     #######################################################################################
@@ -200,7 +200,7 @@ def run(args):
             post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
     
         elif imag_calc == 'approx':
-            imag_list = np.ones(num_points) # Dummy list to pass to tot_list() function
+            imag_list = np.zeros(num_points) # Dummy list to pass to tot_list() function
             post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                             contrast_str, a_lim, m_lim, grid_num)
         
@@ -208,7 +208,7 @@ def run(args):
             raise Exception("driver.run: 'imag_calc' must be either 'exact' or 'approx'")
     
     else:
-        imag_list = np.ones(num_points)
+        imag_list = np.zeros(num_points)
         post_imag = np.ones((grid_num, grid_num))
         vmag=None
         imag_wavelength=None
@@ -308,6 +308,7 @@ def lims(args):
     Arguments:
         args: Command line arguments, including:
 
+        config_path (str): Path to configuration file
         read_file_path (str): Path to saved outputs.
         grid_num (int): Shape of square posterior arrays.
 

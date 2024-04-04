@@ -56,7 +56,7 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
 #### Load and plot saved results
 - *\$ ethraid plot -cf path/to/my_config.py -rfp results/\{star_name\}/\{star_name\}_raw.h5 -t 1d 2d*
 #### Print 95\% mass and semi-major axis confidence intervals based on derived posterior
-- *\$ ethraid lims -rfp results/\{star_name\}/\{star_name\}_raw.h5*
+- *\$ ethraid lims -cf path/to/my_config.py -rfp results/\{star_name\}/\{star_name\}_raw.h5*
 
 ### Another alternative: use the api_run.py module to interface easily with the API
 

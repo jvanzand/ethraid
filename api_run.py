@@ -138,9 +138,7 @@ def run(config_path, read_file_path=None,
         
             # If delta_mu is not provided directly, use provided name
             if any([val is None for val in [delta_mu, delta_mu_err]]):
-                astro_data = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
-        
-                delta_mu, delta_mu_err = astro_data
+                delta_mu, delta_mu_err = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
                 
             # astro_list is a 1D array of log-likelihoods for the astrometry data
             # post_astro is the result of exponentiating astro_list and reshaping it into a 2D array
