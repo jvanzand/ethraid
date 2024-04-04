@@ -188,83 +188,6 @@ def joint_plot(star_name, m_star, d_star,
     plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
     plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)
     
-    ## Removed angular separation axis. Orbits are not face-on/circular in general, so 'a' does not correspond uniquely to angular separation.
-    ########
-    ######## Done with x and y axes. Now to add the top x axis, which is separation in arcseconds ########
-    # raw_labels_sep = hlp_plot.tick_function_a(tick_labels_a, d_star)
-    # tick_labels_sep = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_sep))
-    #
-    # ax2 = ax.twiny()
-    # plt.sca(ax2)
-    # plt.xlim(0, grid_num+grid_pad-1)
-    # plt.xticks(tick_positions_a, tick_labels_sep, size=tick_size*0.75)
-    # plt.xlabel('Angular separation (arcsec)', size=label_size*0.75)
-    
-    ## TEMPORARY: Making appendix plots for ethraid
-    ################
-    # ## Trend line
-    # x0 = 8**0.5
-    # y0 = 2
-    #
-    # x = np.linspace(3, 60, 10)
-    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
-    #
-    # trend_y = y0 * (x/x0)**2
-    # pl_trend_y = hlp.value2index(trend_y, (0, grid_num_ext-1), m_lim_plot)
-    #
-    # plt.plot(pl_x, pl_trend_y, zorder=100, c='royalblue', linewidth=4, label=r'$m_{c} \propto a^{2}$')
-    #
-    # ## Curv line
-    # x0 = 1*8**0.5
-    # y0 = 4
-    #
-    # x = np.linspace(2.5, 12, 10)
-    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
-    #
-    # curv_y = y0 * (x/x0)**(7/2)
-    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
-    #
-    # plt.plot(pl_x, pl_curv_y, zorder=100, c='firebrick', linewidth=4, label=r'$m_{c} \propto a^{7/2}$')
-
-    # ## High-mass curv
-    # x0 = x[-1]
-    # y0 = curv_y[-1]
-    #
-    # x = np.linspace(x0, 60, 10)
-    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
-    #
-    # curv_y = y0 * (x/x0)**(7/3)
-    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
-    #
-    # plt.plot(pl_x, pl_curv_y, zorder=100, c='firebrick', linewidth=4, \
-    #                           label=r'$m_{c} \propto a^{7/3}$', linestyle='dashed')
-    
-    # ## Astro short-period
-    # x0 = 0.5
-    # y0 = 24
-    #
-    # x = np.linspace(0.5, 4, 10)
-    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
-    #
-    # curv_y = y0 * (x/x0)**(-1)
-    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
-    #
-    # plt.plot(pl_x, pl_curv_y, zorder=100, c='orangered', linewidth=4, label=r'$m_{c} \propto a^{-1}$')
-    #
-    # ## Astro long-period
-    # x0 = 16
-    # y0 = 4
-    #
-    # x = np.linspace(20, 190, 10)
-    # pl_x = hlp.value2index(x, (0, grid_num_ext-1), a_lim_plot)
-    #
-    # curv_y = y0 * (x/x0)**(2)
-    # pl_curv_y = hlp.value2index(curv_y, (0, grid_num_ext-1), m_lim_plot)
-    #
-    # plt.plot(pl_x, pl_curv_y, zorder=100, c='lawngreen', linewidth=4, label=r'$m_{c} \propto a^{2}$')
-    
-    # plt.legend(fontsize=28, loc='lower left', bbox_to_anchor=(0.6, 0.1))
-    ################
     
     ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:
@@ -275,7 +198,7 @@ def joint_plot(star_name, m_star, d_star,
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
-    if True:#period_lines:
+    if period_lines:
         ## Plot harmonics of total baseline
         const_per_a_inds_list, const_per_m_inds_list, fmt =\
                                 hlp_plot.period_lines(m_star, a_lim, m_lim, 
@@ -354,7 +277,6 @@ def plot_1d(star_name, post_tot, a_lim, m_lim, outdir=''):
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
     bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
-
 
     hlp_plot.marginalized_1d(star_name, post_tot, twosig_inds, 
                              a_lim, m_lim, tick_labels_a, tick_labels_m, 

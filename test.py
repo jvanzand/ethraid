@@ -16,6 +16,9 @@ def api_tester(calc=True, load=True, verbose=False):
     calc=False and load=True, the necessary files
     will not yet exist to load.
     """
+    calc_error_count = None
+    load_error_count = None
+    
     if calc:
         # Tests of full calculations
         # Two separate config files testing different options
@@ -184,19 +187,21 @@ def cli_tester(calc=True, load=True, all_=True):
 
 if __name__=="__main__":
     
-    api_errs = (None, None)
-    cli_errs = (None, None)
+    api_errs = api_tester(calc=True, load=True)
+    cli_errs = cli_tester(calc=True, load=True, all_=True)
     
-    api_errs = api_tester()
-    cli_errs = cli_tester()
-    
-    if api_errs==0 and cli_errs==0:
-        print("Tests for API and CLI ran with no errors")
-    else:
-        print("Some errors detected")
-        print("API: {} errors calculating arrays and {} errors loading them.".format(api_errs[0], api_errs[1]))
-        print("CLI: {} errors calculating arrays, {} errors loading them, and {} errors running 'all' function."\
-                    .format(cli_errs[0], cli_errs[1], cli_errs[2]))
+    print("\n")
+    print("Test complete:")
+    type_list = ["API array calculation", "API array loading", 
+                 "CLI array calculation", "CLI array loading", "CLI 'all' function"]
+    for i, err_count in enumerate([*api_errs, *cli_errs]):
+        use_type = type_list[i]
+        if err_count==None:
+            print("    Did not perform "+use_type)
+        elif err_count==0:
+            print("    0 errors encountered running "+use_type)
+        elif err_count>0:
+            print("    {} errors encountered running ".format(err_count)+use_type)
     
     
     

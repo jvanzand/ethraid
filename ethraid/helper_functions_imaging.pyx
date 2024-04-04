@@ -35,12 +35,13 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     """
     Calculates the likelihood of the imaging data conditioned 
     on each of a list of orbital models, resulting in a list of 
-    likelihoods. All input lists must have the same length, and 
-    the output lik_list has that length as well.
+    likelihoods. All input lists must have the same length, which 
+    is also the length of the output, log_lik_list.
     
-    NOTE that unlike for RVs and astrometry, each likelihood is either
-    1 or 0, approximating that with respect to the imaging data, a given
-    model has a 100% or 0% chance of being detected.
+    NOTE that unlike for RVs and astrometry, each log-likelihood is either
+    0 or -np.inf (likelihood = 1 or 0, respectively), approximating that 
+    with respect to the imaging data, a given model has a 100% or 0% chance 
+    of being detected.
     
     Arguments:
         a_list (list of floats, AU): Semi-major axes
@@ -60,8 +61,8 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
         contrast_str (str): Path to contrast curve file
     
     Returns:
-        lik_list (list of floats): List of likelihoods corresponding
-                                   to the input models. 
+        log_lik_list (list of floats): List of likelihoods corresponding
+                                       to the input models. 
     """
     
     cdef int num_points, j
@@ -70,9 +71,7 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     num_points = a_list.shape[0]
     cdef np.ndarray[double, ndim=1] ang_sep_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     max_dmag_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
-                                    model_dmag_list = np.ndarray(shape=(num_points,), dtype=np.float64)
-    #cdef np.ndarray[bool_c, ndim=1] lik_list = np.ndarray(shape=(num_points,), dtype=bool_c)
-                                    
+                                    model_dmag_list = np.ndarray(shape=(num_points,), dtype=np.float64)                               
     
     
     print('Running imaging models')
@@ -107,10 +106,12 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     # The "model" gives the brightness of the modeled companion
     model_dmag_list = mass_to_dmag(m_list)
     
-    lik_list = model_dmag_list > max_dmag_list # lik_list is a list of booleans. If target is too dim, False
-    lik_list = lik_list.astype(float) # Convert booleans to 1s and 0s
+    log_lik_list = model_dmag_list > max_dmag_list # lik_list is a list of booleans. If target is too dim, False
+    log_lik_list = log_lik_list.astype(float) # Convert booleans to 1s and 0s
+    log_lik_list[log_lik_list==0] = -np.inf # Convert lik to log-lik
+    log_lik_list[log_lik_list==1] = 0 # Convert lik to log-lik
     
-    return lik_list
+    return log_lik_list
 
 
 def ang_sep(double a, double m, double e, double i, double om, double M_anom_0, 

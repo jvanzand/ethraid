@@ -25,10 +25,10 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
                double [:] per_list, 
                double m_star, double d_star, double delta_mu, double delta_mu_err):
     """
-    Calculates the likelihood of the astrometry data conditioned 
+    Calculates the log-likelihood of the astrometry data conditioned 
     on each of a list of orbital models, resulting in a list of 
-    likelihoods. All input lists must have the same length, and 
-    the output lik_list has that length as well.
+    log-likelihoods. All input lists must have the same length, 
+    which is also the length of the output, log_lik_list.
     
     Arguments:
         a_list (list of floats, AU): Semi-major axes
@@ -49,15 +49,15 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
         delta_mu_err (float, mas/yr): Error on delta_mu
     
     Returns:
-        lik_list (list of floats): List of likelihoods corresponding
-                                   to the input models. 
+        log_lik_list (list of floats): List of log_likelihoods corresponding
+                                       to the input models. 
     """
       
     cdef int num_points, j
     cdef double a, m, e, i, om, M_anom_0, per, log_lik
     num_points = a_list.shape[0]     
         
-    cdef np.ndarray[double, ndim=1] lik_list = np.ndarray(shape=(num_points,), dtype=np.float64)
+    cdef np.ndarray[double, ndim=1] log_lik_list = np.ndarray(shape=(num_points,), dtype=np.float64)
     
     if delta_mu < 0:
        raise Exception("delta_mu cannot be negative")
@@ -77,9 +77,9 @@ def astro_list(double [:] a_list, double [:] m_list, double [:] e_list,
                               per, m_star, d_star,
                               delta_mu, delta_mu_err)
 
-        lik_list[j] = math_e**log_lik
+        log_lik_list[j] = log_lik
     
-    return lik_list
+    return log_lik_list
 
 
 def log_lik_dmu(double a, double m, double e, double i, double om, double M_anom_0, 

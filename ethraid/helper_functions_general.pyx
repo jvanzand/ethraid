@@ -104,13 +104,13 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
 def tot_list(double [:] rv_post_list, double [:] astro_post_list, 
              double [:] imag_post_list, int num_points):
     """
-    Start with 3 1D lists and multiply them element-wise.
+    Start with 3 1D lists and add them element-wise.
     
     Arguments:
         rv_post_list, astro_post_list, 
         imag_post_list (1D numpy arrays, len=num_points):
-            Lists of likelihoods of the rv/astrometry/imaging data
-            conditioned on a given model. Then ith likelihood in each
+            Lists of log-likelihoods of the rv/astrometry/imaging data
+            conditioned on a given model. Then ith log-likelihood in each
             list corresponds to the same model.
         num_points (int): Length of above lists. Also equal to the
                           total number of models run.
@@ -118,8 +118,8 @@ def tot_list(double [:] rv_post_list, double [:] astro_post_list,
     Returns:
         tot_list (1D numpy array, len=num_points):
             The likelihoods of all data sets, conditioned on a given
-            model. The ith element is the product of the ith elements
-            of the three above lists.
+            model. The ith element is the exponentiation of the sum 
+            of the ith elements of the three above lists.
     """
     cdef int i
     cdef double prob
@@ -127,62 +127,13 @@ def tot_list(double [:] rv_post_list, double [:] astro_post_list,
 
     for i in range(num_points):
 
-       prob = rv_post_list[i]*astro_post_list[i]*imag_post_list[i]
+       log_prob = rv_post_list[i]+astro_post_list[i]+imag_post_list[i]
 
-       tot_list[i] += prob
+       tot_list[i] += log_prob
     
     return tot_list
 
 
-#def post_tot(double [:] rv_post_list, double [:] astro_post_list, 
-#            double [:] imag_post_list, int grid_num,
-#            long [:] a_inds, long [:] m_inds):
-#
-#   """
-#   Start with 3 1D lists and multiply them element-wise, THEN form 
-#   the result into a 2D array. This function is for the total posterior;
-#   the individual RV, astrometry, and imaging posteriors are handled by the 
-#   post_single() function below.
-#
-#   Arguments:
-#       rv_post_list (np array of floats, len=num_points): List of model likelihoods
-#                    given the RV data
-#       rv_post_list (np array of floats, len=num_points): List of model likelihoods
-#                   given the astrometry data
-#       grid_num (int): Dimension of square (a,m) grid
-#       a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
-#                                       (a, m, per, e, i, om, M_anom_0) model will 
-#                                       be placed, based on the model's 
-#                                       a and m values
-#                            
-#   Returns:
-#       tot_prob_array (numpy array, dim = grid_num x grid_dum): 2-D array of binned
-#                      (aka marginalized) posterior probabilities. Note, the binning
-#                      process itself is what applies my priors, converting the
-#                      individual likelihoods into posterior probabilities.
-#   """
-#
-#   cdef int num_points, i, a_i, m_i
-#   cdef double prob
-#   
-#   # Not cdef because then I can't change it from memview to np array
-#   tot_prob_array = np.zeros((grid_num, grid_num))
-#
-#   num_points = rv_post_list.size
-#
-#   for i in range(num_points):
-#       # a_inds/m_inds generated from np.digitize, which 1-indexes. -1 to 0-index.
-#       a_i = a_inds[i]-1
-#       m_i = m_inds[i]-1
-#
-#       prob = rv_post_list[i]*astro_post_list[i]*imag_post_list[i]
-#
-#       tot_prob_array[m_i, a_i] += prob
-#
-#
-#   tot_prob_array = np.array(tot_prob_array)
-#
-#   return tot_prob_array/tot_prob_array.sum()
 
 def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
                          long [:] a_inds, long [:] m_inds, int grid_num):
@@ -194,8 +145,8 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
     post_single() function below.
     
     Arguments:
-        tot_list (np array of floats, len=num_points): List of RV/astro data likelihoods
-        post_imag (2D np array of floats, dim=num_points x num_points): Array of imaging data likelihoods
+        tot_list (np array of floats, len=num_points): List of RV/astro data log-likelihoods
+        post_imag (2D np array of floats, dim=num_points x num_points): Array of imaging data log-likelihoods
         a_inds, m_inds (numpy arrays of ints, len = num_points): Grid position where each 
                                         (a, m, per, e, i, om, M_anom_0) model will 
                                         be placed, based on the model's 
@@ -205,23 +156,12 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
     Returns:
         tot_prob_array (numpy array, dim = grid_num x grid_dum): 2-D array of binned
                        (aka marginalized) posterior probabilities. Note, the binning
-                       process itself is what applies my priors, converting the
+                       process itself is what applies the priors, converting the
                        individual likelihoods into posterior probabilities.
     """
 
     cdef int i, a_i, m_i
     cdef double [:,:] rv_ast_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
-
-    #size = rv_post_list.size
-    #
-    #for i in range(size):
-    #    # a_inds/m_inds generated from np.digitize, which 1-indexes. -1 to 0-index.
-    #    a_i = a_inds[i]-1
-    #    m_i = m_inds[i]-1
-    #
-    #    prob = rv_post_list[i]*astro_post_list[i]
-    #
-    #    rv_ast_array[m_i, a_i] += prob
     
     rv_ast_array = post_single(tot_list, a_inds, m_inds, grid_num)
     
@@ -234,19 +174,16 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
         for j in range(grid_num):
             tot_prob_array[i,j] += rv_ast_array[i,j]*post_imag[i,j]
     
-    
-    tot_prob_array = np.array(tot_prob_array)
-    
 
-    return tot_prob_array/tot_prob_array.sum()
+    return np.array(tot_prob_array)/np.array(tot_prob_array).sum()
 
 
-def post_single(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid_num):
+def post_single(double [:] log_lik_list, long [:] a_inds, long [:] m_inds, int grid_num):
     """
-    Form a list of probabilities into a 2D array.
+    Form a list of log-likelihoods into a 2D array of (non-log) posterior probabilities.
     
     Arguments:
-        prob_list (list/array): List of probabilities to be be reshaped
+        log_lik_list (list/array): List of log-likelihoods to be be reshaped
         a_inds, m_inds (numpy arrays of ints): Coordinates where each probability
                                                will be placed. Probabilities with
                                                matching coordinates are summed 
@@ -256,23 +193,22 @@ def post_single(double [:] prob_list, long [:] a_inds, long [:] m_inds, int grid
     
     Returns:
         prob_array (np array, dim = grid_num x grid_num): Array of binned 
-                                                         probabilities
+                                                          probabilities
     """
 
     cdef int i, size, a_i, m_i
     cdef double [:,:] prob_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
 
-    size = prob_list.shape[0]
+    size = log_lik_list.shape[0]
     for i in range(size):
         # The lowest index in a_inds or m_inds is 1 because the lower limit of the sampling range (a_min or m_min) is also the smallest bin divider. So no sampled values are small enough to get an index of 0. Still, we want the bin between a_min and the next divider to be the 0th bin, so subtract 1 off of each bin value.
         a_i = a_inds[i]-1
         m_i = m_inds[i]-1
 
-        prob_array[m_i, a_i] += prob_list[i]
+        prob_array[m_i, a_i] += np.exp(log_lik_list[i])
+        
     
-    np_prob_array = np.array(prob_array)/np.array(prob_array).sum()
-    
-    return np_prob_array
+    return np.array(prob_array)/np.array(prob_array).sum()
 
 
 def P_list(double [:] a_list, double [:] m_list, double m_star):

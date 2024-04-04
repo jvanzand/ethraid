@@ -115,15 +115,16 @@ def run(config_path, read_file_path=None,
             if (gammaddot is None) or (gammaddot_err is None):
                 gammaddot, gammaddot_err = 0, 1e8
                 
-        
+            # rv_list is a 1D array of log-likelihoods for the RV data
+            # post_rv is the result of exponentiating rv_list and reshaping it into a 2D array
             rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
-                                    per_list, cm.m_star, rv_epoch,
-                                    gammadot, gammadot_err, gammaddot, gammaddot_err)
+                                     per_list, cm.m_star, rv_epoch,
+                                     gammadot, gammadot_err, gammaddot, gammaddot_err)
             post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
     
         else:
-            rv_list = np.ones(num_points)
-            post_rv = np.ones((grid_num, grid_num))
+            rv_list = np.zeros(num_points) # 1D arrays contain log-likelihoods
+            post_rv = np.ones((grid_num, grid_num)) # 2D arrays contain likelihoods (actually posteriors due to binning)
         end_rv_time = time.time()#######################################################
         #######################################################################################
         ## Astrometry
@@ -140,7 +141,9 @@ def run(config_path, read_file_path=None,
                 astro_data = hlp_astro.HGCA_retrieval(hip_id, gaia_id)
         
                 delta_mu, delta_mu_err = astro_data
-    
+                
+            # astro_list is a 1D array of log-likelihoods for the astrometry data
+            # post_astro is the result of exponentiating astro_list and reshaping it into a 2D array
             astro_list = hlp_astro.astro_list(a_list, m_list, e_list, i_list, 
                                               om_list, M_anom_0_list, per_list,
                                               m_star, d_star, delta_mu, delta_mu_err)                     
@@ -148,8 +151,8 @@ def run(config_path, read_file_path=None,
             post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
 
         else:
-            astro_list = np.ones(num_points)
-            post_astro = np.ones((grid_num, grid_num))
+            astro_list = np.zeros(num_points) # 1D arrays contain log-likelihoods
+            post_astro = np.ones((grid_num, grid_num)) # 2D arrays contain likelihoods
         end_astro_time = time.time()#######################################################
         #######################################################################################
         ## Imaging
@@ -165,14 +168,17 @@ def run(config_path, read_file_path=None,
             if imag_calc == 'exact':
                 imag_epoch = cm.imag_epoch
                 
+                # imag_list is a 1D array of log-likelihoods for the imaging data
+                # post_imag is the result of exponentiating imag_list and reshaping it into a 2D array
                 imag_list = hlp_imag.imag_list(a_list, m_list, e_list, i_list, om_list, 
                                                M_anom_0_list, per_list, m_star, 
                                                d_star, vmag, imag_wavelength, 
                                                imag_epoch, contrast_str)
+                                               
                 post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
     
             elif imag_calc == 'approx':
-                imag_list = np.ones(num_points) # Dummy list to pass to tot_list() function
+                imag_list = np.zeros(num_points) # Dummy list to pass to tot_list() function
                 post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                                 contrast_str, a_lim, m_lim, grid_num)
             
@@ -180,8 +186,8 @@ def run(config_path, read_file_path=None,
                 raise Exception("api_run.run: 'imag_calc' must be either 'exact' or 'approx'")
     
         else:
-            imag_list = np.ones(num_points)
-            post_imag = np.ones((grid_num, grid_num)) #/ np.ones((grid_num, grid_num)).sum()
+            imag_list = np.zeros(num_points) # 1D arrays contain log-likelihoods
+            post_imag = np.ones((grid_num, grid_num)) # 2D arrays contain likelihoods
             vmag=None
             imag_wavelength=None
             contrast_str=None
@@ -192,8 +198,10 @@ def run(config_path, read_file_path=None,
         ###################################################################################
         start_tot_time = time.time()#######################################################
         
+        # tot_list is a 1D array of log-likelihoods for all data
         tot_list = np.array(hlp.tot_list(rv_list, astro_list, imag_list, num_points))
         
+        # If imag=='exact', then post_tot is the result of exponentiating imag_list and reshaping it into a 2D array. Otherwise there is a special treatment for the imag_calc=="approx" case.
         if cm.run_imag and imag_calc=='exact':
             post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
         
@@ -201,7 +209,8 @@ def run(config_path, read_file_path=None,
             # Need to multiply by post_imag in approx imaging case
             post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
             
-            
+        # import pdb; pdb.set_trace()
+        # print("This is the type, and I do",)
         end_tot_time = time.time()#######################################################
         #######################################################################################
         #######################################################################################

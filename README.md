@@ -22,8 +22,18 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
 - *\$ cd trends/*
 - *\$ python setup.py build_ext --inplace*
 
-### Use api_run.py as a reference
-- *\$ python api_run.py*
+## Run a basic set of test configuration files to ensure all API and CLI functions are working correctly
+- *\$ python test.py*
+    - Desired outcome:
+        ```
+        Test complete:
+            0 errors encountered running API array calculation
+            0 errors encountered running API array loading
+    	    0 errors encountered running CLI array calculation
+            0 errors encountered running CLI array loading
+            0 errors encountered running CLI 'all' function
+        ```
+    - The output plots and bounds will be meaningless because of the small number of models sampled.
 
 ## Create a configuration file from the template provided and provide the required parameters and desired data
 - *\$ cp template_config.py my_config.py*

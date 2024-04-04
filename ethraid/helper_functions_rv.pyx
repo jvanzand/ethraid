@@ -28,10 +28,10 @@ def rv_list(double [:] a_list, double [:] m_list, double [:] e_list,
             double gdot, double gdot_err, double gddot, double gddot_err):
     
     """
-    Calculates the likelihood of the RV data (measured gdot, gddot,
+    Calculates the log-likelihood of the RV data (measured gdot, gddot,
     and their uncertainties) conditioned on each of a list of orbital 
-    models, resulting in a list of likelihoods. All input lists must 
-    have the same length, and the output lik_list has that length as well.
+    models, resulting in a list of log-likelihoods. All input lists must 
+    have the same length, which is also the length of the output, log_lik_list.
     
     Arguments:
         a_list (list of floats, AU): Semi-major axis
@@ -49,13 +49,16 @@ def rv_list(double [:] a_list, double [:] m_list, double [:] e_list,
         gddot (float, m/s/day/day): Measured quadratic curvature 
                                     term
         gddot_err (float, m/s/day/day): Error on gddot
+        
+    Returns:
+        log_lik_list (lsit of floats): Log-likelihoods of RV data
     """
     
     cdef int num_points, j
     cdef double a, m, e, i, om, M_anom_0, per, log_lik
     num_points = a_list.shape[0]
                
-    cdef np.ndarray[double, ndim=1] lik_list = np.ndarray(shape=(num_points,),
+    cdef np.ndarray[double, ndim=1] log_lik_list = np.ndarray(shape=(num_points,),
                                                             dtype=np.float64)
     if gdot_err==0 or gddot_err==0:
         raise Exception('Errors cannot be 0')
@@ -75,9 +78,9 @@ def rv_list(double [:] a_list, double [:] m_list, double [:] e_list,
                                 per, m_star, rv_epoch,
                                 gdot, gdot_err, gddot, gddot_err)
                               
-        lik_list[j] = math_e**log_lik
+        log_lik_list[j] = log_lik
         
-    return lik_list
+    return log_lik_list
 
 def log_lik_gamma(double a, double m, double e, double i, double om, double M_anom_0, 
                   double per, double m_star, double rv_epoch,
