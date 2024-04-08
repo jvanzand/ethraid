@@ -22,7 +22,7 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
 - *\$ cd trends/*
 - *\$ python setup.py build_ext --inplace*
 
-## Run 3 simple test configuration files to ensure all API and CLI functions are working correctly
+### Run 3 simple test configuration files to ensure all API and CLI functions are working correctly
 - *\$ python test.py*
     - This should only take a few minutes. Desired outcome:
         ```
@@ -33,7 +33,7 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
             0 errors encountered running CLI array loading
             0 errors encountered running CLI 'all' function
         ```
-    - This test is only meant to test basic functionality. The output plots and bounds will be meaningless because of the small number of models sampled.
+    - These are only meant to test basic functionality. The output plots and bounds will be meaningless because of the small number of models sampled.
 
 ## Create a configuration file from the template provided and provide the required parameters and desired data
 - *\$ cp template_config.py my_config.py*
@@ -42,21 +42,21 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
     ```
     from ethraid import Ms2Mj, pc_in_au
     ```
-    which respectively convert solar masses to Jupiter masses and parsecs to AU, in your config file.
+    which respectively convert solar masses to Jupiter masses and parsecs to AU in your config file.
 
 ## Example usage
-### CLI: Run orbit fits, plot results, and print 95\% confidence intervals all at once from the command line
-- *\$ ethraid all -cf path/to/my_config.py* -rfp results/\{star_name\}/\{star_name\}_processed.h5 -t 1d 2d
+### CLI: Run orbit fits, plot results, and print 95\% confidence intervals all at once from the command line. Ethraid's installation includes a configuration file, ```example/config_191939.py```, which may be used to validate its functionality.
+- *\$ ethraid all -cf path/to/ethraid/example/config_191939.py* -rfp results/191939/191939_processed.h5 -t 1d 2d
     - Note that the *-rfp* (read file path) flag requires the path to the output directory where the fit results are stored. On a first run, this path *does not exist yet,* but it will be created after the fit and before plotting.
 
 ### Alternative: run each command separately
 
 #### Run orbit fits using parameters in configuration file
-- *\$ ethraid run -cf path/to/my_config.py*
+- *\$ ethraid run -cf path/to/ethraid/example/config_191939.py*
 #### Load and plot saved results
-- *\$ ethraid plot -cf path/to/my_config.py -rfp results/\{star_name\}/\{star_name\}_raw.h5 -t 1d 2d*
+- *\$ ethraid plot -cf path/to/ethraid/example/config_191939.py -rfp results/191939/191939_processed.h5 -t 1d 2d*
 #### Print 95\% mass and semi-major axis confidence intervals based on derived posterior
-- *\$ ethraid lims -cf path/to/my_config.py -rfp results/\{star_name\}/\{star_name\}_raw.h5*
+- *\$ ethraid lims -cf path/to/ethraid/example/config_191939.py -rfp results/191939/191939_processed.h5*
 
 ### Another alternative: use the api_run.py module to interface easily with the API
 
@@ -65,8 +65,8 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
     ```
     if __name__ == "__main__":
     
-        config_path = 'path/to/my_config.py
-        read_file_path = 'results/{star_name}/{star_name}_processed.h5'
+        config_path = 'path/to/ethraid/example/config_191939.py'
+        read_file_path = 'results/191939/191939_processed.h5'
     
     
         plot=True

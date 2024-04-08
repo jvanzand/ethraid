@@ -3,7 +3,7 @@ from ethraid import _ROOT, Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e8
+num_points = 1e6
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
@@ -13,7 +13,7 @@ grid_num = 70
 min_a = 2
 max_a = 100
 # Minimum and maximum masses to sample (M_Jup)
-min_m = 1
+min_m = 0.9
 max_m = 1e3
 # Eccentricity distribution for sampled orbits
 e_dist = 'piecewise'
@@ -59,7 +59,7 @@ gaia_id = None
 
 # IMAGING PARAMS
 # Whether to use imaging data. Assign run_imag=False to omit imaging from the calculation entirely.
-run_imag = False
+run_imag = True
 # How to calculate imaging posterior. If 'exact', forward model companions as with RVs and astrometry.
 # If 'approx', then for the imaging calculations only, approximate all orbits to be face-on and circular regardless of sampled parameters, and rule out any model with a mass/angular separation combo that was detectable by imaging.
 imag_calc = 'exact'
