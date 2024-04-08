@@ -92,13 +92,14 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
 ## Troubleshooting
 
 ### Why are my posteriors splotchy?
-- Try decreasing the *grid_num* argument. This will lower the resolution of the grid and help smooth over stochastic variation.
+- Try increasing the *num_points* argument. This will increase the number of sampled orbit models with a corresponding rise in run time.
+- Try decreasing the *grid_num* argument. This will lower the resolution of the grid and help smooth over stochastic variation with no increase in run time.
 
-### Why does my RV/astrometry posterior extend down to the low-mass/high-separation regime? It's not helping to rule out any models!
-- Check your input data values. They may be consistent with 0, meaning that companions producing negligible signals are permissible.
+### Why does my RV/astrometry posterior extend down to the low-mass/high-separation regime (the bottom-right corner)? It's not helping to rule out any models!
+- Check your input data values. They may be consistent with 0, meaning that companions producing negligible signals are good fits to the data.
 
-### Why does the astrometry posterior overlap with the RVs? It's not helping to rule out any models!
-- Check the range of orbital separations you're probing. Beyond ~25 years (~8.5 AU for a Sun-like star), the RV and astrometry posteriors have the same m-a relation, and thus give the same information.
+### Why does the astrometry posterior have large overlap with the RVs? It's not helping to rule out any models!
+- Check the range of orbital separations you're probing. Beyond ~25 years (~8.5 AU for a Sun-like star), the RV and astrometry posteriors have the same m-a relation, and thus have the same information content.
 
 ### How do I check the &Delta;&mu; value of my desired target in the *Hipparcos-Gaia* Catalog of Accelerations?
 
