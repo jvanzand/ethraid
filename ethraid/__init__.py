@@ -1,7 +1,7 @@
 import os
 from astropy.time import Time
 
-__version__='2.4.3' # Remember to remove random seed
+__version__='2.4.4' # Remember to remove random seed
 
 _ROOT = os.path.abspath(os.path.dirname(__file__))
 
