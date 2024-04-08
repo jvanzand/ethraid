@@ -100,6 +100,7 @@ setup(
     version = get_property('__version__', 'ethraid'),
     description = "Characterize long-period companions using RV trends, astrometric accelerations, and direct imaging",
     long_description = long_description,
+    long_description_content_type='text/markdown',
     author = "Judah Van Zandt",
     author_email = "judahvz@astro.ucla.edu",
     url = "",
