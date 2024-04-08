@@ -45,7 +45,7 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
     which respectively convert solar masses to Jupiter masses and parsecs to AU in your config file.
 
 ## Example usage
-### CLI: Run orbit fits, plot results, and print 95\% confidence intervals all at once from the command line. Ethraid's installation includes a configuration file, ```example/config_191939.py```, which may be used to validate its functionality.
+### CLI: Run orbit fits, plot results, and print 95\% confidence intervals all at once from the command line. Ethraid's installation includes a configuration file, ```example/config_191939.py```, which may be used to validate its functionality on the system HD 191939.
 - *\$ ethraid all -cf path/to/ethraid/example/config_191939.py* -rfp results/191939/191939_processed.h5 -t 1d 2d
     - Note that the *-rfp* (read file path) flag requires the path to the output directory where the fit results are stored. On a first run, this path *does not exist yet,* but it will be created after the fit and before plotting.
 
