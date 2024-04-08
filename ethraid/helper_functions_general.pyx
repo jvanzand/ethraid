@@ -69,14 +69,13 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     m_min = m_lim[0]
     m_max = m_lim[1]
 
-    np.random.seed(101)
     # These are the "full" semi-major axes of the orbit, ie the sma of the ellipse traced by the 1-body solution to the 2-body problem. a = a_planet+a_star
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
 
     # Match up a_list and m_list and get the period for each pair (in days).
     # Calculate this now to avoid having to do it twice for RVs and astrometry.
-    per_list = P_list(a_list, m_list, m_star) # Use this line when we are sampling a_tot, not a_planet
+    per_list = P_list(a_list, m_list, m_star)
     
     # Eccentricities drawn from specified distribution.
     e_list = ecc_dist(m_list, per_list, num_points, dist=e_dist)
