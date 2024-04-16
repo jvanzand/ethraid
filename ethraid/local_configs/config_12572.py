@@ -3,7 +3,7 @@ from ethraid import _ROOT, Ms2Mj, pc_in_au
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e8
+num_points = 1e6
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than config file (default grid_num=100).
@@ -16,7 +16,7 @@ max_a = 1e2
 min_m = 1
 max_m = 1e3
 # Eccentricity distribution for sampled orbits
-e_dist = 'piecewise'
+e_dist = 'kipping'
 
 
 # STELLAR PARAMS

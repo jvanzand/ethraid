@@ -94,13 +94,13 @@ def run(config_path, read_file_path=None,
 
         start_list_time = time.time()#######################################################
         a_list, m_list, per_list, e_list, i_list,\
-        om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
-                                                                 grid_num, num_points, e_dist)
+        om_list, M_anom_0_list, a_inds, m_inds, prior = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
+                                                                         grid_num, num_points, e_dist)
         end_list_time = time.time()#######################################################
                                                                  
         if verbose:
             print('made arrays')
-            
+
         #######################################################################################
         ## RVs
         #######################################################################################
@@ -242,7 +242,7 @@ def run(config_path, read_file_path=None,
             ls.save_processed(star_name, m_star, d_star,
                               run_rv, run_astro, run_imag, 
                               post_tot, post_rv, post_astro, post_imag,
-                              a_lim, m_lim, outdir=outdir)
+                              prior, a_lim, m_lim, outdir=outdir)
 
         if 'raw' in save:
             if imag_calc=='approx':
@@ -253,7 +253,7 @@ def run(config_path, read_file_path=None,
             ls.save_raw(star_name, m_star, d_star, 
                         run_rv, run_astro, run_imag,
                         tot_list, rv_list, astro_list, imag_data,
-                        vmag, imag_wavelength, contrast_str,
+                        prior, vmag, imag_wavelength, contrast_str,
                         a_list, m_list, a_inds, m_inds, a_lim, m_lim, 
                         imag_calc=imag_calc, outdir=outdir, 
                         verbose=False)
@@ -266,7 +266,7 @@ def run(config_path, read_file_path=None,
         star_name, m_star, d_star,\
         run_rv, run_astro, run_imag,\
         post_tot, post_rv, post_astro, post_imag,\
-        a_lim, m_lim = ls.load(read_file_path, grid_num=cm.grid_num, verbose=verbose)
+        prior, a_lim, m_lim = ls.load(read_file_path, grid_num=cm.grid_num, verbose=verbose)
         
         
     if plot==True:
@@ -296,7 +296,7 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_T001710.py'
+    config_path = 'ethraid/local_configs/config_12572.py'
     read_file_path = None#'results/191939/191939_raw.h5'
     
     

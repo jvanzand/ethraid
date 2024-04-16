@@ -72,16 +72,20 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     # These are the "full" semi-major axes of the orbit, ie the sma of the ellipse traced by the 1-body solution to the 2-body problem. a = a_planet+a_star
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
+    
+    a_prior = spst.loguniform.pdf(a_list, a_min, a_max) # Find the PDF value of each value in a_list
+    m_prior = spst.loguniform.pdf(m_list, m_min, m_max)
 
     # Match up a_list and m_list and get the period for each pair (in days).
     # Calculate this now to avoid having to do it twice for RVs and astrometry.
     per_list = P_list(a_list, m_list, m_star)
     
     # Eccentricities drawn from specified distribution.
-    e_list = ecc_dist(m_list, per_list, num_points, dist=e_dist)
+    e_list, e_prior = ecc_dist(m_list, per_list, num_points, dist=e_dist)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
+    i_prior = np.sin(i_list) # PDF of inclination is prop to sin(i)
 
     # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
     M_anom_0_list = np.random.uniform(0, two_pi, num_points)
@@ -96,9 +100,11 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
 
     a_inds = np.digitize(a_list, bins = a_bins)
     m_inds = np.digitize(m_list, bins = m_bins)
+    
+    tot_prior = a_prior*m_prior*e_prior*i_prior
 
     return a_list, m_list, per_list, e_list, i_list,\
-           om_list, M_anom_0_list, a_inds, m_inds
+           om_list, M_anom_0_list, a_inds, m_inds, tot_prior
 
 def tot_list(double [:] rv_post_list, double [:] astro_post_list, 
              double [:] imag_post_list, int num_points):
@@ -274,25 +280,35 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
     cdef int i
     cdef double m, per, e
     
-    cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(num_points), dtype=np.float64),\
+    cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_sample4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+                                    e_sample4 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_prior1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_prior2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_prior3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    e_prior4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
     # Fix e=0
     if dist=='zero':
         e_list = np.zeros(num_points)
+        e_prior = np.ones(int(num_points))
         
     # Draw e uniformly between 0 and 0.99
     elif dist=='uniform':
         e_list = spst.uniform(0, 0.99).rvs(size=int(num_points))
+        e_prior = np.ones(int(num_points))
         
     # Use Kipping (2013) distribution for all companions
     elif dist=='kipping':
         # Note that I make lists that are each num_points long, so I only use part of each. I don't think this can be avoided while using pre-determined list lengths.                                
         e_sample1 = spst.beta(0.697, 3.27).rvs(size=int(num_points))
         e_sample2 = spst.beta(1.12, 3.09).rvs(size=int(num_points))
+        
+        e_prior1 = spst.beta(0.697, 3.27).pdf(e_sample1)
+        e_prior2 = spst.beta(1.12, 3.09).pdf(e_sample2)
 
     
         for i in range(num_points):
@@ -300,13 +316,16 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
         
             if per <= 382.3:
                 e = e_sample1[i]
+                e_pri = e_prior1[i]
             
             elif per > 382.3:
                 e = e_sample2[i]
+                e_pri = e_prior2[i]
 
             if e > 0.99:
                 e = 0.99
             e_list[i] = e
+            e_prior[i] = e_pri
     
     # Use Kipping for planetary masses, Bowler (2020) for BDs, and Raghavan (2010) for stars
     # Why not determine based on *separation* instead of mass? Preliminary CLS analysis suggests e depends more on mass than on a.
@@ -314,7 +333,12 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
         e_sample1 = spst.beta(0.697, 3.27).rvs(size=int(num_points))
         e_sample2 = spst.beta(1.12, 3.09).rvs(size=int(num_points))
         e_sample3 = spst.beta(2.30, 1.65).rvs(size=int(num_points))
-        e_sample4 = np.random.uniform(0.1, 0.8, size=int(num_points))
+        e_sample4 = spst.uniform(0.1, 0.7).rvs(size=int(num_points)) # (0.1, 0.7) --> sample from [0.1,0.8]
+        
+        e_prior1 = spst.beta(0.697, 3.27).pdf(e_sample1)
+        e_prior2 = spst.beta(1.12, 3.09).pdf(e_sample2)
+        e_prior3 = spst.beta(2.30, 1.65).pdf(e_sample3)
+        e_prior4 = spst.uniform(0.1, 0.7).pdf(e_sample4) # (0.1, 0.7) --> sample from [0.1,0.8]
         
         for i in range(num_points):
             m = m_list[i]
@@ -324,25 +348,30 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
                 
                 if per <= 382.3:
                     e = e_sample1[i]
+                    e_pri = e_prior1[i]
             
                 elif per > 382.3:
                     e = e_sample2[i]
+                    e_pri = e_prior2[i]
                     
             elif m > 13 and m <= 80:
                 e = e_sample3[i]
+                e_pri = e_prior3[i]
             
             elif m > 80:
                 e = e_sample4[i]
+                e_pri = e_prior4[i]
             
             if e > 0.99:
                 e = 0.99
             e_list[i] = e
+            e_prior[i] = e_pri
             
     else:
         raise Exception('Error: e_dist must be one of the options supported by the ecc_dist function.')
     
     
-    return e_list
+    return e_list, e_prior
     
     
 
