@@ -68,6 +68,9 @@ imag_calc = 'approx'
 vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
+# Choose (based on system age) which table from Baraffe+03 to use for brown dwarf cooling model
+# Table 1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
+age_table = 1
 # Path to contrast curve
 contrast_str = 'ethraid/data/test_K_band.csv'
 # Epoch of imaging observations (BJD).

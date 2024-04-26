@@ -4,7 +4,7 @@ import ethraid.compiled.helper_functions_general as hlp
 
 # GENERAL PARAMS
 # Number of orbital models to simulate
-num_points = 1e4
+num_points = 1e6
 # Dimension of grid over which model probabilities will be spread.
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than in the config file (default grid_num=100).
@@ -17,7 +17,7 @@ e_dist = 'piecewise'
 
 # STELLAR PARAMS
 # Star name for file labeling. Need not be official.
-star_name = 'test1'
+star_name = 'test3'
 # Mass of star in Jupiter masses
 m_star = 0.5*Ms2Mj
 # Distance from Earth to star in AU
@@ -77,6 +77,9 @@ imag_calc = 'exact'
 vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
+# Choose (based on system age) which table from Baraffe+03 to use for brown dwarf cooling model
+# Table 1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
+age_table = 5
 # Path to contrast curve
 contrast_str = 'ethraid/data/test_K_band.csv'
 # Epoch of imaging observations (BJD).

@@ -22,7 +22,7 @@ pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
 mamajek_rename = {'K_s':'K', 'W1':'L_prime'}
 mamajek_table = pd.read_csv(_ROOT+'/data/mamajek.csv')\
                   .rename(columns=mamajek_rename)
-baraffe_table = pd.read_csv(_ROOT+'/data/baraffe_table_4.csv')
+#baraffe_table = pd.read_csv(_ROOT+'/data/baraffe_table4.csv')
 bands= pd.read_csv(_ROOT+'/data/bands.csv')
 
 
@@ -31,7 +31,7 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
               double [:] i_list, double [:] om_list, 
               double [:] M_anom_0_list, double [:] per_list, 
               double m_star, double d_star, double vmag,
-              double imag_wavelength, double imag_epoch, str contrast_str):
+              double imag_wavelength, int age_table, double imag_epoch, str contrast_str):
     """
     Calculates the likelihood of the imaging data conditioned 
     on each of a list of orbital models, resulting in a list of 
@@ -57,6 +57,9 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
         d_star (float, AU): Distance of system from Earth
         vmag (float): Apparent V-band magnitude of host star
         imag_wavelength (float, micrometers): Wavelength of imaging data
+        age_table (int): Integer 1-5, indicating which BD cooling model to use
+                         based on age of system.
+                         1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
         imag_epoch (float, BJD): Epoch at which imaging was acquired
         contrast_str (str): Path to contrast curve file
     
@@ -92,13 +95,13 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
     ##########
     # This is the "data"
     # Interpolate a contrast curve to get a function that maps angular separation to delta_mag contrasts
-    angsep_to_dmag = interp_fn(d_star, vmag, imag_wavelength, 
+    angsep_to_dmag = interp_fn(d_star, vmag, imag_wavelength, age_table, 
                                contrast_str=contrast_str, which='A2C')
     
     # This is the "model"
-    # Next function is to map model companion masses to delta_mag contrasts based on stellar/Brown Dwarf mass-luminosity models from Pecaut/Mamajek2013 and Baraffe03.
+    # Next function is to map model companion masses to delta_mag contrasts based on stellar/Brown Dwarf mass-luminosity models from Pecaut/Mamajek2013 and Baraffe+03.
     # Must set fill_value for mass_to_dmag because sampled masses go well below masses listed in Brown Dwarf cooling model tables (m_min~2 M_J). For objects smaller than that, make contrast very high (ie, we cannot image 2 M_J objects).
-    mass_to_dmag = interp_fn(d_star, vmag, imag_wavelength, which='M2C', fill_value=(10000, 0))
+    mass_to_dmag = interp_fn(d_star, vmag, imag_wavelength, age_table, which='M2C', fill_value=(10000, 0))
     #########
     
     # The "data" sets the dimmest detectable object at the model seps
@@ -145,7 +148,7 @@ def ang_sep(double a, double m, double e, double i, double om, double M_anom_0,
     cdef double [:,:] rot_mtrx # This makes rot_mtrx a memview
     rot_mtrx = np.zeros((3,3),dtype=np.float64)
     
-    # vec holds various values throughout dmu(). After each value
+    # vec holds various values throughout ang_sep(). After each value
     # has served its purpose, it is overwritten so that only one
     # vector needs to be allocated, saving time.
     cdef double vec_list[3]
@@ -165,7 +168,7 @@ def ang_sep(double a, double m, double e, double i, double om, double M_anom_0,
     E = kepler_single(M%two_pi, e)
     
     # Equations 2.41 in Murray & Dermott
-    # vec points from the star to the companion (note the pre-factor a is the full semi-major axis)
+    # vec points from the star to the companion (note the pre-factor, a, is the full semi-major axis)
     vec[0] = a*(cos(E)-e)
     vec[1] = a*sqrt(1-e*e)*sin(E)
     vec[2] = 0
@@ -275,7 +278,7 @@ cpdef void mat_mul(double [:,:] mat, double [:] in_vec, double [:] out_vec):
     # Do not return out_vec
     
     
-def interp_fn(d_star, vmag, imag_wavelength, contrast_str=None, which='C2M', fill_value=None):
+def interp_fn(d_star, vmag, imag_wavelength, age_table, contrast_str=None, which='C2M', fill_value=None):
     """
     Helper function to interpolate between Δmag contrast and mass. 
     Choose whether the output function takes contrasts and returns 
@@ -285,6 +288,9 @@ def interp_fn(d_star, vmag, imag_wavelength, contrast_str=None, which='C2M', fil
         d_star (float, AU): Distance to the host star
         vmag (float, mag): Apparent V-band magnitude of host star
         imag_wavelength (float, μm): Wavelength of imaging data in contrast_curve
+        age_table (int): Integer from 1 to 5, indicating which BD cooling model to use
+                         based on age of system. Correspond to tables 1-5 in Baraffe+03.
+                         1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
         contrast_str (str): Path to a csv file with columns "ang_sep" and "delta_mag"
         which (str): One of 'C2M', 'M2C', 'A2M', or 'A2C' to choose a function with
                      arguments/outputs of contrast/mass, mass/contrast,
@@ -321,6 +327,7 @@ def interp_fn(d_star, vmag, imag_wavelength, contrast_str=None, which='C2M', fil
     max_mag = interp_df_mamajek[band_name].max()
 
     # Just like we took even the brightest entries from Mamajek, take even the dimmest from Baraffe to be safe.
+    baraffe_table = pd.read_csv(_ROOT+'/data/baraffe_table{}.csv'.format(age_table)) # Load correct table
     interp_df_baraffe = baraffe_table.query("{}>{}".format(band_name, max_mag))[['M_jup', band_name]]
 
     # Concatenate the two dfs above
@@ -403,7 +410,7 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
     return band_name, host_abs_Xmag
 
 
-def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_num):
+def imag_array(d_star, vmag, imag_wavelength, age_table, contrast_str, a_lim, m_lim, grid_num):
     """
     Convert a contrast curve in (angular_separation, Δmag) space
     into (separation, mass) space. This requires finding a
@@ -419,6 +426,9 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
         d_star (float, AU): Distance to the host star
         vmag (float, mag): Apparent V-band magnitude of host star
         imag_wavelength (float, μm): Wavelength of imaging data in contrast_curve
+        age_table (int): Integer 1-5, indicating which BD cooling model to use
+                         based on age of system.
+                         1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
         contrast_str (str): Path to contrast curve with columns of 
                               'ang_sep' (arcseconds) and 'delta_mag' (mag)
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
@@ -450,7 +460,7 @@ def imag_array(d_star, vmag, imag_wavelength, contrast_str, a_lim, m_lim, grid_n
 
     ## Create an interpolation fn that takes delta mag contrast to companion mass
     ## Fill value: if dmag is extremely small, mass is large. If too large, then mass -> 0
-    dmag_to_mass = interp_fn(d_star, vmag, imag_wavelength, which='C2M', fill_value=(np.inf,0))
+    dmag_to_mass = interp_fn(d_star, vmag, imag_wavelength, age_table, which='C2M', fill_value=(np.inf,0))
     companion_masses = dmag_to_mass(dmags)
 
     # Discrete correspondence between separation and mass. We get a continuous correspondence below

@@ -74,7 +74,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
     
     a_prior = spst.loguniform.pdf(a_list, a_min, a_max) # Find the PDF value of each value in a_list
-    m_prior = spst.loguniform.pdf(m_list, m_min, m_max)
+    m_prior = spst.loguniform.pdf(m_list, m_min, m_max) # Find the PDF value of each value in m_list
 
     # Match up a_list and m_list and get the period for each pair (in days).
     # Calculate this now to avoid having to do it twice for RVs and astrometry.
@@ -101,7 +101,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     a_inds = np.digitize(a_list, bins = a_bins)
     m_inds = np.digitize(m_list, bins = m_bins)
     
-    tot_prior = a_prior*m_prior*e_prior*i_prior
+    tot_prior = a_prior*m_prior*e_prior*i_prior # Multiply priors to obtain total prior (note: not log)
 
     return a_list, m_list, per_list, e_list, i_list,\
            om_list, M_anom_0_list, a_inds, m_inds, tot_prior
@@ -122,9 +122,9 @@ def tot_list(double [:] rv_post_list, double [:] astro_post_list,
     
     Returns:
         tot_list (1D numpy array, len=num_points):
-            The likelihoods of all data sets, conditioned on a given
-            model. The ith element is the exponentiation of the sum 
-            of the ith elements of the three above lists.
+            The log-likelihoods of all data sets, conditioned on a given
+            model. The ith element is the sum of the ith elements of the 
+            three above lists.
     """
     cdef int i
     cdef double prob

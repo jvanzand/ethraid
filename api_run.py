@@ -160,6 +160,7 @@ def run(config_path, read_file_path=None,
             imag_calc = driver.set_values(config_path, ['imag_calc'], ['exact'])
             vmag = cm.vmag
             imag_wavelength = cm.imag_wavelength
+            age_table = cm.age_table
             contrast_str = cm.contrast_str
         
         
@@ -170,14 +171,14 @@ def run(config_path, read_file_path=None,
                 # post_imag is the result of exponentiating imag_list and reshaping it into a 2D array
                 imag_list = hlp_imag.imag_list(a_list, m_list, e_list, i_list, om_list, 
                                                M_anom_0_list, per_list, m_star, 
-                                               d_star, vmag, imag_wavelength, 
+                                               d_star, vmag, imag_wavelength, age_table,
                                                imag_epoch, contrast_str)
                                                
                 post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
     
             elif imag_calc == 'approx':
                 imag_list = np.zeros(num_points) # Dummy list to pass to tot_list() function
-                post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
+                post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, age_table,
                                                 contrast_str, a_lim, m_lim, grid_num)
             
             else:
@@ -296,7 +297,8 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_12572.py'
+    #config_path = 'ethraid/local_configs/config_191939.py'
+    config_path = 'test_config_files/test3.py'
     read_file_path = None#'results/191939/191939_raw.h5'
     
     

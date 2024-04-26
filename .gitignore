@@ -7,7 +7,11 @@
 
 /ethraid/data/*
 !/ethraid/data/mamajek.csv
-!/ethraid/data/baraffe_table_4.csv
+!/ethraid/data/baraffe_table1.csv
+!/ethraid/data/baraffe_table2.csv
+!/ethraid/data/baraffe_table3.csv
+!/ethraid/data/baraffe_table4.csv
+!/ethraid/data/baraffe_table5.csv
 !/ethraid/data/bands.csv
 !/ethraid/data/test_K_band.csv
 

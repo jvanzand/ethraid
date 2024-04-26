@@ -62,6 +62,9 @@ def run(args):
     
         vmag (mag): Apparent V-band magnitude of host star
         imag_wavelength (μm): Wavelength of imaging observations
+        age_table (int): Integer 1-5, indicating which BD cooling model to use
+                         based on age of system.
+                         1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
         contrast_str (dataframe or dict, 
                       columns of 'ang_sep' (arcseconds) 
                       and 'delta_mag' (mag)
@@ -187,6 +190,7 @@ def run(args):
         imag_calc = set_values(config_path, ['imag_calc'], ['exact'])
         vmag = cm.vmag
         imag_wavelength = cm.imag_wavelength
+        age_table = cm.age_table
         contrast_str = cm.contrast_str
         
         
@@ -195,13 +199,13 @@ def run(args):
             
             imag_list = hlp_imag.imag_list(a_list, m_list, e_list, i_list, om_list, 
                                            M_anom_0_list, per_list, m_star, 
-                                           d_star, vmag, imag_wavelength, 
+                                           d_star, vmag, imag_wavelength, age_table, 
                                            imag_epoch, contrast_str)
             post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
     
         elif imag_calc == 'approx':
             imag_list = np.zeros(num_points) # Dummy list to pass to tot_list() function
-            post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
+            post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, age_table, 
                                             contrast_str, a_lim, m_lim, grid_num)
         
         else:

@@ -30,6 +30,7 @@ def load(read_file_path, grid_num=100, verbose=False):
         post_imag (array of floats): Model probabilities given imaging data only, 
                                      marginalized over all orbital parameters 
                                      except a and m
+        prior (array of floats): Prior probability of each model.
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max)
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
@@ -160,16 +161,18 @@ def save_raw(star_name, m_star, d_star,
              run_rv (bool): Was RV data used in calculation?
              run_astro (bool): Was astrometry data used in calculation?
              run_imag (bool): Was imaging data used in calculation?
-             rv_list (list floats): RV data likelihoods conditioned
-                                    on full orbit models
-             astro_list (list of floats): Astrometry data likelihoods 
+             rv_list (list of floats): RV data log-likelihoods conditioned
+                                       on full orbit models
+             astro_list (list of floats): Astrometry data log-likelihoods 
                                           conditioned on full orbit models
-             imag_data (list or array of floats): Imaging data likelihoods 
+             imag_data (list or array of floats): Imaging data log-likelihoods
+                                                  (if 1D) likelihoods (if 2D)
                                                   conditioned on full orbit
-                                                  models. Should be list if 
+                                                  models. Should be 1D if 
                                                   imag_calc is 'exact' and a 
-                                                  2d array if imag_calc is 
+                                                  2D array if imag_calc is 
                                                   'approx'.
+             prior (array of floats): Prior probability of each model.
 
              
              vmag (mag): Apparent V-band magnitude of host star
@@ -225,9 +228,7 @@ def save_raw(star_name, m_star, d_star,
              post_file.create_dataset('vmag', data=vmag)
              post_file.create_dataset('imag_wavelength', data=imag_wavelength)
              post_file.create_dataset('contrast_str', data=contrast_str)
-             print("Saving imag_calc", imag_calc)
              post_file.create_dataset('imag_calc', data=imag_calc)
-             print("SavED imag_calc", imag_calc)
         
          except Exception as err:
              # Only print message if user provided imaging data. If they did not, then irrelevant
@@ -271,7 +272,9 @@ def save_processed(star_name, m_star, d_star,
              run_rv (bool): Was RV data used in calculation?
              run_astro (bool): Was astrometry data used in calculation?
              run_imag (bool): Was imaging data used in calculation?
-             post_tot (2D array of floats): 
+             post_tot (2D array of floats): Likelihood of RV/astro/imaging
+                                            data sets with respect to orbit 
+                                            models.
              post_rv (2D array of floats): RV data likelihoods conditioned
                                            on full orbit models. Shaped into
                                            a 2D array, with model probabilities
@@ -280,6 +283,8 @@ def save_processed(star_name, m_star, d_star,
                                            giving an array of posterior probabilities.
              post_astro (2D array of floats): Same as post_rv for astrometry data.
              post_imag (2D array of floats): Same as post_rv for imaging data.
+             prior (array of floats): Prior probability of each model.
+             
                    
              a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                           in the form (a_min, a_max)
