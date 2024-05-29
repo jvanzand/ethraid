@@ -67,8 +67,12 @@ imag_calc = 'exact'
 vmag = 9.2
 # Wavelength at which contrast curve was acquired (micrometers)
 imag_wavelength = 2.2
+# Choose (based on system age) which table from Baraffe+03 to use for brown dwarf cooling model
+# Table 1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
+age_table = 4
 # Path to contrast curve
-contrast_str = os.path.join(_ROOT, 'data/clean_curves/TOI1471_Brgamma.csv')
+# contrast_str = os.path.join(_ROOT, 'data/clean_curves/TOI1471_Brgamma.csv')
+contrast_str = 'ethraid/ethraid/data/clean_curves/TOI1471_Brgamma.csv'
 # Epoch of imaging observations (BJD).
 imag_epoch = 2458991.236308
 

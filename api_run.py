@@ -297,17 +297,18 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    #config_path = 'ethraid/local_configs/config_191939.py'
-    config_path = 'test_config_files/test3.py'
-    read_file_path = None#'results/191939/191939_raw.h5'
+    config_path = 'ethraid/local_configs/config_T001438.py'
+    #config_path = 'test_config_files/test3.py'
+    read_file_path = 'results/T001438/T001438_processed.h5'
     
     
     plot=True
     verbose=True
-    
+    first_time = time.time()
     run(config_path, read_file_path,
         plot=plot, verbose=verbose)
-    
+    second_time = time.time()
+    print("TIMEEEEE {:.2f}".format(second_time-first_time))    
     
     
     
