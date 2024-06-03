@@ -459,7 +459,7 @@ def imag_array(d_star, vmag, imag_wavelength, age_table, contrast_str, a_lim, m_
     dmags = contrast_curve['delta_mag']
 
     ## Create an interpolation fn that takes delta mag contrast to companion mass
-    ## Fill value: if dmag is extremely small, mass is large. If too large, then mass -> 0
+    ## Fill value: if dmag is extremely small, mass is large. If dmag is too large, then mass -> 0
     dmag_to_mass = interp_fn(d_star, vmag, imag_wavelength, age_table, which='C2M', fill_value=(np.inf,0))
     companion_masses = dmag_to_mass(dmags)
 

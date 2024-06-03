@@ -49,7 +49,7 @@ def load(read_file_path, grid_num=100, verbose=False):
     run_astro = np.array(post_file.get('run_astro'))
     run_imag = np.array(post_file.get('run_imag'))
 
-    prior = np.array(post_file.get('prior')) # List of prior probabilities for each model
+    #prior = np.array(post_file.get('prior')) # List of prior probabilities for each model
     a_lim = np.array(post_file.get('a_lim')) # Limits over which a is sampled
     m_lim = np.array(post_file.get('m_lim')) # Limits over which m is sampled
     
@@ -137,14 +137,14 @@ def load(read_file_path, grid_num=100, verbose=False):
     return_tuple = (star_name, m_star, d_star, 
                     run_rv, run_astro, run_imag, 
                     post_tot, post_rv, post_astro, post_imag, 
-                    prior, a_lim, m_lim)
+                    a_lim, m_lim)
         
     return return_tuple
 
 def save_raw(star_name, m_star, d_star,
              run_rv, run_astro, run_imag, 
              tot_list, rv_list, astro_list, imag_data,
-             prior, vmag, imag_wavelength, contrast_str,
+             vmag, imag_wavelength, contrast_str,
              a_list, m_list, a_inds, m_inds, a_lim, m_lim, 
              imag_calc='exact', outdir='', verbose=False):
          
@@ -244,7 +244,7 @@ def save_raw(star_name, m_star, d_star,
          # post_file.create_dataset('a_inds', data=a_inds)
          # post_file.create_dataset('m_inds', data=m_inds)
          
-         post_file.create_dataset('prior', data=prior)
+         #post_file.create_dataset('prior', data=prior)
          post_file.create_dataset('a_lim', data=a_lim)
          post_file.create_dataset('m_lim', data=m_lim)
          
@@ -260,7 +260,7 @@ def save_raw(star_name, m_star, d_star,
 def save_processed(star_name, m_star, d_star, 
                    run_rv, run_astro, run_imag,
                    post_tot, post_rv, post_astro, post_imag,
-                   prior, a_lim, m_lim, outdir='', verbose=False):
+                   a_lim, m_lim, outdir='', verbose=False):
          
          """
          Saves shaped 2D probability arrays to a specified h5py file.
@@ -316,7 +316,7 @@ def save_processed(star_name, m_star, d_star,
          post_file.create_dataset('post_astro', data=post_astro)
          post_file.create_dataset('post_imag', data=post_imag)
          
-         post_file.create_dataset('prior', data=prior)
+         #post_file.create_dataset('prior', data=prior)
          post_file.create_dataset('a_lim', data=a_lim)
          post_file.create_dataset('m_lim', data=m_lim)
          

@@ -20,6 +20,7 @@ M_sun = 1.988409870698051e+33
 M_jup = 1.8981245973360504e+30
 au = 14959787070000.0
 pc_in_cm = 3.086e18
+Mj2Me = 317.828133
 
 def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_points, str e_dist):
     """
@@ -73,19 +74,22 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
     m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
     
-    a_prior = spst.loguniform.pdf(a_list, a_min, a_max) # Find the PDF value of each value in a_list
-    m_prior = spst.loguniform.pdf(m_list, m_min, m_max) # Find the PDF value of each value in m_list
+    #a_prior = spst.loguniform.pdf(a_list, a_min, a_max) # Find the PDF value of each value in a_list
+    #m_prior = spst.loguniform.pdf(m_list, m_min, m_max) # Find the PDF value of each value in m_list
+    
+    #m_list, m_prior = m_dist(a_list, a_lim, m_lim, num_points)
+    
 
     # Match up a_list and m_list and get the period for each pair (in days).
     # Calculate this now to avoid having to do it twice for RVs and astrometry.
     per_list = P_list(a_list, m_list, m_star)
     
     # Eccentricities drawn from specified distribution.
-    e_list, e_prior = ecc_dist(m_list, per_list, num_points, dist=e_dist)
+    e_list = ecc_dist(m_list, per_list, num_points, dist=e_dist)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
-    i_prior = np.sin(i_list) # PDF of inclination is prop to sin(i)
+    #i_prior = np.sin(i_list) # PDF of inclination is prop to sin(i)
 
     # Mean anomaly, uniformly distributed. This represents M at the beginning of the Hipparcos epoch for BOTH RVs and astrometry. Use this to solve for True anomaly.
     M_anom_0_list = np.random.uniform(0, two_pi, num_points)
@@ -95,16 +99,18 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
 
     # Breaking up the (a, M) parameter space into grid_num x grid_num.
     # Note: grid_num+1 bin dividers means grid_num+2 bins (including below/above min/max), but the first/last bins are never used because we sample between the min and max values. So if grid_num=100, there are bins 0 up to 101. But only bins 1 to 100 have values in them.
+    
+    #m_min, m_max = 10/317.828133, 1400
     a_bins = np.logspace(np.log10(a_min), np.log10(a_max), grid_num+1)
     m_bins = np.logspace(np.log10(m_min), np.log10(m_max), grid_num+1)
 
     a_inds = np.digitize(a_list, bins = a_bins)
     m_inds = np.digitize(m_list, bins = m_bins)
     
-    tot_prior = a_prior*m_prior*e_prior*i_prior # Multiply priors to obtain total prior (note: not log)
+    #tot_prior = a_prior*m_prior*e_prior*i_prior # Multiply priors to obtain total prior (note: not log)
 
     return a_list, m_list, per_list, e_list, i_list,\
-           om_list, M_anom_0_list, a_inds, m_inds, tot_prior
+           om_list, M_anom_0_list, a_inds, m_inds#, tot_prior
 
 def tot_list(double [:] rv_post_list, double [:] astro_post_list, 
              double [:] imag_post_list, int num_points):
@@ -209,7 +215,7 @@ def post_single(double [:] log_lik_list, long [:] a_inds, long [:] m_inds, int g
         # The lowest index in a_inds or m_inds is 1 because the lower limit of the sampling range (a_min or m_min) is also the smallest bin divider. So no sampled values are small enough to get an index of 0. Still, we want the bin between a_min and the next divider to be the 0th bin, so subtract 1 off of each bin value.
         a_i = a_inds[i]-1
         m_i = m_inds[i]-1
-
+        
         prob_array[m_i, a_i] += np.exp(log_lik_list[i])
         
     
@@ -261,9 +267,9 @@ cpdef P(double a, double m_planet, double m_star):
     return per
 
 
-def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piecewise'):
+cdef ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piecewise'):
     """
-    Sample a random eccentricity whose distribution is based on a and m.
+    Sample a list of random eccentricities whose distribution depends on a and m.
     Kipping(2013) advocates two distributions for P below and above 382.3 days.
     
     Arguments:
@@ -275,31 +281,32 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
                     Options: ['zero', 'uniform', 'kipping', 'piecewise']
     
     Returns:
-        e_list (list of floats): List of randomly sampled eccentricities
+        e_list, e_prior (lists of floats): List of randomly sampled eccentricities and
+                                           corresponding prior probabilities
     """
     cdef int i
-    cdef double m, per, e
+    cdef double m, per, e, e_pri
     
     cdef np.ndarray[double, ndim=1] e_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_sample4 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_prior1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_prior2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_prior3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_prior4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+                                    e_sample4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)#,\
+                                    #e_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #e_prior1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #e_prior2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #e_prior3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #e_prior4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
     # Fix e=0
     if dist=='zero':
         e_list = np.zeros(num_points)
-        e_prior = np.ones(int(num_points))
+        #e_prior = np.ones(int(num_points))
         
     # Draw e uniformly between 0 and 0.99
     elif dist=='uniform':
         e_list = spst.uniform(0, 0.99).rvs(size=int(num_points))
-        e_prior = np.ones(int(num_points))
+        #e_prior = np.ones(int(num_points))
         
     # Use Kipping (2013) distribution for all companions
     elif dist=='kipping':
@@ -307,8 +314,8 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
         e_sample1 = spst.beta(0.697, 3.27).rvs(size=int(num_points))
         e_sample2 = spst.beta(1.12, 3.09).rvs(size=int(num_points))
         
-        e_prior1 = spst.beta(0.697, 3.27).pdf(e_sample1)
-        e_prior2 = spst.beta(1.12, 3.09).pdf(e_sample2)
+        #e_prior1 = spst.beta(0.697, 3.27).pdf(e_sample1)
+        #e_prior2 = spst.beta(1.12, 3.09).pdf(e_sample2)
 
     
         for i in range(num_points):
@@ -316,16 +323,16 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
         
             if per <= 382.3:
                 e = e_sample1[i]
-                e_pri = e_prior1[i]
+                #e_pri = e_prior1[i]
             
             elif per > 382.3:
                 e = e_sample2[i]
-                e_pri = e_prior2[i]
+                #e_pri = e_prior2[i]
 
             if e > 0.99:
                 e = 0.99
             e_list[i] = e
-            e_prior[i] = e_pri
+            #e_prior[i] = e_pri
     
     # Use Kipping for planetary masses, Bowler (2020) for BDs, and Raghavan (2010) for stars
     # Why not determine based on *separation* instead of mass? Preliminary CLS analysis suggests e depends more on mass than on a.
@@ -335,10 +342,10 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
         e_sample3 = spst.beta(2.30, 1.65).rvs(size=int(num_points))
         e_sample4 = spst.uniform(0.1, 0.7).rvs(size=int(num_points)) # (0.1, 0.7) --> sample from [0.1,0.8]
         
-        e_prior1 = spst.beta(0.697, 3.27).pdf(e_sample1)
-        e_prior2 = spst.beta(1.12, 3.09).pdf(e_sample2)
-        e_prior3 = spst.beta(2.30, 1.65).pdf(e_sample3)
-        e_prior4 = spst.uniform(0.1, 0.7).pdf(e_sample4) # (0.1, 0.7) --> sample from [0.1,0.8]
+        #e_prior1 = spst.beta(0.697, 3.27).pdf(e_sample1)
+        #e_prior2 = spst.beta(1.12, 3.09).pdf(e_sample2)
+        #e_prior3 = spst.beta(2.30, 1.65).pdf(e_sample3)
+        #e_prior4 = spst.uniform(0.1, 0.7).pdf(e_sample4) # (0.1, 0.7) --> sample from [0.1,0.8]
         
         for i in range(num_points):
             m = m_list[i]
@@ -348,31 +355,236 @@ def ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piece
                 
                 if per <= 382.3:
                     e = e_sample1[i]
-                    e_pri = e_prior1[i]
+                    #e_pri = e_prior1[i]
             
                 elif per > 382.3:
                     e = e_sample2[i]
-                    e_pri = e_prior2[i]
+                    #e_pri = e_prior2[i]
                     
             elif m > 13 and m <= 80:
                 e = e_sample3[i]
-                e_pri = e_prior3[i]
+                #e_pri = e_prior3[i]
             
             elif m > 80:
                 e = e_sample4[i]
-                e_pri = e_prior4[i]
+                #e_pri = e_prior4[i]
             
             if e > 0.99:
                 e = 0.99
             e_list[i] = e
-            e_prior[i] = e_pri
+            #e_prior[i] = e_pri
             
     else:
         raise Exception('Error: e_dist must be one of the options supported by the ecc_dist function.')
     
     
-    return e_list, e_prior
+    return e_list#, e_prior
+
+cdef m_dist(double [:] a_list, tuple a_lim, tuple m_lim, int num_points):
+    """
+    Sample a list of random masses whose distribution is based on a.
+    This distribution was derived from the CLS catalog and CLS 2
+    completeness map: divide the parameter space into 4 intervals of
+    separation, correct for completeness, and calculate the relative
+    occurrence rates of planets, BDs, and stars in each interval based
+    on binomial statistics. Then, for a given a, assign planet, BD, or
+    star based on relative occurrence rates, and then sample log-uniformly
+    from the chosen mass range.
+
+    Arguments:
+        m_list (list of floats, M_jup): List of companion separations
+        num_points (int): Number of random masses to generate
+
+    Returns:
+        m_list, m_prior (lists of floats): List of randomly sampled masses and
+                                           corresponding prior probabilities
+    """
+    cdef int i
+    cdef double a, rand, m, m_pri
+    cdef list m_samples, m_priors
+
+    cdef np.ndarray[double, ndim=1] m_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    m_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    rands = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+                                    #m_sample1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #m_sample2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #m_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #m_prior1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #m_prior2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                                    #m_prior3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
+                     
+    # User-input separation boundaries
+    #a_min = a_lim[0]
+    #a_max = a_lim[1]
+    #if a_min<0.03 or a_max>64:
+        #raise Exception("Separation limits must be between 0.03 - 64 AU to use mass prior")
     
+    
+    rel_probs, bounds_tuples = relative_probs(m_lim)
+    #######################################
+
+    
+    #USE length of bounds_tuples and m_min to infer which bounds there are
+    """
+    m_sample0 = spst.loguniform.rvs(3/Mj2Me, 0.05, size=num_points)
+    m_sample1 = spst.loguniform.rvs(0.05, 0.3, size=num_points)
+    m_sample2 = spst.loguniform.rvs(0.3, 13, size=num_points)
+    m_sample3 = spst.loguniform.rvs(13, 80, size=num_points)
+    m_sample4 = spst.loguniform.rvs(80, 1400, size=num_points)
+    
+    
+    m_prior0 = spst.loguniform.pdf(m_sample0, 3/Mj2Me, 0.05)
+    m_prior1 = spst.loguniform.pdf(m_sample1, 0.05, 0.3)
+    m_prior2 = spst.loguniform.pdf(m_sample2, 0.3, 13)
+    m_prior3 = spst.loguniform.pdf(m_sample3, 13, 80)
+    m_prior4 = spst.loguniform.pdf(m_sample4, 80, 1400)
+    """
+    
+    # m_samples is a list of np arrays. Each np array is a long list of randomly sampled, log-uniform masses from the interval specified by the bounds in bounds_tuples
+    m_samples = [spst.loguniform.rvs(mtuple[0], mtuple[1], size=num_points) for mtuple in bounds_tuples]
+    m_priors = [spst.loguniform.pdf(m_samples[i], bounds_tuples[i][0], bounds_tuples[i][1]) for i in range(len(m_samples))]
+    
+    rands = np.random.rand(num_points) # Random numbers between 0-1
+    
+    for i in range(num_points):
+        a = a_list[i]
+        rand = rands[i]
+        
+        if a<=0.2:
+            prob_list = rel_probs[0]
+        elif 0.2<a<=1:
+            prob_list = rel_probs[1]
+        elif 1<a<=4:
+            prob_list = rel_probs[2]
+        elif 4<a<=16:
+            prob_list = rel_probs[3]
+        elif a>16: # If desired, remove above Exception to approximate that this prior holds for a>64 AU.
+            prob_list = rel_probs[4]
+            
+        cdf = np.cumsum(prob_list)
+
+        for j in range(len(cdf)): # Each time you add another probability
+            if rand<=cdf[j]: # If the random number is now less than the incremented probability
+                m = m_samples[j][i] # Then select the sample corresponding to this mass interval
+                m_pri = m_priors[j][i]
+                break
+        """
+        if rand<=prob_list[0]:
+            m = m_sample0[i]
+            m_pri = m_prior0[i]
+
+        elif rand<=(prob_list[0]+prob_list[1]):
+            m = m_sample1[i]
+            m_pri = m_prior1[i]
+
+        elif rand<=(prob_list[0]+prob_list[1]+prob_list[2]):
+            m = m_sample2[i]
+            m_pri = m_prior2[i]
+            
+        elif rand<=(prob_list[0]+prob_list[1]+prob_list[2]+prob_list[3]):
+            m = m_sample3[i]
+            m_pri = m_prior3[i]
+        
+        elif rand<=(prob_list[0]+prob_list[1]+prob_list[2]+prob_list[3]+prob_list[4]):
+            m = m_sample4[i]
+            m_pri = m_prior4[i]
+        """
+
+            
+        m_list[i] = m
+        m_prior[i] = m_pri
+
+    return m_list, m_prior
+    
+def relative_probs(m_lim):
+    """
+    Create an array of relative probabilities to be used in m_dist() above.
+    Start with or_array, which has hard-coded occurrence rates derived
+    from the CLS catalog. Then adjust those probabilities according to the
+    user-input mass bounds.
+    NOTE that the separation bounds don't come into play because a is sampled
+    first, and that is used to determine which m regime to sample from. So if
+    the user gives a_lim that exclude some entries in or_array, then those SMAs
+    will simply not be sampled, giving the desired result. If you exclude some
+    fraction of mass space though, you need to adjust the probabilities 
+    accordingly.
+    
+    Arguments:
+        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max), the desired
+                                        companion mass interval to sample from
+    
+    Returns:
+        or_array (np array of floats): Array containing occurrence rate values,
+                                       adjusted (ie, appropriately decreased) to
+                                       account for any truncations of the pre-set
+                                       mass intervals due to the user's m_lim choice
+    """
+    
+    # Hard-coded binomial occurrence rates measured from the CLS catalog, corrected
+    # with the CLS 2 average completeness map (extrapolated to higher masses and separations)
+    # Each row is the occurrence for a range of separations.
+    # Each column is the occurrence for a range of masses. From left to right: 0.01-0.05 MJ, 0.05-0.3 MJ, 0.3-13 MJ, 13-80 MJ, and 80-1420 MJ.
+    or_array = np.array([[0.2028, 0.0197, 0.0279, 0.0011, 0.0023], # 0.03-0.2 AU
+                         [0.1803, 0.0597, 0.0344, 0.0010, 0.0039], # 0.2-1 AU
+                         [0.0195, 0.0769, 0.0922, 0.0070, 0.0039], # 1-4 AU
+                         [0.0185, 0.0163, 0.0802, 0.0183, 0.0194], # 4-16 AU
+                         [0.0164, 0.0182, 0.0454, 0.0377, 0.0584]]) # 16-64 AU
+
+    bounds_list = np.array([1/Mj2Me, 0.05, 0.3, 13, 80, 1420]) # Bounds between occurrence measurements
+
+    # User-input mass boundaries
+    m_min = m_lim[0]
+    m_max = m_lim[1]
+    
+    # First, find the masses in bounds_list that fall within the m limits. Then make tuples describing intervals.
+    middles = bounds_list[np.where((m_min<bounds_list)&(bounds_list<m_max))]
+    middle_tuples = [(middles[i], middles[i+1]) for i in range(len(middles)-1)]
+    # The full set of tuples consists of middle_tuples with an extra interval on each side, defined with the user-input mass limits.
+    bounds_tuples = [(m_min, middle_tuples[0][0])]+middle_tuples+[(middle_tuples[-1][1], m_max)]
+
+    # Second, determine the fraction by which to reduce prior prob.s on the edges based on user-input m_lims
+    # If the user-input m_lims are beyond the limits where the prior is defined, there will be a ValueError
+    try:
+        # Find the index of the largest m_bound that is smaller than the user-input m_min 
+        min_bound_ind = np.max(np.where((bounds_list-m_min)<0))
+
+        # Find the index of the smallest m_bound that is larger than the user-input m_max 
+        max_bound_ind = np.min(np.where((bounds_list-m_max)>0))
+    except ValueError:
+        print("Mass limits must be between 0.004 - 1400 M_Jup") # Technically 0.003146 and 1420, but leave a safety cushion
+        
+    # Lower interval probability correction. Determine how much of the bottom mass box to "cut off"
+    interval_orig = np.log10(bounds_list[min_bound_ind+1]) - np.log10(bounds_list[min_bound_ind]) # Full interval
+    interval_new = np.log10(bounds_list[min_bound_ind+1]) - np.log10(m_min) # Partial interval
+    lower_correction_fac = interval_new/interval_orig # Ratio between intervals
+    
+    
+    or_array[:, min_bound_ind] = or_array[:, min_bound_ind]*lower_correction_fac # Replace occ. rates with corrected values
+    
+    # Special treatment for the upper correction in case user-input limits fall completely within one cell. In that case, the cell gets truncated from both sides
+    if max_bound_ind == min_bound_ind+1: # If both m_min and m_max fall within the same cell
+        interval_orig = np.log10(bounds_list[max_bound_ind]) - np.log10(m_min) # Full interval
+        interval_new = np.log10(m_max) - np.log10(m_min) # Partial interval
+    
+    else: # If m_min and m_max are separated by at least one of the bounds in bounds_list
+        interval_orig = np.log10(bounds_list[max_bound_ind]) - np.log10(bounds_list[max_bound_ind-1]) # Full interval
+        interval_new = np.log10(m_max) - np.log10(bounds_list[max_bound_ind-1]) # Partial interval
+        
+    upper_correction_fac = interval_new/interval_orig
+    
+    or_array[:, max_bound_ind-1] = or_array[:, max_bound_ind-1]*upper_correction_fac
+    
+    or_array = or_array[:, min_bound_ind:max_bound_ind+1] # Take all rows, but only columns that fall within mlim
+    #for i in range(np.shape(or_array)[1]): # For each column of or_array (ie, each set of constant-mass ORs)
+     #   if i<min_bound_ind or i>=max_bound_ind: # If the column is below or above the user-input limits --> 0 prob.
+      #      or_array[:, i] = 0
+            
+    # Finally, convert the array of probabilities into *relative* probabilities (so they add up to 100)
+    for i in range(np.shape(or_array)[0]): # For each row (ie, each set of ORs corresponding to one sep. range)
+        or_array[i] = or_array[i]/np.sum(or_array[i]) # Divide all entries by the sum of the full row
+        
+    return or_array, bounds_tuples
+
     
 
 def contour_levels(prob_array, sig_list, t_num = 1e3):
