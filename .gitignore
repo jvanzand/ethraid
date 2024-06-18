@@ -1,4 +1,4 @@
-/analysis
+d/analysis
 /build
 /cython_practice
 
@@ -18,6 +18,9 @@
 # exclude contents of results/ but keep the folder
 results/*
 !results/.gitkeep
+
+# Any h5 files, which take up too much space
+*.h5
 
 /trends/c_kepler/build
 /trends/__pycache__
