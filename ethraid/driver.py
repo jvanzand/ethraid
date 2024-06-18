@@ -131,7 +131,7 @@ def run(args):
     ##
 
     a_list, m_list, per_list, e_list, i_list,\
-    om_list, M_anom_0_list, a_inds, m_inds, prior = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
+    om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
                                                                     grid_num, num_points, e_dist)
 
     if verbose:
@@ -242,7 +242,7 @@ def run(args):
         ls.save_processed(star_name, m_star, d_star,
                           run_rv, run_astro, run_imag, 
                           post_tot, post_rv, post_astro, post_imag,
-                          prior, a_lim, m_lim, outdir=outdir, verbose=verbose)
+                          a_lim, m_lim, outdir=outdir, verbose=verbose)
     if 'raw' in save:
         if imag_calc=='approx':
             imag_data = post_imag
@@ -252,7 +252,7 @@ def run(args):
         ls.save_raw(star_name, m_star, d_star,
                     run_rv, run_astro, run_imag,
                     tot_list, rv_list, astro_list, imag_data,
-                    prior, vmag, imag_wavelength, contrast_str,
+                    vmag, imag_wavelength, contrast_str,
                     a_list, m_list, a_inds, m_inds, a_lim, m_lim, 
                     imag_calc=imag_calc, outdir=outdir, 
                     verbose=verbose)     
@@ -288,7 +288,7 @@ def plot(args):
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
     post_tot, post_rv, post_astro, post_imag,\
-    prior, a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
+    a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
 
     if "2d" in args.type:
         plotter.joint_plot(star_name, m_star, d_star,
@@ -326,7 +326,7 @@ def lims(args):
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
     post_tot, post_rv, post_astro, post_imag,\
-    prior, a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
+    a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.

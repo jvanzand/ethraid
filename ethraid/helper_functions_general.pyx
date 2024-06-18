@@ -72,12 +72,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
 
     # These are the "full" semi-major axes of the orbit, ie the sma of the ellipse traced by the 1-body solution to the 2-body problem. a = a_planet+a_star
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
-    m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
+    #m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
     
     #a_prior = spst.loguniform.pdf(a_list, a_min, a_max) # Find the PDF value of each value in a_list
     #m_prior = spst.loguniform.pdf(m_list, m_min, m_max) # Find the PDF value of each value in m_list
     
-    #m_list, m_prior = m_dist(a_list, a_lim, m_lim, num_points)
+    m_list = m_dist(a_list, a_lim, m_lim, num_points)
     
 
     # Match up a_list and m_list and get the period for each pair (in days).
@@ -421,6 +421,7 @@ cdef m_dist(double [:] a_list, tuple a_lim, tuple m_lim, int num_points):
     
     
     rel_probs, bounds_tuples = relative_probs(m_lim)
+    print("BOUNDDSSSS", bounds_tuples)
     #######################################
 
     
@@ -442,7 +443,7 @@ cdef m_dist(double [:] a_list, tuple a_lim, tuple m_lim, int num_points):
     
     # m_samples is a list of np arrays. Each np array is a long list of randomly sampled, log-uniform masses from the interval specified by the bounds in bounds_tuples
     m_samples = [spst.loguniform.rvs(mtuple[0], mtuple[1], size=num_points) for mtuple in bounds_tuples]
-    m_priors = [spst.loguniform.pdf(m_samples[i], bounds_tuples[i][0], bounds_tuples[i][1]) for i in range(len(m_samples))]
+    #m_priors = [spst.loguniform.pdf(m_samples[i], bounds_tuples[i][0], bounds_tuples[i][1]) for i in range(len(m_samples))]
     
     rands = np.random.rand(num_points) # Random numbers between 0-1
     
@@ -466,7 +467,7 @@ cdef m_dist(double [:] a_list, tuple a_lim, tuple m_lim, int num_points):
         for j in range(len(cdf)): # Each time you add another probability
             if rand<=cdf[j]: # If the random number is now less than the incremented probability
                 m = m_samples[j][i] # Then select the sample corresponding to this mass interval
-                m_pri = m_priors[j][i]
+                #m_pri = m_priors[j][i]
                 break
         """
         if rand<=prob_list[0]:
@@ -492,9 +493,9 @@ cdef m_dist(double [:] a_list, tuple a_lim, tuple m_lim, int num_points):
 
             
         m_list[i] = m
-        m_prior[i] = m_pri
+        #m_prior[i] = m_pri
 
-    return m_list, m_prior
+    return m_list#, m_prior
     
 def relative_probs(m_lim):
     """
@@ -524,13 +525,19 @@ def relative_probs(m_lim):
     # with the CLS 2 average completeness map (extrapolated to higher masses and separations)
     # Each row is the occurrence for a range of separations.
     # Each column is the occurrence for a range of masses. From left to right: 0.01-0.05 MJ, 0.05-0.3 MJ, 0.3-13 MJ, 13-80 MJ, and 80-1420 MJ.
-    or_array = np.array([[0.2028, 0.0197, 0.0279, 0.0011, 0.0023], # 0.03-0.2 AU
-                         [0.1803, 0.0597, 0.0344, 0.0010, 0.0039], # 0.2-1 AU
-                         [0.0195, 0.0769, 0.0922, 0.0070, 0.0039], # 1-4 AU
-                         [0.0185, 0.0163, 0.0802, 0.0183, 0.0194], # 4-16 AU
-                         [0.0164, 0.0182, 0.0454, 0.0377, 0.0584]]) # 16-64 AU
+    #or_array = np.array([[0.2028, 0.0197, 0.0279, 0.0011, 0.0023], # 0.03-0.2 AU
+    #                     [0.1803, 0.0597, 0.0344, 0.0010, 0.0039], # 0.2-1 AU
+    #                     [0.0195, 0.0769, 0.0922, 0.0070, 0.0039], # 1-4 AU
+    #                     [0.0185, 0.0163, 0.0802, 0.0183, 0.0194], # 4-16 AU
+    #                     [0.0164, 0.0182, 0.0454, 0.0377, 0.0584]]) # 16-64 AU
+                         
+    or_array = np.array([[0.1920, 0.0195, 0.0260, 0.0039, 0.0009, 0.0239], # 0.03-0.2 AU
+                         [0.3333, 0.0634, 0.0253, 0.0113, 0.0009, 0.0433], # 0.2-1 AU
+                         [0.1276, 0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
+                         [0.0815, 0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
+                         [0.0564, 0.0503, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
 
-    bounds_list = np.array([1/Mj2Me, 0.05, 0.3, 13, 80, 1420]) # Bounds between occurrence measurements
+    bounds_list = np.array([3/Mj2Me, 0.05, 0.3, 3, 13, 80, 1420]) # Mass bounds for occurrence measurements
 
     # User-input mass boundaries
     m_min = m_lim[0]
