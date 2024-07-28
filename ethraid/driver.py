@@ -103,15 +103,16 @@ def run(args):
     
     ## First try loading optional params. If they can't be loaded, use defaults
     optional_params = ['num_points', 'min_a', 'max_a', 
-                       'e_prior', 'a_m_prior', 'min_m', 'max_m', 'save', 'outdir']
-    default_values = [int(1e6), 1, 1e2, 
-                      'piecewise', 'cls', 1, 1e3, ['proc'], '']
+                       'e_prior', 'a_m_prior', 'min_m', 'max_m',
+                       'age_table', 'save', 'outdir']
+    default_values = [int(1e6), 1, 64, 
+                      'piecewise', 'cls', 1, 1e3, 4, ['proc'], '']
 
     num_points, min_a, max_a,\
     e_prior, a_m_prior, min_m, max_m,\
-    save, outdir = set_values(config_path, 
-                              optional_params, 
-                              default_values)
+    age_table, save, outdir = set_values(config_path, 
+                                         optional_params, 
+                                         default_values)
     
     num_points = int(num_points)
     ######################################
@@ -202,10 +203,9 @@ def run(args):
     ## Imaging
     #######################################################################################
     if run_imag:
-        imag_calc = set_values(config_path, ['imag_calc'], ['exact'])
+        imag_calc, age_table = set_values(config_path, ['imag_calc', 'age_table'], ['exact', 4])
         vmag = cm.vmag
         imag_wavelength = cm.imag_wavelength
-        age_table = cm.age_table
         contrast_str = cm.contrast_str
         
         

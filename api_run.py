@@ -58,15 +58,16 @@ def run(config_path, read_file_path=None,
 
         ## First try loading optional params. If they can't be loaded, use defaults
         optional_params = ['num_points', 'min_a', 'max_a', 
-                           'e_prior', 'a_m_prior', 'min_m', 'max_m', 'save', 'outdir']
-        default_values = [int(1e6), 1, 1e2, 
-                          'piecewise', 'cls', 1, 1e3, ['proc'], '']
+                           'e_prior', 'a_m_prior', 'min_m', 'max_m',
+                           'age_table', 'save', 'outdir']
+        default_values = [int(1e6), 1, 64, 
+                          'piecewise', 'cls', 1, 1e3, 4, ['proc'], '']
 
         num_points, min_a, max_a,\
         e_prior, a_m_prior, min_m, max_m,\
-        save, outdir = driver.set_values(config_path, 
-                                         optional_params, 
-                                         default_values)
+        age_table, save, outdir = driver.set_values(config_path, 
+                                                    optional_params, 
+                                                    default_values)
         
         num_points = int(num_points)
         ######################################
@@ -170,7 +171,6 @@ def run(config_path, read_file_path=None,
             imag_calc = driver.set_values(config_path, ['imag_calc'], ['exact'])
             vmag = cm.vmag
             imag_wavelength = cm.imag_wavelength
-            age_table = cm.age_table
             contrast_str = cm.contrast_str
         
         
@@ -308,11 +308,11 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_T001438.py'
-    read_file_path = None#'results/T001438/T001438_raw.h5'
+    # config_path = 'ethraid/local_configs/config_156141.py'
+    # read_file_path = None#'results/T001438/T001438_raw.h5'
     
-    # config_path = 'test_config_files/test3.py'
-    # read_file_path = 'results/test3/test3_raw.h5'
+    config_path = 'test_config_files/test1.py'
+    read_file_path = None#'results/test1/test1_raw.h5'
     
     
     plot=True
