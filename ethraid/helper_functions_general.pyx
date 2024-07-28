@@ -22,7 +22,7 @@ au = 14959787070000.0
 pc_in_cm = 3.086e18
 Mj2Me = 317.828133
 
-def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_points, str e_dist):
+def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_points, str e_prior, str a_m_prior):
     """
     Create the parameter arrays which will be used for the RV and astrometry posteriors.
     
@@ -72,12 +72,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
 
     # These are the "full" semi-major axes of the orbit, ie the sma of the ellipse traced by the 1-body solution to the 2-body problem. a = a_planet+a_star
     a_list = spst.loguniform.rvs(a_min, a_max, size=num_points)
-    #m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
+    m_list = spst.loguniform.rvs(m_min, m_max, size=num_points)
     
     #a_prior = spst.loguniform.pdf(a_list, a_min, a_max) # Find the PDF value of each value in a_list
     #m_prior = spst.loguniform.pdf(m_list, m_min, m_max) # Find the PDF value of each value in m_list
     
-    m_list = m_dist(a_list, a_lim, m_lim, num_points)
+    am_pri_list = a_m_pri(a_list, m_list, a_lim, m_lim, num_points, a_m_prior) # Prior probs on a and m
     
 
     # Match up a_list and m_list and get the period for each pair (in days).
@@ -85,7 +85,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     per_list = P_list(a_list, m_list, m_star)
     
     # Eccentricities drawn from specified distribution.
-    e_list = ecc_dist(m_list, per_list, num_points, dist=e_dist)
+    e_list = ecc_pri(m_list, per_list, num_points, dist=e_prior)
 
     cosi_list = np.random.uniform(0, 1, num_points)
     i_list = np.arccos(cosi_list)
@@ -110,7 +110,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     #tot_prior = a_prior*m_prior*e_prior*i_prior # Multiply priors to obtain total prior (note: not log)
 
     return a_list, m_list, per_list, e_list, i_list,\
-           om_list, M_anom_0_list, a_inds, m_inds#, tot_prior
+           om_list, M_anom_0_list, a_inds, m_inds, am_pri_list
 
 def tot_list(double [:] rv_post_list, double [:] astro_post_list, 
              double [:] imag_post_list, int num_points):
@@ -146,7 +146,7 @@ def tot_list(double [:] rv_post_list, double [:] astro_post_list,
 
 
 
-def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
+def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag, double [:] log_a_m_prior_list,
                          long [:] a_inds, long [:] m_inds, int grid_num):
             
     """
@@ -174,7 +174,7 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
     cdef int i, a_i, m_i
     cdef double [:,:] rv_ast_array = np.zeros(shape=(grid_num,grid_num), dtype=np.float64)
     
-    rv_ast_array = post_single(tot_list, a_inds, m_inds, grid_num)
+    rv_ast_array = post_single(tot_list, log_a_m_prior_list, a_inds, m_inds, grid_num)
     
     
     # Not cdef because then I can't change it from memview to np array
@@ -189,7 +189,7 @@ def post_tot_approx_imag(double [:] tot_list, double [:,:] post_imag,
     return np.array(tot_prob_array)/np.array(tot_prob_array).sum()
 
 
-def post_single(double [:] log_lik_list, long [:] a_inds, long [:] m_inds, int grid_num):
+def post_single(double [:] log_lik_list, double [:] log_a_m_prior_list, long [:] a_inds, long [:] m_inds, int grid_num):
     """
     Form a list of log-likelihoods into a 2D array of (non-log) posterior probabilities.
     
@@ -216,7 +216,7 @@ def post_single(double [:] log_lik_list, long [:] a_inds, long [:] m_inds, int g
         a_i = a_inds[i]-1
         m_i = m_inds[i]-1
         
-        prob_array[m_i, a_i] += np.exp(log_lik_list[i])
+        prob_array[m_i, a_i] += np.exp(log_lik_list[i] + log_a_m_prior_list[i])
         
     
     return np.array(prob_array)/np.array(prob_array).sum()
@@ -267,7 +267,7 @@ cpdef P(double a, double m_planet, double m_star):
     return per
 
 
-cdef ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piecewise'):
+cdef ecc_pri(double [:] m_list, double [:] per_list, int num_points, dist='piecewise'):
     """
     Sample a list of random eccentricities whose distribution depends on a and m.
     Kipping(2013) advocates two distributions for P below and above 382.3 days.
@@ -291,12 +291,7 @@ cdef ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piec
                                     e_sample1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
                                     e_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    e_sample4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)#,\
-                                    #e_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #e_prior1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #e_prior2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #e_prior3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #e_prior4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+                                    e_sample4 = np.ndarray(shape=(int(num_points)), dtype=np.float64)
     
     # Fix e=0
     if dist=='zero':
@@ -375,127 +370,104 @@ cdef ecc_dist(double [:] m_list, double [:] per_list, int num_points, dist='piec
             #e_prior[i] = e_pri
             
     else:
-        raise Exception('Error: e_dist must be one of the options supported by the ecc_dist function.')
+        raise Exception('Error: e_prior must be one of the options supported by the ecc_prior function.')
     
     
     return e_list#, e_prior
 
-cdef m_dist(double [:] a_list, tuple a_lim, tuple m_lim, int num_points):
+cdef a_m_pri(double [:] a_list, double [:] m_list, tuple a_lim, tuple m_lim, int num_points, dist='cls'):
     """
-    Sample a list of random masses whose distribution is based on a.
-    This distribution was derived from the CLS catalog and CLS 2
-    completeness map: divide the parameter space into 4 intervals of
-    separation, correct for completeness, and calculate the relative
-    occurrence rates of planets, BDs, and stars in each interval based
-    on binomial statistics. Then, for a given a, assign planet, BD, or
-    star based on relative occurrence rates, and then sample log-uniformly
-    from the chosen mass range.
+    Calculate a list of sample weights based on mass and semi-major
+    axis. This distribution was derived from the CLS catalog and CLS 2
+    completeness map: divide the parameter space into intervals (bins) of
+    mass/separation, correct for completeness, and calculate the relative
+    occurrence rates objects in each interval using binomial statistics.
+    Then go through the log-uniformly sampled a/m lists, and assign each
+    sample a weight based on its a and m.
 
     Arguments:
-        m_list (list of floats, M_jup): List of companion separations
-        num_points (int): Number of random masses to generate
+        a_list, m_list (lists of floats, AU/M_jup): List of log-uniformly
+                                                    sampled companion masses 
+                                                    and separations
+        a_lim, m_lim (2-tuples of floats): User-input limits over which a and m
+                                           are sampled. Must fall within (0.03-64)
+                                           for a and (0.01-1300) for m
+        num_points (int): Number of weights to generate
+        dist (str): Either "loguniform" or "cls", indicating whether a and m
+                    should be drawn from log-uniform distributions or should
+                    have the CLS a/m prior applied to them.
 
     Returns:
-        m_list, m_prior (lists of floats): List of randomly sampled masses and
-                                           corresponding prior probabilities
+        a_m_log_prior (list of floats): Prior probability weights for the input
+                                        a/m lists.
     """
     cdef int i
-    cdef double a, rand, m, m_pri
-    cdef list m_samples, m_priors
+    cdef double a_ind, m_ind
 
-    cdef np.ndarray[double, ndim=1] m_list = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    m_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    rands = np.ndarray(shape=(int(num_points)), dtype=np.float64)
-                                    #m_sample1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #m_sample2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #m_sample3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #m_prior1 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #m_prior2 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                                    #m_prior3 = np.ndarray(shape=(int(num_points)), dtype=np.float64),\
-                     
-    # User-input separation boundaries
-    #a_min = a_lim[0]
-    #a_max = a_lim[1]
-    #if a_min<0.03 or a_max>64:
-        #raise Exception("Separation limits must be between 0.03 - 64 AU to use mass prior")
-    
-    
-    rel_probs, bounds_tuples = relative_probs(m_lim)
-    print("BOUNDDSSSS", bounds_tuples)
-    #######################################
-
-    
-    #USE length of bounds_tuples and m_min to infer which bounds there are
-    """
-    m_sample0 = spst.loguniform.rvs(3/Mj2Me, 0.05, size=num_points)
-    m_sample1 = spst.loguniform.rvs(0.05, 0.3, size=num_points)
-    m_sample2 = spst.loguniform.rvs(0.3, 13, size=num_points)
-    m_sample3 = spst.loguniform.rvs(13, 80, size=num_points)
-    m_sample4 = spst.loguniform.rvs(80, 1400, size=num_points)
-    
-    
-    m_prior0 = spst.loguniform.pdf(m_sample0, 3/Mj2Me, 0.05)
-    m_prior1 = spst.loguniform.pdf(m_sample1, 0.05, 0.3)
-    m_prior2 = spst.loguniform.pdf(m_sample2, 0.3, 13)
-    m_prior3 = spst.loguniform.pdf(m_sample3, 13, 80)
-    m_prior4 = spst.loguniform.pdf(m_sample4, 80, 1400)
-    """
-    
-    # m_samples is a list of np arrays. Each np array is a long list of randomly sampled, log-uniform masses from the interval specified by the bounds in bounds_tuples
-    m_samples = [spst.loguniform.rvs(mtuple[0], mtuple[1], size=num_points) for mtuple in bounds_tuples]
-    #m_priors = [spst.loguniform.pdf(m_samples[i], bounds_tuples[i][0], bounds_tuples[i][1]) for i in range(len(m_samples))]
-    
-    rands = np.random.rand(num_points) # Random numbers between 0-1
-    
-    for i in range(num_points):
-        a = a_list[i]
-        rand = rands[i]
+    cdef np.ndarray[double, ndim=1] a_m_log_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64)
+              
+    if dist=='loguniform':
+        pass # a_m_log_prior was initialized as an array of 0s, so leave it
         
-        if a<=0.2:
-            prob_list = rel_probs[0]
-        elif 0.2<a<=1:
-            prob_list = rel_probs[1]
-        elif 1<a<=4:
-            prob_list = rel_probs[2]
-        elif 4<a<=16:
-            prob_list = rel_probs[3]
-        elif a>16: # If desired, remove above Exception to approximate that this prior holds for a>64 AU.
-            prob_list = rel_probs[4]
+    elif dist=='cls':
+        # Hard-coded binomial occurrence rates measured from the CLS catalog, corrected
+        # with the CLS 2 average completeness map (extrapolated to higher masses and separations)
+        # Each row is the occurrence for a range of separations.
+        # Each column is the occurrence for a range of masses. From left to right: 0.01-0.05 MJ, 0.05-0.3 MJ, 0.3-3 MJ. 3-13 MJ, 13-80 MJ, and 80-1300 MJ.
+        ## Note: the cells with values of 1 are regions where there were zero detected planets, and zero completeness
+        or_array = np.array([[0.1920, 0.0195, 0.0260, 0.0039, 0.0009, 0.0239], # 0.03-0.2 AU
+                             [0.3333, 0.0634, 0.0253, 0.0113, 0.0009, 0.0433], # 0.2-1 AU
+                             [1, 0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
+                             [1, 0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
+                             [1, 1, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
+         
+        ## This block makes all SMA columns equally probable. Removing bc I don't think that's  actually right.
+        #for i in range(np.shape(or_array)[0]): # For each row (ie, each set of ORs corresponding to one sep. range)
+         #   or_array[i] = or_array[i]/np.sum(or_array[i]) 
             
-        cdf = np.cumsum(prob_list)
-
-        for j in range(len(cdf)): # Each time you add another probability
-            if rand<=cdf[j]: # If the random number is now less than the incremented probability
-                m = m_samples[j][i] # Then select the sample corresponding to this mass interval
-                #m_pri = m_priors[j][i]
-                break
-        """
-        if rand<=prob_list[0]:
-            m = m_sample0[i]
-            m_pri = m_prior0[i]
-
-        elif rand<=(prob_list[0]+prob_list[1]):
-            m = m_sample1[i]
-            m_pri = m_prior1[i]
-
-        elif rand<=(prob_list[0]+prob_list[1]+prob_list[2]):
-            m = m_sample2[i]
-            m_pri = m_prior2[i]
-            
-        elif rand<=(prob_list[0]+prob_list[1]+prob_list[2]+prob_list[3]):
-            m = m_sample3[i]
-            m_pri = m_prior3[i]
+        or_array = or_array/np.sum(or_array) # Normalize array
         
-        elif rand<=(prob_list[0]+prob_list[1]+prob_list[2]+prob_list[3]+prob_list[4]):
-            m = m_sample4[i]
-            m_pri = m_prior4[i]
-        """
-
+        log_or_array = np.log(or_array) # ln of prior probabilities
+                    
+        # User-input mass/sma boundaries
+        a_min, a_max = a_lim[0], a_lim[1]
+        m_min, m_max = m_lim[0], m_lim[1]
+    
+        if a_min<0.03 or a_max>64 or m_min<3/Mj2Me or m_max>1300:
+            st0 = "User-input mass/SMA bounds: {}-{} AU, {}-{} MJ.\n".format(a_min, a_max, m_min, m_max)
+            st1 = "Mass prior is defined between a = 0.03-64 AU, M = 0.01 - 1300 MJ.\n"
+            st2 = "Please adjust limits to fit within these bounds.\n"
+            raise Exception(st0+st1+st2)
+    
+        a_bounds_list = np.array([0.03, 0.2, 1., 4., 16., 64.]) # SMA bounds for occurrence measurements (AU)
+        m_bounds_list = np.array([3/Mj2Me, 0.05, 0.3, 3, 13, 80, 1300]) # Mass bounds for occurrence measurements (MJ)
+    
+        ######################################
+        # Find the masses in each bounds_list that fall within the limits. Then make a list of bin edges.
+        #a_middles = a_bounds_list[np.where((a_min<a_bounds_list)&(a_bounds_list<a_max))]
+        #m_middles = m_bounds_list[np.where((m_min<m_bounds_list)&(m_bounds_list<m_max))]
+    
+        #a_bin_edges = [a_min, *a_middles, a_max] # SMA bin edges that are book-ended by the user-input limits
+        #m_bin_edges = [m_min, *m_middles, m_max] # Mass bin edges that are book-ended by the user-input limits
+        #print("BINZZZZ", a_bin_edges, m_bin_edges)
+    
+    
+        #log_rel_probs = relative_probs(m_lim) # Get the cleaned up array of probabilities, plus the mass bounds that fall within the user-input mass limits
+        #######################################
+    
+        a_inds = np.digitize(a_list, bins=a_bounds_list)
+        m_inds = np.digitize(m_list, bins=m_bounds_list)
+    
+        for i in range(num_points):
+            a_ind = a_inds[i]-1
+            m_ind = m_inds[i]-1
+            a_m_log_prior[i] = log_or_array[int(a_ind), int(m_ind)]
             
-        m_list[i] = m
-        #m_prior[i] = m_pri
+    else:
+        raise Exception('Error: a_m_prior must be one of the options supported by the a_m_prior function.')
+        
 
-    return m_list#, m_prior
+    return a_m_log_prior
     
 def relative_probs(m_lim):
     """
@@ -524,30 +496,29 @@ def relative_probs(m_lim):
     # Hard-coded binomial occurrence rates measured from the CLS catalog, corrected
     # with the CLS 2 average completeness map (extrapolated to higher masses and separations)
     # Each row is the occurrence for a range of separations.
-    # Each column is the occurrence for a range of masses. From left to right: 0.01-0.05 MJ, 0.05-0.3 MJ, 0.3-13 MJ, 13-80 MJ, and 80-1420 MJ.
-    #or_array = np.array([[0.2028, 0.0197, 0.0279, 0.0011, 0.0023], # 0.03-0.2 AU
-    #                     [0.1803, 0.0597, 0.0344, 0.0010, 0.0039], # 0.2-1 AU
-    #                     [0.0195, 0.0769, 0.0922, 0.0070, 0.0039], # 1-4 AU
-    #                     [0.0185, 0.0163, 0.0802, 0.0183, 0.0194], # 4-16 AU
-    #                     [0.0164, 0.0182, 0.0454, 0.0377, 0.0584]]) # 16-64 AU
+    # Each column is the occurrence for a range of masses. From left to right: 0.01-0.05 MJ, 0.05-0.3 MJ, 0.3-3 MJ. 3-13 MJ, 13-80 MJ, and 80-1300 MJ.
+    ## Note: the cells with values of 1 regions where there were zero detected planets, and zero completeness
                          
+    
     or_array = np.array([[0.1920, 0.0195, 0.0260, 0.0039, 0.0009, 0.0239], # 0.03-0.2 AU
                          [0.3333, 0.0634, 0.0253, 0.0113, 0.0009, 0.0433], # 0.2-1 AU
-                         [0.1276, 0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
-                         [0.0815, 0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
-                         [0.0564, 0.0503, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
+                         [1, 0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
+                         [1, 0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
+                         [1, 1, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
 
-    bounds_list = np.array([3/Mj2Me, 0.05, 0.3, 3, 13, 80, 1420]) # Mass bounds for occurrence measurements
+
+    bounds_list = np.array([3/Mj2Me, 0.05, 0.3, 3, 13, 80, 1300]) # Mass bounds for occurrence measurements
 
     # User-input mass boundaries
     m_min = m_lim[0]
     m_max = m_lim[1]
     
-    # First, find the masses in bounds_list that fall within the m limits. Then make tuples describing intervals.
-    middles = bounds_list[np.where((m_min<bounds_list)&(bounds_list<m_max))]
-    middle_tuples = [(middles[i], middles[i+1]) for i in range(len(middles)-1)]
-    # The full set of tuples consists of middle_tuples with an extra interval on each side, defined with the user-input mass limits.
-    bounds_tuples = [(m_min, middle_tuples[0][0])]+middle_tuples+[(middle_tuples[-1][1], m_max)]
+    # First, find the masses in bounds_list that fall within the m limits. Then make a list of bin edges.
+    #middles = bounds_list[np.where((m_min<bounds_list)&(bounds_list<m_max))]
+    
+    #bin_edges = [m_min, *middles, m_max] # Bin edges to be used to sort masses in the m_dist function
+    #print("BINZZZZ", bin_edges)
+    
 
     # Second, determine the fraction by which to reduce prior prob.s on the edges based on user-input m_lims
     # If the user-input m_lims are beyond the limits where the prior is defined, there will be a ValueError
@@ -557,8 +528,9 @@ def relative_probs(m_lim):
 
         # Find the index of the smallest m_bound that is larger than the user-input m_max 
         max_bound_ind = np.min(np.where((bounds_list-m_max)>0))
+
     except ValueError:
-        print("Mass limits must be between 0.004 - 1400 M_Jup") # Technically 0.003146 and 1420, but leave a safety cushion
+        print("Mass limits must be between 0.004 - 1300 M_Jup") # Technically 0.003146 and 1300, but leave a safety cushion
         
     # Lower interval probability correction. Determine how much of the bottom mass box to "cut off"
     interval_orig = np.log10(bounds_list[min_bound_ind+1]) - np.log10(bounds_list[min_bound_ind]) # Full interval
@@ -580,17 +552,18 @@ def relative_probs(m_lim):
     upper_correction_fac = interval_new/interval_orig
     
     or_array[:, max_bound_ind-1] = or_array[:, max_bound_ind-1]*upper_correction_fac
-    
+    print("OR ARR1", or_array)
+
     or_array = or_array[:, min_bound_ind:max_bound_ind+1] # Take all rows, but only columns that fall within mlim
-    #for i in range(np.shape(or_array)[1]): # For each column of or_array (ie, each set of constant-mass ORs)
-     #   if i<min_bound_ind or i>=max_bound_ind: # If the column is below or above the user-input limits --> 0 prob.
-      #      or_array[:, i] = 0
+    print("OR ARR2", or_array)
             
     # Finally, convert the array of probabilities into *relative* probabilities (so they add up to 100)
     for i in range(np.shape(or_array)[0]): # For each row (ie, each set of ORs corresponding to one sep. range)
         or_array[i] = or_array[i]/np.sum(or_array[i]) # Divide all entries by the sum of the full row
         
-    return or_array, bounds_tuples
+    log_or_array = np.log(or_array) # ln of prior probabilities
+        
+    return log_or_array
 
     
 

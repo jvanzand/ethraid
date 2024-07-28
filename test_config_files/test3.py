@@ -12,7 +12,9 @@ num_points = 1e6
 grid_num = 100
 ## See below for min_a and min_m, calculated in terms of the RV data
 # Eccentricity distribution for sampled orbits
-e_dist = 'piecewise'
+e_prior = 'piecewise'
+# Mass/SMA prior
+a_m_prior = 'cls'
 
 
 # STELLAR PARAMS
@@ -48,7 +50,7 @@ min_a_and_m = hlp.min_a_and_m(gammadot, gammaddot, rv_baseline, min_per, m_star)
 min_a = min_a_and_m[0]
 min_m = min_a_and_m[1]
 
-max_a = 1e2
+max_a = 64
 max_m = 1e3
 ###################
 

@@ -12,12 +12,15 @@ num_points = 1e4
 grid_num = 50
 # Minimum and maximum semi-major axes to sample (AU)
 min_a = 1.6489
-max_a = 1e2
+max_a = 64
 # Minimum and maximum masses to sample (M_Jup)
 min_m = 0.769
 max_m = 1e3
 # Eccentricity distribution for sampled orbits
-e_dist = 'kipping'
+e_prior = 'kipping'
+# Mass/SMA prior
+a_m_prior = 'loguniform'
+
 
 
 # STELLAR PARAMS

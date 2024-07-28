@@ -11,12 +11,14 @@ num_points = 1e6
 grid_num = 70
 # Minimum and maximum semi-major axes to sample (AU)
 min_a = 2
-max_a = 1e2
+max_a = 64
 # Minimum and maximum masses to sample (M_Jup)
 min_m = 1
 max_m = 1e3
 # Eccentricity distribution for sampled orbits
-e_dist = 'kipping'
+e_prior = 'piecewise'
+# Mass/SMA prior
+a_m_prior = 'cls'
 
 
 # STELLAR PARAMS
@@ -71,8 +73,8 @@ imag_wavelength = 2.2
 # Table 1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
 age_table = 4
 # Path to contrast curve
-# contrast_str = os.path.join(_ROOT, 'data/clean_curves/TOI1471_Brgamma.csv')
-contrast_str = 'ethraid/ethraid/data/clean_curves/TOI1471_Brgamma.csv'
+contrast_str = os.path.join(_ROOT, 'data/clean_curves/TOI1471_Brgamma.csv')
+#contrast_str = 'ethraid/ethraid/data/clean_curves/TOI1471_Brgamma.csv'
 # Epoch of imaging observations (BJD).
 imag_epoch = 2458991.236308
 

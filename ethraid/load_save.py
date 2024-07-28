@@ -6,13 +6,15 @@ from ethraid.compiled import helper_functions_general as hlp
 from ethraid.compiled import helper_functions_imaging as hlp_imag
 
 
-def load(read_file_path, grid_num=100, verbose=False):
+def load(read_file_path, grid_num=100, use_prior=True, verbose=False):
     """
     Loads probability arrays from a specified h5py file.
     
     Arguments:
         read_file_path (str): Path to saved data
         grid_num (int): Desired array shape
+        use_prior (bool): Whether to apply log_a_m_prior to
+                          the loaded likelihoods
     
     Returns:
         star_name (str): Name of star (does not need to be official)
@@ -30,7 +32,7 @@ def load(read_file_path, grid_num=100, verbose=False):
         post_imag (array of floats): Model probabilities given imaging data only, 
                                      marginalized over all orbital parameters 
                                      except a and m
-        prior (array of floats): Prior probability of each model.
+        log_a_m_prior (array of floats): Prior mass/separation probability of each model.
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max)
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
@@ -64,10 +66,10 @@ def load(read_file_path, grid_num=100, verbose=False):
                       "                Only raw arrays can be reshaped.")
         
         post_rv = np.array(post_file.get('post_rv')) # Marginalized probabity array associated with RV models
-        post_astro = np.array(post_file.get('post_astro')) # Marginalized probabity array associated with astrometry models
-        post_imag = np.array(post_file.get('post_imag')) # Marginalized probabity array associated with imaging models
+        post_astro = np.array(post_file.get('post_astro')) # Marginalized probability array associated with astrometry models
+        post_imag = np.array(post_file.get('post_imag')) # Marginalized probability array associated with imaging models
         
-        post_tot = np.array(post_file.get('post_tot')) # Marginalized probabity array associated with RV/astro models
+        post_tot = np.array(post_file.get('post_tot')) # Marginalized probability array associated with RV/astro models
         
         
     elif data_type=='raw':
@@ -80,9 +82,14 @@ def load(read_file_path, grid_num=100, verbose=False):
         tot_list = np.array(post_file.get('tot_list')) # Probability list associated with RV/astro and possibly models
         rv_list = np.array(post_file.get('rv_list')) # Probability list associated with RV models
         astro_list = np.array(post_file.get('astro_list')) # Probability list of astro models
-        # imag_list = np.array(post_file.get('imag_list')) # Probability list of imaging models
+        
         a_list = np.array(post_file.get('a_list')) # Semi-major axis values
         m_list = np.array(post_file.get('m_list')) # Companion mass values
+        
+        if use_prior==True:
+            log_a_m_prior = np.array(post_file.get('log_a_m_prior')) # Prior probabilities of a/m values
+        else:
+            log_a_m_prior = np.zeros_like(a_list) # If prior is not desired, replace with zeros
         
         # Recalculate a and m indices.
         #####################################################################
@@ -93,9 +100,8 @@ def load(read_file_path, grid_num=100, verbose=False):
         m_inds = np.digitize(m_list, bins = m_bins)
         #####################################################################
             
-        post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
-        post_astro = hlp.post_single(astro_list, a_inds, m_inds, grid_num)
-        # post_imag = hlp.post_single(imag_list, a_inds, m_inds, grid_num)
+        post_rv = hlp.post_single(rv_list, log_a_m_prior, a_inds, m_inds, grid_num)
+        post_astro = hlp.post_single(astro_list, log_a_m_prior, a_inds, m_inds, grid_num)
         
         if run_imag:
             
@@ -103,6 +109,7 @@ def load(read_file_path, grid_num=100, verbose=False):
                 vmag = np.array(post_file.get('vmag'))
                 imag_wavelength = np.array(post_file.get('imag_wavelength'))
                 contrast_str = post_file.get('contrast_str').asstr()[()]
+                age_table = np.array(post_file.get('age_table'))
                 imag_calc = post_file.get('imag_calc').asstr()[()]
                 
                 no_None = not any([i is None for i in [vmag, imag_wavelength, contrast_str, imag_calc]])
@@ -115,9 +122,12 @@ def load(read_file_path, grid_num=100, verbose=False):
             
             if imag_calc=='exact':
                 imag_list = np.array(post_file.get('imag_list')) # Probability list of imaging models
-                post_imag = hlp.post_single(imag_list, a_inds, m_inds, grid_num)
+                #post_imag = hlp.post_single(imag_list, log_a_m_prior, a_inds, m_inds, grid_num)
+                ## New change: save and plot the *approx* imag array even when calculating imag exactly (but still calculate post_tot exactly)
+                post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, age_table,
+                                                contrast_str, a_lim, m_lim, grid_num)
             
-                post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
+                post_tot = hlp.post_single(tot_list, log_a_m_prior, a_inds, m_inds, grid_num)
             
             elif imag_calc=='approx':
                 post_imag = np.array(post_file.get('post_imag'))
@@ -126,13 +136,13 @@ def load(read_file_path, grid_num=100, verbose=False):
                     post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, 
                                                     contrast_str, a_lim, m_lim, grid_num)
             
-                post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
+                post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, log_a_m_prior, a_inds, m_inds, grid_num)
         
         else:
             # If run_imag=False, then imag_list was saved as an array of 1s. Load it and reshape as needed.
             imag_list = np.array(post_file.get('imag_list'))
-            post_imag = hlp.post_single(imag_list, a_inds, m_inds, grid_num) # Define post_imag solely so that it can be returned
-            post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num) # run_imag == False, so do not include post_imag in calculation
+            post_imag = hlp.post_single(imag_list, log_a_m_prior, a_inds, m_inds, grid_num) # Define post_imag solely so that it can be returned
+            post_tot = hlp.post_single(tot_list, log_a_m_prior, a_inds, m_inds, grid_num) # run_imag == False, so do not include post_imag in calculation
 
     return_tuple = (star_name, m_star, d_star, 
                     run_rv, run_astro, run_imag, 
@@ -144,9 +154,10 @@ def load(read_file_path, grid_num=100, verbose=False):
 def save_raw(star_name, m_star, d_star,
              run_rv, run_astro, run_imag, 
              tot_list, rv_list, astro_list, imag_data,
-             vmag, imag_wavelength, contrast_str,
-             a_list, m_list, a_inds, m_inds, a_lim, m_lim, 
-             imag_calc='exact', outdir='', verbose=False):
+             vmag, imag_wavelength, contrast_str, age_table,
+             log_a_m_prior, a_list, m_list, a_inds, m_inds, 
+             a_lim, m_lim, imag_calc='exact', outdir='', 
+             verbose=False):
          
          """
          Saves raw 1D probability arrays to a specified h5py file.
@@ -172,7 +183,7 @@ def save_raw(star_name, m_star, d_star,
                                                   imag_calc is 'exact' and a 
                                                   2D array if imag_calc is 
                                                   'approx'.
-             prior (array of floats): Prior probability of each model.
+             log_a_m_prior (array of floats): Prior mass/separation probability of each model.
 
              
              vmag (mag): Apparent V-band magnitude of host star
@@ -214,6 +225,7 @@ def save_raw(star_name, m_star, d_star,
          post_file.create_dataset('tot_list', data=tot_list)
          post_file.create_dataset('rv_list', data=rv_list)
          post_file.create_dataset('astro_list', data=astro_list)
+         post_file.create_dataset('log_a_m_prior', data=log_a_m_prior)
          
          # Check if provided imaging data is exact (1d list) or approx (2d array)
          # This is only relevant for save_raw, because in save_processed only the 2d arrays are saved
@@ -228,6 +240,7 @@ def save_raw(star_name, m_star, d_star,
              post_file.create_dataset('vmag', data=vmag)
              post_file.create_dataset('imag_wavelength', data=imag_wavelength)
              post_file.create_dataset('contrast_str', data=contrast_str)
+             post_file.create_dataset('age_table', data=age_table)
              post_file.create_dataset('imag_calc', data=imag_calc)
         
          except Exception as err:

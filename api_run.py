@@ -58,14 +58,15 @@ def run(config_path, read_file_path=None,
 
         ## First try loading optional params. If they can't be loaded, use defaults
         optional_params = ['num_points', 'min_a', 'max_a', 
-                           'e_dist', 'min_m', 'max_m', 'save', 'outdir']
+                           'e_prior', 'a_m_prior', 'min_m', 'max_m', 'save', 'outdir']
         default_values = [int(1e6), 1, 1e2, 
-                          'piecewise', 1, 1e3, ['proc'], '']
+                          'piecewise', 'cls', 1, 1e3, ['proc'], '']
 
         num_points, min_a, max_a,\
-        e_dist, min_m, max_m, save, outdir = driver.set_values(config_path, 
-                                                optional_params, 
-                                                default_values)
+        e_prior, a_m_prior, min_m, max_m,\
+        save, outdir = driver.set_values(config_path, 
+                                         optional_params, 
+                                         default_values)
         
         num_points = int(num_points)
         ######################################
@@ -94,8 +95,16 @@ def run(config_path, read_file_path=None,
 
         start_list_time = time.time()#######################################################
         a_list, m_list, per_list, e_list, i_list,\
-        om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
-                                                                         grid_num, num_points, e_dist)
+        om_list, M_anom_0_list, a_inds, m_inds, log_a_m_prior = hlp.make_arrays(m_star, a_lim, m_lim,\
+                                                                                grid_num, num_points,\
+                                                                                e_prior, a_m_prior)
+                                                                         
+        # m_prior_array = hlp.post_single(np.ones(num_points), log_m_prior, a_inds, m_inds, grid_num)
+        # import matplotlib.pyplot as plt
+        # from matplotlib import colors
+        # plt.imshow(m_prior_array, origin="lower")#, norm=colors.LogNorm())
+        # plt.colorbar(); plt.show()
+        # sdfsd
         end_list_time = time.time()#######################################################
                                                                  
         if verbose:
@@ -120,7 +129,8 @@ def run(config_path, read_file_path=None,
             rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
                                      per_list, cm.m_star, rv_epoch,
                                      gammadot, gammadot_err, gammaddot, gammaddot_err)
-            post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
+
+            post_rv = hlp.post_single(rv_list, log_a_m_prior, a_inds, m_inds, grid_num)
     
         else:
             rv_list = np.zeros(num_points) # 1D arrays contain log-likelihoods
@@ -146,7 +156,7 @@ def run(config_path, read_file_path=None,
                                               om_list, M_anom_0_list, per_list,
                                               m_star, d_star, delta_mu, delta_mu_err)                     
 
-            post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
+            post_astro = np.array(hlp.post_single(astro_list, log_a_m_prior, a_inds, m_inds, grid_num))
 
         else:
             astro_list = np.zeros(num_points) # 1D arrays contain log-likelihoods
@@ -174,7 +184,10 @@ def run(config_path, read_file_path=None,
                                                d_star, vmag, imag_wavelength, age_table,
                                                imag_epoch, contrast_str)
                                                
-                post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
+                #post_imag= hlp.post_single(imag_list, log_a_m_prior, a_inds, m_inds, grid_num)
+                ## New change: save and plot the *approx* imag array even when calculating imag exactly (but still calculate post_tot exactly)
+                post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, age_table,
+                                                contrast_str, a_lim, m_lim, grid_num)
     
             elif imag_calc == 'approx':
                 imag_list = np.zeros(num_points) # Dummy list to pass to tot_list() function
@@ -197,19 +210,17 @@ def run(config_path, read_file_path=None,
         ###################################################################################
         start_tot_time = time.time()#######################################################
         
-        # tot_list is a 1D array of log-likelihoods for all data
+        # tot_list is a 1D array of log-likelihoods for all data. No priors incorporated yet.
         tot_list = np.array(hlp.tot_list(rv_list, astro_list, imag_list, num_points))
         
         # If imag=='exact', then post_tot is the result of exponentiating imag_list and reshaping it into a 2D array. Otherwise there is a special treatment for the imag_calc=="approx" case.
         if cm.run_imag and imag_calc=='exact':
-            post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
+            post_tot = hlp.post_single(tot_list, log_a_m_prior, a_inds, m_inds, grid_num)
         
         else:
             # Need to multiply by post_imag in approx imaging case
-            post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
+            post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, log_a_m_prior, a_inds, m_inds, grid_num)
             
-        # import pdb; pdb.set_trace()
-        # print("This is the type, and I do",)
         end_tot_time = time.time()#######################################################
         #######################################################################################
         #######################################################################################
@@ -254,9 +265,9 @@ def run(config_path, read_file_path=None,
             ls.save_raw(star_name, m_star, d_star, 
                         run_rv, run_astro, run_imag,
                         tot_list, rv_list, astro_list, imag_data,
-                        vmag, imag_wavelength, contrast_str,
-                        a_list, m_list, a_inds, m_inds, a_lim, m_lim, 
-                        imag_calc=imag_calc, outdir=outdir, 
+                        vmag, imag_wavelength, contrast_str, age_table,
+                        log_a_m_prior, a_list, m_list, a_inds, m_inds, 
+                        a_lim, m_lim, imag_calc=imag_calc, outdir=outdir, 
                         verbose=False)
 
     # If read_file_path is NOT None, load in existing data:
@@ -297,9 +308,11 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    config_path = 'ethraid/local_configs/config_191939.py'
-    #config_path = 'test_config_files/test3.py'
-    read_file_path = None#'results/T001438/T001438_processed.h5'
+    config_path = 'ethraid/local_configs/config_T001438.py'
+    read_file_path = None#'results/T001438/T001438_raw.h5'
+    
+    # config_path = 'test_config_files/test3.py'
+    # read_file_path = 'results/test3/test3_raw.h5'
     
     
     plot=True

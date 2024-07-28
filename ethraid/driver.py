@@ -31,6 +31,19 @@ def run(args):
         args: Command line arguments, especially config,
               a config file which contains the following:
     
+        num_points (int): Number of orbits to simulate
+        grid_num (int): Number of mass and semi-major axis
+                        bins to divide the parameter space
+                        into: grid_num x grid_num
+        min_a, max_a (AU): Min and max semi-major axis
+                           values to sample over
+        min_m, max_m (Jupiter masses): Min and max semi-major 
+                                       axis values to sample 
+                                       over
+        
+        e_prior (str): Eccentricity prior to sample from
+        a_m_prior (str): Mass and SMA prior to sample from
+    
         star_name (str): Name of host star
         m_star (Jupiter masses): Mass of host star
         d_star (AU): Distance to host star
@@ -90,14 +103,15 @@ def run(args):
     
     ## First try loading optional params. If they can't be loaded, use defaults
     optional_params = ['num_points', 'min_a', 'max_a', 
-                       'e_dist', 'min_m', 'max_m', 'save', 'outdir']
-    default_values = [1e6, 1, 1e2, 
-                      'piecewise', 1, 1e3, ['proc'], '']
+                       'e_prior', 'a_m_prior', 'min_m', 'max_m', 'save', 'outdir']
+    default_values = [int(1e6), 1, 1e2, 
+                      'piecewise', 'cls', 1, 1e3, ['proc'], '']
 
     num_points, min_a, max_a,\
-    e_dist, min_m, max_m, save, outdir = set_values(config_path, 
-                                            optional_params, 
-                                            default_values)
+    e_prior, a_m_prior, min_m, max_m,\
+    save, outdir = set_values(config_path, 
+                              optional_params, 
+                              default_values)
     
     num_points = int(num_points)
     ######################################
@@ -131,8 +145,9 @@ def run(args):
     ##
 
     a_list, m_list, per_list, e_list, i_list,\
-    om_list, M_anom_0_list, a_inds, m_inds = hlp.make_arrays(cm.m_star, a_lim, m_lim,\
-                                                                    grid_num, num_points, e_dist)
+    om_list, M_anom_0_list, a_inds, m_inds, log_a_m_prior = hlp.make_arrays(m_star, a_lim, m_lim,\
+                                                                            grid_num, num_points,\
+                                                                            e_prior, a_m_prior)
 
     if verbose:
         print('made arrays')
@@ -153,7 +168,7 @@ def run(args):
         rv_list = hlp_rv.rv_list(a_list, m_list, e_list, i_list, om_list, M_anom_0_list,
                                 per_list, cm.m_star, rv_epoch,
                                 gammadot, gammadot_err, gammaddot, gammaddot_err)
-        post_rv = hlp.post_single(rv_list, a_inds, m_inds, grid_num)
+        post_rv = hlp.post_single(rv_list, log_a_m_prior, a_inds, m_inds, grid_num)
     
     # If run_rv is False, populate arrays with 1s
     else:
@@ -177,7 +192,7 @@ def run(args):
                                           om_list, M_anom_0_list, per_list,
                                           m_star, d_star, delta_mu, delta_mu_err)                     
 
-        post_astro = np.array(hlp.post_single(astro_list, a_inds, m_inds, grid_num))
+        post_astro = np.array(hlp.post_single(astro_list, log_a_m_prior, a_inds, m_inds, grid_num))
     
     else:
         astro_list = np.zeros(num_points)
@@ -201,7 +216,10 @@ def run(args):
                                            M_anom_0_list, per_list, m_star, 
                                            d_star, vmag, imag_wavelength, age_table, 
                                            imag_epoch, contrast_str)
-            post_imag= hlp.post_single(imag_list, a_inds, m_inds, grid_num)
+                                           
+            # post_imag= hlp.post_single(imag_list, log_a_m_prior, a_inds, m_inds, grid_num)
+            post_imag = hlp_imag.imag_array(d_star, vmag, imag_wavelength, age_table, 
+                                            contrast_str, a_lim, m_lim, grid_num)
     
         elif imag_calc == 'approx':
             imag_list = np.zeros(num_points) # Dummy list to pass to tot_list() function
@@ -225,10 +243,10 @@ def run(args):
     tot_list = hlp.tot_list(rv_list, astro_list, imag_list, num_points)
     
     if run_imag and imag_calc=='exact':
-        post_tot = hlp.post_single(tot_list, a_inds, m_inds, grid_num)
+        post_tot = hlp.post_single(tot_list, log_a_m_prior, a_inds, m_inds, grid_num)
         
     else:
-        post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, a_inds, m_inds, grid_num)
+        post_tot = hlp.post_tot_approx_imag(tot_list, post_imag, log_a_m_prior, a_inds, m_inds, grid_num)
     #######################################################################################
     #######################################################################################
     
@@ -252,9 +270,9 @@ def run(args):
         ls.save_raw(star_name, m_star, d_star,
                     run_rv, run_astro, run_imag,
                     tot_list, rv_list, astro_list, imag_data,
-                    vmag, imag_wavelength, contrast_str,
-                    a_list, m_list, a_inds, m_inds, a_lim, m_lim, 
-                    imag_calc=imag_calc, outdir=outdir, 
+                    vmag, imag_wavelength, contrast_str, age_table,
+                    log_a_m_prior, a_list, m_list, a_inds, m_inds, 
+                    a_lim, m_lim, imag_calc=imag_calc, outdir=outdir, 
                     verbose=verbose)     
     return
     
@@ -288,7 +306,7 @@ def plot(args):
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
     post_tot, post_rv, post_astro, post_imag,\
-    a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
+    a_lim, m_lim = ls.load(args.read_file_path, grid_num=cm.grid_num, use_prior=True, verbose=args.verbose)
 
     if "2d" in args.type:
         plotter.joint_plot(star_name, m_star, d_star,
@@ -326,7 +344,7 @@ def lims(args):
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
     post_tot, post_rv, post_astro, post_imag,\
-    a_lim, m_lim = ls.load(args.read_file_path, cm.grid_num, args.verbose)
+    a_lim, m_lim = ls.load(args.read_file_path, grid_num=cm.grid_num, use_prior=True, verbose=args.verbose)
     
     # bounds is the final answer: [range of 2σ a, range of 2σ m].
     # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
