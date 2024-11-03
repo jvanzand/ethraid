@@ -11,7 +11,7 @@ num_points = 1e6
 grid_num = 70
 # Minimum and maximum semi-major axes to sample (AU)
 min_a = 2
-max_a = 100
+max_a = 64
 # Minimum and maximum masses to sample (M_Jup)
 min_m = 0.9
 max_m = 1e3
