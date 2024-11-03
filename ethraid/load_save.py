@@ -79,7 +79,7 @@ def load(read_file_path, grid_num=100, use_prior=True, verbose=False):
 
         assert grid_num is not None, "To load raw arrays, grid_num must be provided"
         
-        tot_list = np.array(post_file.get('tot_list')) # Probability list associated with RV/astro and possibly models
+        tot_list = np.array(post_file.get('tot_list')) # Probability list associated with RV/astro and possibly imaging models
         rv_list = np.array(post_file.get('rv_list')) # Probability list associated with RV models
         astro_list = np.array(post_file.get('astro_list')) # Probability list of astro models
         
@@ -155,7 +155,7 @@ def save_raw(star_name, m_star, d_star,
              run_rv, run_astro, run_imag, 
              tot_list, rv_list, astro_list, imag_data,
              vmag, imag_wavelength, contrast_str, age_table,
-             log_a_m_prior, a_list, m_list, a_inds, m_inds, 
+             log_a_m_prior, a_list, m_list,
              a_lim, m_lim, imag_calc='exact', outdir='', 
              verbose=False):
          
@@ -253,11 +253,6 @@ def save_raw(star_name, m_star, d_star,
          post_file.create_dataset('a_list', data=a_list)
          post_file.create_dataset('m_list', data=m_list)
          
-         ## Don't save a/m inds. They will need to be recalculated if loaded with a different grid_num value
-         # post_file.create_dataset('a_inds', data=a_inds)
-         # post_file.create_dataset('m_inds', data=m_inds)
-         
-         #post_file.create_dataset('prior', data=prior)
          post_file.create_dataset('a_lim', data=a_lim)
          post_file.create_dataset('m_lim', data=m_lim)
          

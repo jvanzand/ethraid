@@ -66,8 +66,6 @@ def period_lines(m_star, a_lim, m_lim, a_lim_plot, m_lim_plot, grid_num_ext, n, 
     
     a_min, a_max = a_lim
     m_min, m_max = m_lim
-    # a_min, m_min = a_lim[0], m_lim[0]
-    # a_max, m_max = a_lim[1], m_lim[1]
     
     ######## Adding lines of constant period ##########
     hip_times  = [Time(1989.85, format='decimalyear').jd, Time(1993.21, format='decimalyear').jd]       

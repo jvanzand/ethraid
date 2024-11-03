@@ -33,8 +33,12 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
         grid_num (int): Dimensions of square (a,m) grid
         num_points (int): Number of random orbital models to simulate
-        e_dist (str): Which eccentricity distribution to draw from.
-                        See ecc_dist() function below.
+        e_prior (str): One of ['zero', 'uniform', 'kipping', 'piecewise']
+                       to indicate which eccentricity distribution to draw from.
+                       See ecc_dist() function below.
+        a_m_prior (str): Either "loguniform" or "cls" to indicate 
+                         whether to draw a/m log-uniformly or according
+                         to CLS prior
     
     Returns:
         a_list, m_list, per_list, e_list, 
@@ -411,21 +415,18 @@ cdef a_m_pri(double [:] a_list, double [:] m_list, tuple a_lim, tuple m_lim, int
         
     elif dist=='cls':
         # Hard-coded binomial occurrence rates measured from the CLS catalog, corrected
-        # with the CLS 2 average completeness map (extrapolated to higher masses and separations)
+        # with the CLS 2 average completeness map
         # Each row is the occurrence for a range of separations.
-        # Each column is the occurrence for a range of masses. From left to right: 0.01-0.05 MJ, 0.05-0.3 MJ, 0.3-3 MJ. 3-13 MJ, 13-80 MJ, and 80-1300 MJ.
-        ## Note: the cells with values of 1 are regions where there were zero detected planets, and zero completeness
-        or_array = np.array([[0.1920, 0.0195, 0.0260, 0.0039, 0.0009, 0.0239], # 0.03-0.2 AU
-                             [0.3333, 0.0634, 0.0253, 0.0113, 0.0009, 0.0433], # 0.2-1 AU
-                             [1, 0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
-                             [1, 0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
-                             [1, 1, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
+        # Each column is the occurrence for a range of masses. From left to right: 0.05-0.3 MJ, 0.3-3 MJ. 3-13 MJ, 13-80 MJ, and 80-1000 MJ. Set max mass of 1000 MJ bc Raghavan took solar primaries, so the secondary should not be larger than solar to be safe.              
+        
+        or_array = np.array([[0.0195, 0.0260, 0.0039, 0.0009, 0.0239], # 0.03-0.2 AU
+                             [0.0634, 0.0253, 0.0113, 0.0009, 0.0433], # 0.2-1 AU
+                             [0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
+                             [0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
+                             [0.0503, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
          
-        ## This block makes all SMA columns equally probable. Removing bc I don't think that's  actually right.
-        #for i in range(np.shape(or_array)[0]): # For each row (ie, each set of ORs corresponding to one sep. range)
-         #   or_array[i] = or_array[i]/np.sum(or_array[i]) 
             
-        or_array = or_array/np.sum(or_array) # Normalize array
+        #or_array = or_array/np.sum(or_array) # Normalize array
         
         log_or_array = np.log(or_array) # ln of prior probabilities
                     
@@ -433,14 +434,14 @@ cdef a_m_pri(double [:] a_list, double [:] m_list, tuple a_lim, tuple m_lim, int
         a_min, a_max = a_lim[0], a_lim[1]
         m_min, m_max = m_lim[0], m_lim[1]
     
-        if a_min<0.03 or a_max>64 or m_min<3/Mj2Me or m_max>1300:
+        if a_min<0.03 or a_max>64 or m_min<0.05 or m_max>1000:
             st0 = "User-input mass/SMA bounds: {}-{} AU, {}-{} MJ.\n".format(a_min, a_max, m_min, m_max)
-            st1 = "Mass prior is defined between a = 0.03-64 AU, M = 0.01 - 1300 MJ.\n"
+            st1 = "Mass prior is defined between a = 0.03-64 AU, M = 0.05 - 1000 MJ.\n"
             st2 = "Please adjust limits to fit within these bounds.\n"
             raise Exception(st0+st1+st2)
     
         a_bounds_list = np.array([0.03, 0.2, 1., 4., 16., 64.]) # SMA bounds for occurrence measurements (AU)
-        m_bounds_list = np.array([3/Mj2Me, 0.05, 0.3, 3, 13, 80, 1300]) # Mass bounds for occurrence measurements (MJ)
+        m_bounds_list = np.array([0.05, 0.3, 3, 13, 80, 1000]) # Mass bounds for occurrence measurements (MJ)
     
         ######################################
         # Find the masses in each bounds_list that fall within the limits. Then make a list of bin edges.
@@ -496,18 +497,18 @@ def relative_probs(m_lim):
     # Hard-coded binomial occurrence rates measured from the CLS catalog, corrected
     # with the CLS 2 average completeness map (extrapolated to higher masses and separations)
     # Each row is the occurrence for a range of separations.
-    # Each column is the occurrence for a range of masses. From left to right: 0.01-0.05 MJ, 0.05-0.3 MJ, 0.3-3 MJ. 3-13 MJ, 13-80 MJ, and 80-1300 MJ.
-    ## Note: the cells with values of 1 regions where there were zero detected planets, and zero completeness
+    # Each column is the occurrence for a range of masses. From left to right: 0.05-0.3 MJ, 0.3-3 MJ. 3-13 MJ, 13-80 MJ, and 80-1000 MJ.
+    # 
                          
     
-    or_array = np.array([[0.1920, 0.0195, 0.0260, 0.0039, 0.0009, 0.0239], # 0.03-0.2 AU
-                         [0.3333, 0.0634, 0.0253, 0.0113, 0.0009, 0.0433], # 0.2-1 AU
-                         [1, 0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
-                         [1, 0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
-                         [1, 1, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
+    or_array = np.array([[0.0195, 0.0260, 0.0039, 0.0009, 0.0239], # 0.03-0.2 AU
+                         [0.0634, 0.0253, 0.0113, 0.0009, 0.0433], # 0.2-1 AU
+                         [0.0796, 0.0786, 0.0195, 0.0069, 0.0599], # 1-4 AU
+                         [0.0373, 0.0757, 0.0164, 0.0173, 0.0791], # 4-16 AU
+                         [1, 0.0380, 0.0295, 0.0342, 0.0894]]) # 16-64 AU
 
 
-    bounds_list = np.array([3/Mj2Me, 0.05, 0.3, 3, 13, 80, 1300]) # Mass bounds for occurrence measurements
+    bounds_list = np.array([0.05, 0.3, 3, 13, 80, 1000]) # Mass bounds for occurrence measurements
 
     # User-input mass boundaries
     m_min = m_lim[0]
@@ -530,7 +531,7 @@ def relative_probs(m_lim):
         max_bound_ind = np.min(np.where((bounds_list-m_max)>0))
 
     except ValueError:
-        print("Mass limits must be between 0.004 - 1300 M_Jup") # Technically 0.003146 and 1300, but leave a safety cushion
+        print("Mass limits must be between 0.05 - 1300 M_Jup")
         
     # Lower interval probability correction. Determine how much of the bottom mass box to "cut off"
     interval_orig = np.log10(bounds_list[min_bound_ind+1]) - np.log10(bounds_list[min_bound_ind]) # Full interval

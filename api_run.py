@@ -90,7 +90,7 @@ def run(config_path, read_file_path=None,
             print('Min sampling m is: ', min_m)
             print('Min sampling a is: ', min_a)
             
-        ## Time array calculations
+        ## Time the array calculations
         start_time = time.time()
         ##
 
@@ -99,13 +99,7 @@ def run(config_path, read_file_path=None,
         om_list, M_anom_0_list, a_inds, m_inds, log_a_m_prior = hlp.make_arrays(m_star, a_lim, m_lim,\
                                                                                 grid_num, num_points,\
                                                                                 e_prior, a_m_prior)
-                                                                         
-        # m_prior_array = hlp.post_single(np.ones(num_points), log_m_prior, a_inds, m_inds, grid_num)
-        # import matplotlib.pyplot as plt
-        # from matplotlib import colors
-        # plt.imshow(m_prior_array, origin="lower")#, norm=colors.LogNorm())
-        # plt.colorbar(); plt.show()
-        # sdfsd
+                  
         end_list_time = time.time()#######################################################
                                                                  
         if verbose:
@@ -266,7 +260,7 @@ def run(config_path, read_file_path=None,
                         run_rv, run_astro, run_imag,
                         tot_list, rv_list, astro_list, imag_data,
                         vmag, imag_wavelength, contrast_str, age_table,
-                        log_a_m_prior, a_list, m_list, a_inds, m_inds, 
+                        log_a_m_prior, a_list, m_list,
                         a_lim, m_lim, imag_calc=imag_calc, outdir=outdir, 
                         verbose=False)
 
@@ -308,11 +302,11 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
     
-    # config_path = 'ethraid/local_configs/config_156141.py'
-    # read_file_path = None#'results/T001438/T001438_raw.h5'
+    config_path = 'ethraid/local_configs/config_T001438.py'
+    read_file_path = None#'results/93963/93963_processed.h5'
     
-    config_path = 'test_config_files/test1.py'
-    read_file_path = None#'results/test1/test1_raw.h5'
+    # config_path = 'test_config_files/test1.py'
+    # read_file_path = None#'results/test1/test1_raw.h5'
     
     
     plot=True

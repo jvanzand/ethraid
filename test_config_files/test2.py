@@ -11,10 +11,10 @@ num_points = 1e4
 # Include grid_num in config file for API usage.
 grid_num = 50
 # Minimum and maximum semi-major axes to sample (AU)
-min_a = 1.6489
-max_a = 64
+min_a = 0.1
+max_a = 100
 # Minimum and maximum masses to sample (M_Jup)
-min_m = 0.769
+min_m = 1
 max_m = 1e3
 # Eccentricity distribution for sampled orbits
 e_prior = 'kipping'

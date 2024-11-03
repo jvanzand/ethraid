@@ -113,22 +113,6 @@ def joint_plot(star_name, m_star, d_star,
     ################################
     
     
-    
-    # ########
-    # ### Optionally add Vortex coronagraph contrast curve to 2D plot
-    # from ethraid import helper_functions_imaging as hlp_imag
-    # contrast_str = 'ethraid/data/clean_curves/vortex_Lband.csv'
-    # post_vortex = hlp_imag.imag_array(d_star, vmag, 3.77, contrast_str, a_lim, m_lim, grid_num)
-    #
-    #
-    # post_vortex_pad = np.pad(post_vortex, [(grid_pad, 0), (grid_pad, 0)])
-    # t_contours_vortex = hlp.contour_levels(post_vortex, [1,2])
-    #
-    # post_vortex_cont = ax.contour(post_vortex_pad, t_contours_vortex,
-    #                            cmap='autumn', extend='both', alpha=1.0, zorder=35)
-    # #######
-    
-    
     # grid_num_ext is the side length of the 2D plotting array
     grid_num_ext = grid_num+grid_pad
     
@@ -146,14 +130,8 @@ def joint_plot(star_name, m_star, d_star,
     region_label_size = 50
     restricted_region_label_size = 40
 
-    ## Removed "ruled out" labels because users can define their own lower lims. Not necessarily ruled out by anything.
-    # plt.text((5/16)*grid_num_ext, (1/8)*(grid_pad/2), 'Ruled out by RVs',
-    #           size=restricted_region_label_size, zorder=101)
-    # plt.text((1/4)*(grid_pad/2), (1/16)*grid_num_ext, 'Ruled out by minimum period',
-    #           size=restricted_region_label_size, rotation=90, zorder=101)
 
-
-    ax.set_xlabel('Semi-major axis (au)', size=label_size)
+    ax.set_xlabel('Semi-major axis (AU)', size=label_size)
     ax.set_ylabel(r'$m_c$ ($M_{Jup}$)', size=label_size)
 
     ###################################################
@@ -165,11 +143,20 @@ def joint_plot(star_name, m_star, d_star,
     max_exp = 13
     n = max_exp-min_exp+1
     tick_pre_labels_a = np.logspace(min_exp, max_exp, n, base=2)
-    tick_pre_labels_m = np.logspace(min_exp, max_exp, n, base=4)
+    tick_pre_labels_m = np.logspace(min_exp, max_exp, n, base=2)
 
     # Chop out any labels outside the a or m bounds
     raw_labels_a = tick_pre_labels_a[(a_lim[0] < tick_pre_labels_a) & (tick_pre_labels_a < a_lim[1])][:tick_num]
     raw_labels_m = tick_pre_labels_m[(m_lim[0] < tick_pre_labels_m) & (tick_pre_labels_m < m_lim[1])][:tick_num]
+    
+    ## If too many ticks, use base 4 instead
+    if len(raw_labels_a)>=8:
+        tick_pre_labels_a = np.logspace(min_exp, max_exp, n, base=4)
+        raw_labels_a = tick_pre_labels_a[(a_lim[0] < tick_pre_labels_a) & (tick_pre_labels_a < a_lim[1])][:tick_num]
+        
+    if len(raw_labels_m)>8:
+        tick_pre_labels_m = np.logspace(min_exp, max_exp, n, base=4)
+        raw_labels_m = tick_pre_labels_m[(m_lim[0] < tick_pre_labels_m) & (tick_pre_labels_m < m_lim[1])][:tick_num]
 
 
     # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals

@@ -14,12 +14,12 @@ Please cite Van Zandt \& Petigura (2024, Accepted) and the following DOI if you 
 - *\$ pip install ethraid*
 - If the installation fails, try upgrading pip: *\$ curl https://bootstrap.pypa.io/get-pip.py | python*
 
-## Download repo from Github
+## OR Download repo from Github
 ### Install dependencies using requirements.txt 
 - *\$ pip install -r requirements.txt*
 
 ### Build code from top level of repo
-- *\$ cd trends/*
+- *\$ cd ethraid/*
 - *\$ python setup.py build_ext --inplace*
 
 ### Run 3 simple test configuration files to ensure all API and CLI functions are working correctly

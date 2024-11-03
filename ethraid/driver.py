@@ -271,7 +271,7 @@ def run(args):
                     run_rv, run_astro, run_imag,
                     tot_list, rv_list, astro_list, imag_data,
                     vmag, imag_wavelength, contrast_str, age_table,
-                    log_a_m_prior, a_list, m_list, a_inds, m_inds, 
+                    log_a_m_prior, a_list, m_list,
                     a_lim, m_lim, imag_calc=imag_calc, outdir=outdir, 
                     verbose=verbose)     
     return
