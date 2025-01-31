@@ -99,7 +99,7 @@ def run(config_path, read_file_path=None,
         om_list, M_anom_0_list, a_inds, m_inds, log_a_m_prior = hlp.make_arrays(m_star, a_lim, m_lim,\
                                                                                 grid_num, num_points,\
                                                                                 e_prior, a_m_prior)
-                  
+        
         end_list_time = time.time()#######################################################
                                                                  
         if verbose:
@@ -126,7 +126,7 @@ def run(config_path, read_file_path=None,
                                      gammadot, gammadot_err, gammaddot, gammaddot_err)
 
             post_rv = hlp.post_single(rv_list, log_a_m_prior, a_inds, m_inds, grid_num)
-    
+            
         else:
             rv_list = np.zeros(num_points) # 1D arrays contain log-likelihoods
             post_rv = np.ones((grid_num, grid_num)) # 2D arrays contain likelihoods (actually posteriors due to binning)
