@@ -422,10 +422,10 @@ def set_values(config_path, param_names, default_values):
     
     if len(param_names) != len(default_values):
         raise Exception('Error: param_names and defaults_values must have the same length')
-    
+
     if config_path == None: # If no config provided, then return default values
         param_values = default_values
-    
+
     else:
     
         config_module = load_module_from_file(config_path)

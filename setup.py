@@ -58,8 +58,8 @@ try:
     from Cython.Build import cythonize
     import numpy
 except ModuleNotFoundError:
-    subprocess.run(["pip", "install", "cython==0.29.33"])
-    subprocess.run(["pip", "install", "numpy==2.2"])
+    subprocess.run(["pip", "install", "cython==0.29.37"])
+    subprocess.run(["pip", "install", "numpy==2.2.2"])
     from Cython.Build import cythonize
 
 # From radvel but also found on StackExchange

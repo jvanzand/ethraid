@@ -1,5 +1,5 @@
 astropy==4.3.1
-Cython==0.29.33
+Cython==0.29.37
 h5py==3.8.0
 matplotlib==3.5.3
 numpy==1.21.6

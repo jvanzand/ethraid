@@ -29,6 +29,7 @@ def api_tester(calc=True, load=True, verbose=False):
         calc_error_count = 0
         for cf in config_files:
             try:
+                # import pdb; pdb.set_trace()
                 api_run.run(cf)
             except Exception as err:
                 calc_error_count+=1
