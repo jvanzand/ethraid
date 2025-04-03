@@ -1,4 +1,9 @@
-<img align="center" src="ethraid/example/ethraid.jpg" width="168" height="150">
+<table>
+  <tr>
+    <td align="center"><strong>Ethraid</strong></td>
+    <td align="center"><img src="ethraid/example/ethraid.jpg" width="168" height="150"></td>
+  </tr>
+</table>
 
 # Ethraid
 
