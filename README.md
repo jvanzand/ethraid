@@ -1,6 +1,4 @@
-<div align="center">
-    <img src="ethraid/example/ethraid.jpg" width="168" height="150">
-</div>
+<img align="center" src="ethraid/example/ethraid.jpg" width="168" height="150">
 
 # Ethraid
 
