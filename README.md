@@ -1,7 +1,7 @@
-<table>
+<table width="100\%">
   <tr>
-    <td align="center"><strong>Ethraid</strong></td>
-    <td align="center"><img src="ethraid/example/ethraid.jpg" width="168" height="150"></td>
+    <td><h3>Ethraid</h3></td>
+    <td align="center" width="100\%"><img src="ethraid/example/ethraid.png" width="161" height="350"></td>
   </tr>
 </table>
 
