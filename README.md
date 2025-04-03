@@ -1,4 +1,4 @@
-<div style="text-align: center;">
+<div align="center">
     <img src="ethraid/example/ethraid.jpg" width="224" height="200">
 </div>
 
