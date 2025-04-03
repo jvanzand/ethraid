@@ -1,9 +1,10 @@
-<table width="100\%">
-  <tr>
-    <td><h3>Ethraid</h3></td>
-    <td align="center" width="100\%"><img src="ethraid/example/ethraid.png" width="161" height="350"></td>
-  </tr>
-</table>
+<div class="grid" markdown>
+
+![Image title](https://dummyimage.com/600x400/f5f5f5/aaaaaa?text=1)
+
+![Image title](https://dummyimage.com/600x400/f5f5f5/aaaaaa?text=2)
+
+</div>
 
 # Ethraid
 
