@@ -2,6 +2,8 @@
     <img src="ethraid/example/ethraid.jpg" width="224" height="200">
 </div>
 
+#Ethraid
+
 Characterize long-period companions with partial orbits.
 
 Please cite Van Zandt \& Petigura (2024) and the following DOI if you make use of this software in your research.
