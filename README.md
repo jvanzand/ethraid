@@ -1,9 +1,5 @@
-<div class="grid" markdown>
-
-![Image title](https://dummyimage.com/600x400/f5f5f5/aaaaaa?text=1)
-
-![Image title](https://dummyimage.com/600x400/f5f5f5/aaaaaa?text=2)
-
+<div align=“center”>
+  <img src=“ethraid/example/ethraid.jpg” width=“168” height=“150">
 </div>
 
 # Ethraid
