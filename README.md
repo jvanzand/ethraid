@@ -1,6 +1,7 @@
-<h3>Ethraid &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    <img align="center" src="ethraid/example/ethraid.png" width="161" height="200">
-</h3>
+<div style="display: flex; align-items: center;">
+    <h3 style="margin-right: auto;">Ethraid</h3>
+    <img src="ethraid/example/ethraid.png" width="161" height="161">
+</div>
 
 Characterize long-period companions with partial orbits.
 
