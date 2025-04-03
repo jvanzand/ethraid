@@ -41,7 +41,7 @@ results/*
 *.pyc
 *.so
 *.png
-!ethraid/example/ethraid.png
+!ethraid/example/ethraid_1.png
 !ethraid/example/191939/191939_cdf_1d.png
 !ethraid/example/191939/191939_pdf_1d.png
 !ethraid/example/191939/191939_2d.png
