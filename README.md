@@ -2,7 +2,7 @@
     <img src="ethraid/example/ethraid.jpg" width="224" height="200">
 </div>
 
-#Ethraid
+# Ethraid
 
 Characterize long-period companions with partial orbits.
 
