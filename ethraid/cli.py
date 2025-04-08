@@ -2,6 +2,7 @@
 Command Line Interface
 """
 
+import sys
 from argparse import ArgumentParser
 import ethraid.driver
 
@@ -137,6 +138,11 @@ def main():
     #                       help='Dimension of binned probability arrays. Required for raw input arrays.'
     #                       )
     psr_all.set_defaults(func=ethraid.driver.all)
+    
+    # If no arguments are provided, print help message and exit
+    if len(sys.argv)==1:
+        psr.print_help(sys.stderr)
+        sys.exit(1)
 
     
     args = psr.parse_args()
