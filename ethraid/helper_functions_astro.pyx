@@ -1,6 +1,7 @@
 from tqdm import tqdm
 import numpy as np
 from astroquery.vizier import Vizier
+from scipy.stats import norm
 
 import cython
 cimport numpy as np
@@ -448,7 +449,8 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
     include_cols = ['HIP', 'Gaia',
                     'pmRA',  'pmDE',   'pmRAhg',   'pmDEhg', 
                     'e_pmRA','e_pmDE', 'e_pmRAhg', 'e_pmDEhg',
-                    'EpochRAgaia', 'EpochDEgaia', 'EpochRAhip', 'EpochDEhip']
+                    'EpochRAgaia', 'EpochDEgaia', 'EpochRAhip', 'EpochDEhip',
+                    'chi2']
 
     # Query Vizier for HGCA entry. 'J/ApJS/254/42' is the name of the
     # HGCA EDR3.
@@ -509,8 +511,35 @@ def calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
     dmu_mag = np.sqrt((pmra_gaia-pmra_hg)**2+(pmdec_gaia-pmdec_hg)**2)
 
     return dmu_mag
+    
+    
+def calc_dmu_error(chi2, pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
+    """
+    Error on proper motion magnitude using chi squared value.
+    First convert chi2 to a p-value using the chi squared CDF.
+    Then convert p-value to a Z-score assuming Gaussian uncertainties.
+    Finally, convert Z-score to an uncertainty value using the actual dmu value.
+    
+    Arguments:
+        chi2 (float): Chi squared value between pm_G and pm_HG (from HGCA)
+        
+    Returns:
+        dmu_err (float, mas/yr): Error on the change in proper motion
+    """
+    
+    p_value = np.exp(-chi2/2) # Calculate p-value using the CDF of a chi_sq distribution w/ 2 DOF
+    z_score = norm.ppf(1-p_value) # Z-score gives the num of stdevs corresponding to p_value
+    if z_score == np.inf: # Once chi2 exceeds ~74, 1-np.exp(-chi2/2) = 1.0, so need to approximate z_score
+        z_score = np.sqrt(chi2) # Brendan recommended that for large chi squared, signif~sqrt(chi_sq).
+    
+    dmu_mag = calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg) # Calc dmu itself to get error below
+    
+    dmu_err = dmu_mag / z_score # Error is real value divided by Z-score
+    
+    return dmu_err
+    
 
-def calc_dmu_error(pmra_gaia_err, pmra_hg_err, pmdec_gaia_err, pmdec_hg_err, pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
+def calc_dmu_error_old(pmra_gaia_err, pmra_hg_err, pmdec_gaia_err, pmdec_hg_err, pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
     """
     Error on proper motion magnitude using error propagation formula.
     This simplified formula assumes independent variables.
