@@ -613,9 +613,7 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
     t_rev = t[::-1]
     integral_unique, idx = np.unique(integral_rev, return_index=True)
     t_unique = t_rev[idx]
-    #print(t_unique)
-    #print('\n'*4)
-    #print(integral_unique)
+
     f = sp.interpolate.interp1d(integral_unique, t_unique, kind='zero')
 
     contour_list = []
