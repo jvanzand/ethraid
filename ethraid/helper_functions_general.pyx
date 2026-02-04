@@ -608,7 +608,15 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
 
     # Now create a function that takes integral as the x (not the y) and then returns the corresponding prob value from the t array. Interpolating between integral values allows me to choose any enclosed total prob. value (ie, integral value) and get the corresponding prob. value to use as my contour.
     # Use zero-order spline to address the interpolation issues that come with highly concentrated probability regions.
-    f = sp.interpolate.interp1d(integral, t, kind='zero')
+    # Before interpolating, do a little cleanup: first, reverse integral so it's increasing. This is safer for the np.unique() function. Reverse t too, to keep the orders matched. The np.unique function will eliminate duplicate values in integral. These arise from "cliffs" in the PDF, where, e.g., there are no prob. values between 0.004 and 0.007. In that case, the total prob. enclosed by contours connecting all p=0.004 or all p=0.007 values will be equal, say p_tot = 0.2. So if you ask "what prob value should I draw contours at to get p_tot=0.2," the interpolation function doesn't know which one to return. In other words, you're trying to define a function x-->y while giving multiple y vals for the same x. The solution is to eliminate duplicates. I'm choosing to keep the LARGEST t-value that corresponds to a given integral value (which is the first one by default). This choice shouldn't make a difference.
+    integral_rev = integral[::-1]
+    t_rev = t[::-1]
+    integral_unique, idx = np.unique(integral_rev, return_index=True)
+    t_unique = t_rev[idx]
+    #print(t_unique)
+    #print('\n'*4)
+    #print(integral_unique)
+    f = sp.interpolate.interp1d(integral_unique, t_unique, kind='zero')
 
     contour_list = []
     prob_list = [0.68, 0.95, 0.997]
