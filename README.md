@@ -10,8 +10,8 @@ Please cite Van Zandt \& Petigura (2024) and the following DOI if you make use o
 [![DOI](https://zenodo.org/badge/355760029.svg)](https://zenodo.org/doi/10.5281/zenodo.10841606)
 
 ## Environment
-### Create new environment with python 3.7
-- *\$ conda create --name ethraid_env python=3.7*
+### Create new environment with python 3.14
+- *\$ conda create --name ethraid_env python=3.14*
 - *\$ conda activate ethraid_env*
 
 ## Download using pip
