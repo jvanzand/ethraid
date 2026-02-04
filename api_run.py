@@ -312,7 +312,7 @@ if __name__ == "__main__":
     run(config_path, read_file_path,
         plot=plot, verbose=verbose)
     second_time = time.time()
-    print("TIME {:.2f}".format(second_time-first_time))   
+    print("TIME {:.2f}".format(second_time-first_time))
     
     
     
