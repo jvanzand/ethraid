@@ -54,21 +54,13 @@ extensions = [
 
 ##############################
 
-try:
-    from Cython.Build import cythonize
-    import numpy
-except ModuleNotFoundError:
-    subprocess.run(["pip", "install", "cython==0.29.37"])
-    subprocess.run(["pip", "install", "numpy==2.2.2"])
-    from Cython.Build import cythonize
+from Cython.Build import cythonize
+import numpy
 
 # From radvel but also found on StackExchange
 class build_ext(_build_ext):
     def finalize_options(self):
         _build_ext.finalize_options(self)
-        # Prevent numpy from thinking it is still in its setup process:
-        __builtins__.__NUMPY_SETUP__ = False
-        import numpy
         self.include_dirs.append(numpy.get_include())
 
 lib_folder = os.path.dirname(os.path.realpath(__file__))
@@ -91,7 +83,6 @@ setup(
     packages = find_packages(),
     include_package_data = True,
     package_data={'ethraid':['/data']},
-    setup_requires=['cython', 'numpy'],
     install_requires=get_requires(),
     cmdclass={'build_ext':build_ext},
     entry_points = {
