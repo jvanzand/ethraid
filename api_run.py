@@ -314,8 +314,10 @@ if __name__ == "__main__":
     # run('ethraid/local_configs/config_24916.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_HIP45839.py', None, plot=True, verbose=True)
     
-    rfp = None#'results/GammaCep/GammaCep_processed.h5'
+    # hlp.contour_levels()
+    rfp = 'results/GammaCep/GammaCep_processed.h5'
     run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
+    
     # plot=True
     # verbose=True
     # first_time = time.time()
