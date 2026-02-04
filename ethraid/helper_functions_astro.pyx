@@ -474,17 +474,19 @@ def HGCA_retrieval(hip_id=None, gaia_id=None):
     pmra_hg = table['pmRAhg']
     pmdec_gaia = table['pmDE']
     pmdec_hg = table['pmDEhg']
+    chi2 = table['chi2']
 
-    pmra_gaia_error = table['e_pmRA']
-    pmra_hg_error = table['e_pmRAhg']
-    pmdec_gaia_error = table['e_pmDE']
-    pmdec_hg_error = table['e_pmDEhg']
+    #pmra_gaia_error = table['e_pmRA']
+    #pmra_hg_error = table['e_pmRAhg']
+    #pmdec_gaia_error = table['e_pmDE']
+    #pmdec_hg_error = table['e_pmDEhg']
 
 
     dmu = float(calc_dmu(pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
-    dmu_err = float(calc_dmu_error(pmra_gaia_error, pmra_hg_error,\
-                                   pmdec_gaia_error, pmdec_hg_error,\
-                                   pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
+    dmu_err = float(calc_dmu_error(chi2, pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
+    #dmu_err = float(calc_dmu_error(pmra_gaia_error, pmra_hg_error,\
+    #                               pmdec_gaia_error, pmdec_hg_error,\
+    #                               pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg))
     
     return dmu, dmu_err
     

@@ -374,7 +374,8 @@ cdef ecc_pri(double [:] m_list, double [:] per_list, int num_points, dist='piece
             #e_prior[i] = e_pri
             
     else:
-        raise Exception('Error: e_prior must be one of the options supported by the ecc_prior function.')
+        raise Exception("Error: e_prior must be one of the options supported by "\
+                        "the ecc_prior function: ['zero', 'uniform', 'kipping', 'piecewise']")
     
     
     return e_list#, e_prior
@@ -465,7 +466,8 @@ cdef a_m_pri(double [:] a_list, double [:] m_list, tuple a_lim, tuple m_lim, int
             a_m_log_prior[i] = log_or_array[int(a_ind), int(m_ind)]
             
     else:
-        raise Exception('Error: a_m_prior must be one of the options supported by the a_m_prior function.')
+        raise Exception("Error: a_m_prior must be one of the options supported by "\
+                        "the a_m_prior function: ['loguniform', 'cls']")
         
 
     return a_m_log_prior
