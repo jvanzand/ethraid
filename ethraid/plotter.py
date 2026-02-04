@@ -72,6 +72,8 @@ def joint_plot(star_name, m_star, d_star,
          
     # Loop through all data types (rv, astro, and imag) simultaneously define and format variables, as well as the values those variables are being assigned.
     ################################
+    run_list = [run_rv, run_astro, run_imag]
+    post_list = [post_rv, post_astro, post_imag]
     data_types = ['rv', 'astro', 'imag']
     colors = ['Greens', 'Blues', 'gray']
     alphas = [0.5, 0.5, 0.4]
@@ -81,29 +83,31 @@ def joint_plot(star_name, m_star, d_star,
     # colors = ['Blues']
     
     for i in range(len(data_types)):
+        run = run_list[i]
+        post = post_list[i]
         dt = data_types[i]
         c = colors[i]
         alpha = alphas[i]
         z = zorders[i]
         # First, check if run_rv, run_astro, and run_imag are True. If any is not, don't plot that contour
-        if eval("run_{}".format(dt)):
-            exec("post_{0}_pad = np.pad(post_{0}, [(grid_pad, 0), (grid_pad, 0)])".format(dt))
+        if run:
+            post_pad = np.pad(post, [(grid_pad, 0), (grid_pad, 0)])
             
             # For imaging only, plot 2sig contour and use contour instead of contourf to get a line instead of a filled region
             if dt == 'imag':
-                exec("t_contours_{0} = hlp.contour_levels(post_{0}, [1,2])".format(dt))
+                t_contours = hlp.contour_levels(post, [1,2])
                 
                 # In the approximate case, the imaging posterior has 2 regions by design: uniformly 0 and uniformly some nonzero value. Suppress Matplotlib's warning that contour levels are undefined in this case.
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", message='No contour levels were found within the data range.')
-                    exec("post_{0}_cont = ax.contour(post_{0}_pad, t_contours_{0},\
-                                 cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
+                    
+                    post_contour = ax.contour(post_pad, t_contours,\
+                                              cmap=c, extend='max', alpha=alpha, zorder=z)
                                  
             else:
-                exec("t_contours_{0} = hlp.contour_levels(post_{0}, [1,2])".format(dt))
-
-                exec("post_{0}_cont = ax.contourf(post_{0}_pad, t_contours_{0},\
-                             cmap='{1}', extend='max', alpha={2}, zorder={3})".format(dt, c, alpha, z))
+                t_contours = hlp.contour_levels(post, [1,2])
+                post_cont = ax.contourf(post_pad, t_contours,\
+                                        cmap=c, extend='max', alpha=alpha, zorder=z)
             
     ## Only plot the overlap red if plotting both RV and astro. Otherwise let the green/blue show
     if run_rv and run_astro:
