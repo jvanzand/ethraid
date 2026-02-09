@@ -9,7 +9,7 @@ num_points = 1e6
 # Higher grid_num gives greater resolution, but fewer models per grid box.
 # When using CLI, grid_num should be supplied at the command line rather than in the config file (default grid_num=100).
 # Include grid_num in config file for API usage.
-grid_num = 100
+grid_num = 50
 ## See below for min_a and min_m, calculated in terms of the RV data
 # Eccentricity distribution for sampled orbits
 e_prior = 'piecewise'
@@ -43,8 +43,8 @@ rv_epoch = 2458847.780463
 
 ###################
 ## Calculate min a and min m based on RVs, so min_a, max_a, min_m, and max_m must be defined after the RV params
-rv_baseline=500
-min_per=1000
+rv_baseline=500 # The RV trend listed above was measured using 100 days of observations
+min_per=1000 # Based on the shape of the trend, we estimate that the companion per must be at least 200 days
 min_a_and_m = hlp.min_a_and_m(gammadot, gammaddot, rv_baseline, min_per, m_star)
 
 min_a = min_a_and_m[0]
@@ -74,7 +74,7 @@ gaia_id = None
 run_imag = True
 # How to calculate imaging posterior. If 'exact', forward model companions as with RVs and astrometry.
 # If 'approx', then for the imaging calculations only, approximate all orbits to be face-on and circular regardless of sampled parameters, and rule out any model with a mass/angular separation combo that was detectable by imaging.
-imag_calc = 'exact'
+imag_calc = 'approx'
 # Host star visual magnitude. Used to estimate the magnitude at the imaging wavelength
 vmag = 8.97
 # Wavelength at which contrast curve was acquired (micrometers)

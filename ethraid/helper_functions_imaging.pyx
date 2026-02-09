@@ -76,10 +76,8 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
                                     max_dmag_list = np.ndarray(shape=(num_points,), dtype=np.float64),\
                                     model_dmag_list = np.ndarray(shape=(num_points,), dtype=np.float64)                               
     
-    
     print('Running imaging models')
     for j in tqdm(range(num_points)):
-    
         a = a_list[j]
         m = m_list[j]
         e = e_list[j]
@@ -331,8 +329,9 @@ def interp_fn(d_star, vmag, imag_wavelength, age_table, contrast_str=None, which
     interp_df_baraffe = baraffe_table.query("{}>{}".format(band_name, max_mag))[['M_jup', band_name]]
 
     # Concatenate the two dfs above
-    interp_df = pd.concat([interp_df_mamajek, interp_df_baraffe]).sort_values(by=band_name)[[band_name, 'M_jup']]
-    interp_df['delta_mag'] = interp_df[band_name] - host_abs_Xmag # Contrast column
+    interp_df = pd.concat([interp_df_mamajek, interp_df_baraffe])\
+                        .sort_values(by=band_name)[[band_name, 'M_jup']]\
+    interp_df.loc[:, 'delta_mag'] = interp_df[band_name] - host_abs_Xmag # Contrast column
 
     if which=='C2M': # Function from contrast to mass
         interp_fn = interp1d(interp_df['delta_mag'], interp_df['M_jup'], 
@@ -366,7 +365,7 @@ def interp_fn(d_star, vmag, imag_wavelength, age_table, contrast_str=None, which
             raise Exception('helper_functions_imaging.interp_fn: \n'
                             '                                   contrast_str required to generate A2M function')
         contrast_curve = pd.read_csv(contrast_str) # First get your angsep/dmag curve
-        fill_value = (0, contrast_curve['delta_mag'][-1]) # If a sep is entered that is closer than the 'training' data, set contrast to 0; for seps taht are beyond the data, set equal to last contrast
+        fill_value = (0, contrast_curve['delta_mag'].iloc[-1]) # If a sep is entered that is closer than the 'training' data, set contrast to 0; for seps that are beyond the data, set equal to last contrast
         
         interp_fn = interp1d(contrast_curve['ang_sep'], contrast_curve['delta_mag'], 
                             bounds_error=False, fill_value=fill_value)

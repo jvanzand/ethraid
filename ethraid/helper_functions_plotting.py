@@ -33,6 +33,18 @@ def scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot):
     sep_ind = hlp.value2index(sma, (0, grid_num_ext-1), a_lim_plot)
     mp_ind  = hlp.value2index(mass, (0, grid_num_ext-1), m_lim_plot)
     
+
+    scatter_a, scatter_m = scatter_plot
+    c1 = scatter_a<a_lim_plot[0]
+    c2 = scatter_a>a_lim_plot[1]
+    c3 = scatter_m<m_lim_plot[0]
+    c4 = scatter_m>m_lim_plot[1]
+
+    if c1 or c2 or c3 or c4:
+        print("helper_functions_plotting.py: WARNING -\n"\
+              "        Attempting to plot companion coordinates outside plotting bounds.\n"\
+              "        Increase plotting bounds to encompass companion parameters.")
+    
     return sep_ind, mp_ind
         
 
@@ -136,107 +148,15 @@ def constant_per_a(m, per, m_star):
 
     return a
         
-def marginalized_1d(star_name, post_tot, twosig_inds, a_lim, m_lim, 
-                    tick_labels_a, tick_labels_m, which=['cdf'], outdir=''):
-    """
-    Plots and saves 2 marginalized posterior cumulative distribution function (CDF).
-    The first is marginalized over mass, so it gives the semi-major axis CDF. The
-    second is marginalized over semi-major axis and gives the mass CDF.
-                    
-    Arguments:
-        star_name (str): Star name to label saved figure
-        post_tot (array of floats): Posterior probability array
-        twosig_inds (list of 2 lists): Each set of indices in twosig_inds
-                                       encompasses 95% of the sma or mass
-                                       posterior.
-        a_lim (tuple of floats, au): Semi-major axis limits to consider, 
-                                     in the form (a_min, a_max)
-        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
-        tick_labels_a (list of floats, AU): Sma values to use as axis 
-                                            labels
-        tick_labels_m (list of floats, M_jup): Mass values to use as 
-                                               axis labels
-        which (list of str): 'cdf' to plot/save CDFs, and 
-                             'pdf to plot/save PDFs
-        outdir (str): Path to save plot
-    
-    Returns:
-        None (but plots and saves 1D posteriors)
-        
-    """
-    title_size = 30
-    label_size = 25
-    tick_num = 6
-    tick_size = 25
-    
-    sma_1d = post_tot.sum(axis=0)
-    mass_1d = post_tot.sum(axis=1)
-    
-    grid_num = np.shape(post_tot)[0]
-    tick_positions_a1D = hlp.value2index(tick_labels_a, (0, grid_num-1), a_lim)
-    tick_positions_m1D = hlp.value2index(tick_labels_m, (0, grid_num-1), m_lim)
-    
-    for plot_type in which:
-        fig, ax = plt.subplots(1,2, figsize=(12,8))
-        
-        if plot_type == 'cdf':
-            plot_dist_a = np.cumsum(sma_1d)
-            plot_dist_m = np.cumsum(mass_1d)
-            
-            max_ylim_a = 1
-            max_ylim_m = 1
-            
-            save_name_suffix = '_cdf_1d.png'
-            
-        elif plot_type == 'pdf':
-            plot_dist_a = sma_1d
-            plot_dist_m = mass_1d
-            
-            max_ylim_a = np.max(sma_1d)
-            max_ylim_m = np.max(mass_1d)
-            
-            save_name_suffix = '_pdf_1d.png'
-
-        ax[0].plot(range(grid_num+1), np.insert(plot_dist_a, 0, 0))
-        plt.sca(ax[0])
-        plt.xticks(tick_positions_a1D, tick_labels_a, size=tick_size)
-        plt.yticks(size=tick_size)
-        plt.title('Semi-major axis {}'.format(plot_type.upper()), size=title_size)
-        plt.xlabel('Companion semi-major axis (AU)', size = label_size)
-
-        ax[0].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
-        ax[0].vlines(twosig_inds[0][0], 0, max_ylim_a, colors='r', linestyles='dashed')
-        ax[0].vlines(twosig_inds[0][1], 0, max_ylim_a, colors='r', linestyles='dashed')
-
-        ax[1].plot(range(grid_num+1), np.insert(plot_dist_m, 0, 0))
-        plt.sca(ax[1])
-        plt.xticks(tick_positions_m1D, tick_labels_m, size=tick_size)
-        plt.yticks(size=tick_size)
-        plt.xlabel(r'Companion mass ($M_{Jup}$)', size = label_size)
-        plt.title('Mass {}'.format(plot_type.upper()), size=title_size)
-
-        ax[1].hlines(0, 0, grid_num-1, colors='k', linestyles='solid')
-        ax[1].vlines(twosig_inds[1][0], 0, max_ylim_m, colors='r', linestyles='dashed')
-        ax[1].vlines(twosig_inds[1][1], 0, max_ylim_m, colors='r', linestyles='dashed')
-    
-        save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
-        os.makedirs(save_dir, exist_ok = True)
-        # if not os.path.isdir(save_dir):
-        #     os.makedirs(save_dir)
-    
-        fig.tight_layout()
-        fig.savefig(save_dir + star_name + save_name_suffix)
-    
-    return
 
 
-def tick_function_a(sep, d_star):
+def sma2angsep(sma, d_star):
     """
     Converts separation in AU into
     separation in arcsec
     
     Arguments:
-        sep (float, AU): Projected physical separation of
+        sma (float, AU): Projected physical separation of
                          a companion from its host
         d_star (float, AU): Distance of host star from Earth
     
@@ -245,15 +165,31 @@ def tick_function_a(sep, d_star):
                                  companion separation
     """
     pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
-    
     d_star_pc = np.array(d_star)/np.array(pc_in_au)
+    ang_sep = sma/d_star_pc
     
-    ang_sep = sep/d_star_pc
-    
-
     return ang_sep
-        
-        
+
+def angsep2sma(ang_sep, d_star):
+    """
+    Inverse of sma2angsep.
+    Converts separation in AU into
+    separation in arcsec
+    
+    Arguments:
+        ang_sep (float, arcsec): Projected angular host-
+                                 companion separation
+        d_star (float, AU): Distance of host star from Earth
+    
+    Returns:
+        sma (float, AU): Projected physical separation of
+                         a companion from its host
+    """
+    pc_in_au = 206264.80624548031 # (c.pc.cgs/c.au.cgs).value
+    d_star_pc = np.array(d_star)/np.array(pc_in_au)
+    sma = ang_sep*d_star_pc
+    
+    return sma   
         
         
         

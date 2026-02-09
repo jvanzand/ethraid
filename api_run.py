@@ -61,7 +61,7 @@ def run(config_path, read_file_path=None,
                            'e_prior', 'a_m_prior', 'min_m', 'max_m',
                            'age_table', 'save', 'outdir']
         default_values = [int(1e6), 1, 64, 
-                          'piecewise', 'cls', 1, 1e3, 4, ['proc'], '']
+                          'piecewise', 'loguniform', 1, 1e3, 4, ['proc'], '']
 
         num_points, min_a, max_a,\
         e_prior, a_m_prior, min_m, max_m,\
@@ -286,7 +286,7 @@ def run(config_path, read_file_path=None,
                            a_lim, m_lim,
                            scatter_plot=scatter_plot, 
                            period_lines=False, outdir='', verbose=verbose)
-        plotter.plot_1d(star_name, post_tot, a_lim, m_lim, outdir='')
+        plotter.plot_1d(star_name, post_tot, a_lim, m_lim, which=['pdf', 'cdf'], outdir='')
     
         
     # Print out the 2-sigma boundaries (bounds) for the joint posterior
@@ -302,25 +302,25 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
 
-    # config_path = 'test_config_files/test1.py'
-    # read_file_path = None#'results/test1/test1_raw.h5'
+    config_path = 'test_config_files/test3.py'
+    read_file_path = None#'results/test3/test3_raw.h5'
     #
     #
-    # plot=True
-    # verbose=True
-    # first_time = time.time()
-    # run(config_path, read_file_path,
-    #     plot=plot, verbose=verbose)
-    # second_time = time.time()
-    # print("TIME {:.2f}".format(second_time-first_time))  
+    plot=True
+    verbose=True
+    first_time = time.time()
+    run(config_path, read_file_path,
+        plot=plot, verbose=verbose)
+    second_time = time.time()
+    print("TIME {:.2f}".format(second_time-first_time))  
     
     # run('ethraid/local_configs/config_151090_1msun.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_151090_2msun.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_24916.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_HIP45839.py', None, plot=True, verbose=True)
 
-    rfp = 'results/GammaCep/GammaCep_processed.h5'
-    run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
+    # rfp = 'results/GammaCep/GammaCep_processed.h5'
+    # run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
     
     
     

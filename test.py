@@ -4,7 +4,7 @@ import subprocess
 import api_run
 
 
-def api_tester(calc=True, load=True, verbose=False):
+def api_tester(file_nums=[1,2,3], calc=True, load=True, verbose=False):
     """
     This function tests the api_run.py module.
     First it accesses two different configuration files
@@ -22,10 +22,13 @@ def api_tester(calc=True, load=True, verbose=False):
     if calc:
         # Tests of full calculations
         # Two separate config files testing different options
-        config_files = ['test_config_files/test1.py',
-                        'test_config_files/test2.py',
-                        'test_config_files/test3.py'
-                        ]
+        
+        # config_files = ['test_config_files/test1.py',
+        #                 'test_config_files/test2.py',
+        #                 'test_config_files/test3.py'
+        #                 ]
+        config_files = [f'test_config_files/test{fnum}.py' for fnum in file_nums]
+        
         calc_error_count = 0
         for cf in config_files:
             try:
@@ -49,13 +52,16 @@ def api_tester(calc=True, load=True, verbose=False):
         outdir=''
         verbose=False
         
-        read_file_paths = ['results/test1/test1_raw.h5',
-                           'results/test1/test1_processed.h5',
-                           'results/test2/test2_raw.h5',
-                           'results/test2/test2_processed.h5',
-                           'results/test3/test3_raw.h5',
-                           'results/test3/test3_processed.h5'
-                           ]
+        # read_file_paths = ['results/test1/test1_raw.h5',
+        #                    'results/test1/test1_processed.h5',
+        #                    'results/test2/test2_raw.h5',
+        #                    'results/test2/test2_processed.h5',
+        #                    'results/test3/test3_raw.h5',
+        #                    'results/test3/test3_processed.h5'
+        #                    ]
+        read_file_paths_raw = [f'results/test{fnum}/test{fnum}_raw.h5' for fnum in file_nums]
+        read_file_paths_proc = [f'results/test{fnum}/test{fnum}_processed.h5' for fnum in file_nums]
+        read_file_paths = read_file_paths_raw+read_file_paths_proc
 
         load_error_count = 0
         for rfp in read_file_paths:
@@ -87,7 +93,7 @@ def api_tester(calc=True, load=True, verbose=False):
     
     return calc_error_count, load_error_count
 
-def cli_tester(calc=True, load=True, all_=True):
+def cli_tester(file_nums=[1,2,3], calc=True, load=True, all_=True):
     """
     This function tests the command line interface.
     First it accesses two different configuration files
@@ -107,11 +113,7 @@ def cli_tester(calc=True, load=True, all_=True):
     
     if calc:
         # Tests of full calculations
-        # Two separate config files testing different options
-        config_files = ['test_config_files/test1.py',
-                        'test_config_files/test2.py',
-                        'test_config_files/test3.py'
-                        ]
+        config_files = [f'test_config_files/test{fnum}.py' for fnum in file_nums]
                         
         calc_error_count = 0
         for cf in config_files:
@@ -128,13 +130,9 @@ def cli_tester(calc=True, load=True, all_=True):
     
     if load:
         # Tests of loaded data                             
-        read_file_paths = ['results/test1/test1_raw.h5',
-                           'results/test1/test1_processed.h5',
-                           'results/test2/test2_raw.h5',
-                           'results/test2/test2_processed.h5',
-                           'results/test3/test3_raw.h5',
-                           'results/test3/test3_processed.h5'
-                           ]
+        read_file_paths_raw = [f'results/test{fnum}/test{fnum}_raw.h5' for fnum in file_nums]
+        read_file_paths_proc = [f'results/test{fnum}/test{fnum}_processed.h5' for fnum in file_nums]
+        read_file_paths = read_file_paths_raw+read_file_paths_proc
                           
         load_error_count = 0    
         for rfp in read_file_paths:
@@ -165,7 +163,7 @@ def cli_tester(calc=True, load=True, all_=True):
     if all_: # Run the run, plot, and lims functions sequentially
         print("Running all")
         all_error_count = 0
-        for test_num in ['1','2','3']:
+        for test_num in file_nums:
             for file_type in ['raw', 'processed']:
             
                 try:
@@ -187,9 +185,8 @@ def cli_tester(calc=True, load=True, all_=True):
     return calc_error_count, load_error_count, all_error_count
 
 if __name__=="__main__":
-    
-    api_errs = api_tester(calc=True, load=True)
-    cli_errs = cli_tester(calc=True, load=True, all_=True)
+    api_errs = api_tester(file_nums=[1,2,3], calc=True, load=True)
+    cli_errs = cli_tester(file_nums=[1,2,3], calc=True, load=True, all_=True)
     
     print("\n")
     print("Test complete:")

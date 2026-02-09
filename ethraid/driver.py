@@ -106,7 +106,7 @@ def run(args):
                        'e_prior', 'a_m_prior', 'min_m', 'max_m',
                        'age_table', 'save', 'outdir']
     default_values = [int(1e6), 1, 64, 
-                      'piecewise', 'cls', 1, 1e3, 4, ['proc'], '']
+                      'piecewise', 'loguniform', 1, 1e3, 4, ['proc'], '']
 
     num_points, min_a, max_a,\
     e_prior, a_m_prior, min_m, max_m,\

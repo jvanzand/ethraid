@@ -81,7 +81,7 @@ def make_arrays(double m_star, tuple a_lim, tuple m_lim, int grid_num, int num_p
     #a_prior = spst.loguniform.pdf(a_list, a_min, a_max) # Find the PDF value of each value in a_list
     #m_prior = spst.loguniform.pdf(m_list, m_min, m_max) # Find the PDF value of each value in m_list
     
-    am_pri_list = a_m_pri(a_list, m_list, a_lim, m_lim, num_points, a_m_prior) # Prior probs on a and m
+    am_pri_list = a_m_pri(a_list, m_list, a_lim, m_lim, num_points, dist=a_m_prior) # Prior probs on a and m
     
 
     # Match up a_list and m_list and get the period for each pair (in days).
@@ -219,10 +219,13 @@ def post_single(double [:] log_lik_list, double [:] log_a_m_prior_list, long [:]
         # The lowest index in a_inds or m_inds is 1 because the lower limit of the sampling range (a_min or m_min) is also the smallest bin divider. So no sampled values are small enough to get an index of 0. Still, we want the bin between a_min and the next divider to be the 0th bin, so subtract 1 off of each bin value.
         a_i = a_inds[i]-1
         m_i = m_inds[i]-1
-        
+
         prob_array[m_i, a_i] += np.exp(log_lik_list[i] + log_a_m_prior_list[i])
         
-    
+    #print('IN HLP')
+    #print(np.min(prob_array), np.max(prob_array), np.mean(prob_array))
+    #print(np.isnan(prob_array).sum())
+    #print(np.isnan(np.array(prob_array)/np.array(prob_array).sum()).sum())
     return np.array(prob_array)/np.array(prob_array).sum()
 
 
@@ -253,7 +256,7 @@ def P_list(double [:] a_list, double [:] m_list, double m_star):
 cpdef P(double a, double m_planet, double m_star):
     """
     Uses Kepler's third law to find the period of a planet (in days) given its
-    semimajor axis, planet mass, and the host star mass.
+    semimajor axis (au), planet mass, and the host star mass.
     
     Arguments:
         a (float, au): Semi-major axis
@@ -269,6 +272,27 @@ cpdef P(double a, double m_planet, double m_star):
     per = two_pi * a**(1.5) * (G*(m_planet+m_star))**(-0.5)
     
     return per
+
+
+cpdef SMA(double per, double m_planet, double m_star):
+    """
+    Uses Kepler's third law to find the SMA of a planet (in au) given its
+    period (d), planet mass, and the host star mass.
+
+    Arguments:
+        per (float, days): Orbital period
+        m_planet (float, M_jup): Companion mass
+        m_star (float, M_jup): Stellar mass
+
+    Returns:
+        sma (float, au): Semi-major axis
+    """
+
+    cdef double sma
+
+    sma = ((G*(m_planet+m_star))*per**2/two_pi**2)**(1/3)
+
+    return sma
 
 
 cdef ecc_pri(double [:] m_list, double [:] per_list, int num_points, dist='piecewise'):
@@ -409,8 +433,8 @@ cdef a_m_pri(double [:] a_list, double [:] m_list, tuple a_lim, tuple m_lim, int
     cdef int i
     cdef double a_ind, m_ind
 
-    cdef np.ndarray[double, ndim=1] a_m_log_prior = np.ndarray(shape=(int(num_points)), dtype=np.float64)
-              
+    cdef np.ndarray[double, ndim=1] a_m_log_prior = np.ones(shape=(int(num_points)), dtype=np.float64)
+    
     if dist=='loguniform':
         pass # a_m_log_prior was initialized as an array of 0s, so leave it
         
@@ -826,25 +850,23 @@ def min_a_and_m(trend, curv, rv_baseline, min_per, m_star):
                               as lower bound for sampling model masses
     """
     
-    try:
-        import radvel as rv
-    except ModuleNotFoundError as err:
-        raise Exception('helper_functions_general.min_a_and_m: Radvel 1.3.8 must be installed to use this function.')
+    #try:
+    #    import radvel as rv
+    #except ModuleNotFoundError as err:
+    #    raise Exception('helper_functions_general.min_a_and_m: Radvel 1.3.8 must be installed to use this function.')
     
     # Start with the minimum RV semi-amplitude K.
     # The lowest K could be is 1/2 of the current observed RV variation
     min_K = abs(0.5*(trend*rv_baseline + curv*rv_baseline**2))
     
     # Now calculate Msini with minimum period and K amplitude
-    # Make sure m_star is in solar masses
+    # Convert m_star to M_sun for RV equation
     # e=0 for simplicity, though mass could be lower if e were very high
     # High-e companion near min_per is an edge case that can be handled separately
-    min_m = rv.utils.Msini(min_K, min_per, m_star*M_jup/M_sun, 
-                           0, Msini_units='jupiter')
-                           
-    min_m = max(min_m, 0.1) # min_mass cannot be 0 or logarithmic spacing breaks
+    min_m = (min_K/28.4329) * (m_star*M_jup/M_sun) ** (2.0 / 3.0) * (min_per/365.25) ** (1 / 3.0)
+    min_m = max(min_m, 0.0001) # min_mass cannot be 0 or else logarithmic spacing breaks
     
-    min_a = rv.utils.semi_major_axis(min_per, ((m_star + min_m)*(M_jup/M_sun)))
+    min_a = SMA(min_per, min_m, m_star)
     
     return min_a, min_m
     

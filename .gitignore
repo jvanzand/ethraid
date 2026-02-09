@@ -14,6 +14,7 @@ d/analysis
 !/ethraid/data/baraffe_table5.csv
 !/ethraid/data/bands.csv
 !/ethraid/data/test_K_band.csv
+!/ethraid/data/matplotlibrc
 
 # exclude contents of results/ but keep the folder
 results/*

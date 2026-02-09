@@ -5,8 +5,12 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 import warnings
 
+from ethraid import _ROOT
 from ethraid import helper_functions_plotting as hlp_plot
 from ethraid.compiled import helper_functions_general as hlp
+
+# Use plot template
+plt.style.use(os.path.join(_ROOT, 'data/matplotlibrc'))
 
 def joint_plot(star_name, m_star, d_star, 
                run_rv, run_astro, run_imag, 
@@ -53,21 +57,7 @@ def joint_plot(star_name, m_star, d_star,
     """
     grid_num = np.shape(post_tot)[0] # grid_num is the shape of the posterior(s). This handles raw and processed posterior arrays.
     
-    a_min, m_min = a_lim[0], m_lim[0]
-    a_max, m_max = a_lim[1], m_lim[1]
-    
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
-    
-    
-    ######## Padding arrays #########
-    ## Include some blank space of the left and bottom of the figure. This space can be used to label the regions ruled out by some prior knowledge (eg, a trend measured over 3 years can't be due to a 400-day planet).
-    
-    grid_pad = int(np.round(grid_num/15)) # grid_pad is the number of index blocks by which the grid is padded
-    
-    frac_exp = grid_pad/grid_num # This is the fraction by which the grid is extended to include the ruled out regions. Since it's log scale, this is an exponent.
-      
-    a_min_plot = a_min/(a_max/a_min)**(frac_exp)
-    m_min_plot = m_min/(m_max/m_min)**(frac_exp)
                  
          
     # Loop through all data types (rv, astro, and imag) simultaneously define and format variables, as well as the values those variables are being assigned.
@@ -91,7 +81,6 @@ def joint_plot(star_name, m_star, d_star,
         z = zorders[i]
         # First, check if run_rv, run_astro, and run_imag are True. If any is not, don't plot that contour
         if run:
-            post_pad = np.pad(post, [(grid_pad, 0), (grid_pad, 0)])
             
             # For imaging only, plot 2sig contour and use contour instead of contourf to get a line instead of a filled region
             if dt == 'imag':
@@ -101,91 +90,125 @@ def joint_plot(star_name, m_star, d_star,
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", message='No contour levels were found within the data range.')
                     
-                    post_contour = ax.contour(post_pad, t_contours,\
+                    post_contour = ax.contour(post, t_contours,\
                                               cmap=c, extend='max', alpha=alpha, zorder=z)
                                  
             else:
                 t_contours = hlp.contour_levels(post, [1,2])
-                post_cont = ax.contourf(post_pad, t_contours,\
+                post_cont = ax.contourf(post, t_contours,\
                                         cmap=c, extend='max', alpha=alpha, zorder=z)
             
     ## Only plot the overlap red if plotting both RV and astro. Otherwise let the green/blue show
     if run_rv and run_astro:
-        post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
+        #post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
         t_contours_tot = hlp.contour_levels(post_tot, [1,2])
-        post_tot_cont = ax.contourf(post_tot_pad, t_contours_tot,
+        post_tot_cont = ax.contourf(post_tot, t_contours_tot,
            cmap='Reds', extend='max', alpha=0.75, zorder=30)
     ################################
     
-    
-    # grid_num_ext is the side length of the 2D plotting array
-    grid_num_ext = grid_num+grid_pad
-    
-    # We want the rectangles to be grid_num_ext long, and grid_pad wide
-    mass_rect = ptch.Rectangle((0, 0), grid_num_ext-1, grid_pad,
-                                       color='gray', alpha=1.0, zorder=100)
-    a_rect = ptch.Rectangle((0, 0), grid_pad, grid_num_ext-1,
-                                       color='gray', alpha=1.0, zorder=100)
-
-    ax.add_patch(mass_rect)
-    ax.add_patch(a_rect)
-    
     ############### In-plot Labels #####################
     label_size = 50
-    region_label_size = 50
-    restricted_region_label_size = 40
-
 
     ax.set_xlabel('Semi-major axis (AU)', size=label_size)
-    ax.set_ylabel(r'$m_c$ ($M_{Jup}$)', size=label_size)
+    ax.set_ylabel(r'Companion Mass ($\mathrm{M_{Jup}}$)', size=label_size)
 
     ###################################################
     ############ Axis ticks and labels ################
     tick_num = 10
     tick_size = 40
     # List of round numbers to use as labels for both a and m
-    min_exp = -4
-    max_exp = 13
+    min_exp = -3
+    max_exp = 5
     n = max_exp-min_exp+1
-    tick_pre_labels_a = np.logspace(min_exp, max_exp, n, base=2)
-    tick_pre_labels_m = np.logspace(min_exp, max_exp, n, base=2)
-
-    # Chop out any labels outside the a or m bounds
-    raw_labels_a = tick_pre_labels_a[(a_lim[0] < tick_pre_labels_a) & (tick_pre_labels_a < a_lim[1])][:tick_num]
-    raw_labels_m = tick_pre_labels_m[(m_lim[0] < tick_pre_labels_m) & (tick_pre_labels_m < m_lim[1])][:tick_num]
     
-    ## If too many ticks, use base 4 instead
-    if len(raw_labels_a)>=8:
-        tick_pre_labels_a = np.logspace(min_exp, max_exp, n, base=4)
-        raw_labels_a = tick_pre_labels_a[(a_lim[0] < tick_pre_labels_a) & (tick_pre_labels_a < a_lim[1])][:tick_num]
-        
-    if len(raw_labels_m)>8:
-        tick_pre_labels_m = np.logspace(min_exp, max_exp, n, base=4)
-        raw_labels_m = tick_pre_labels_m[(m_lim[0] < tick_pre_labels_m) & (tick_pre_labels_m < m_lim[1])][:tick_num]
 
-
-    # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
-    rounding_function = lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2)
-    tick_labels_a = list(map(rounding_function, raw_labels_a))
-    tick_labels_m = list(map(rounding_function, raw_labels_m))
+    tick_vals_a_long = np.logspace(min_exp, max_exp, n, base=10)
+    tick_vals_m_long = np.logspace(min_exp, max_exp, n, base=10)
+    
+    # Exclude any positions that fall outside the grid domain
+    tick_vals_a = tick_vals_a_long[(a_lim[0]<=tick_vals_a_long)\
+                                  &(tick_vals_a_long<a_lim[1])]
+    tick_vals_m = tick_vals_m_long[(m_lim[0]<=tick_vals_m_long)\
+                                  &(tick_vals_m_long<m_lim[1])]
     
     
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
-    a_lim_plot = (a_min_plot, a_max)
-    m_lim_plot = (m_min_plot, m_max)
+    tick_positions_a = hlp.value2index(tick_vals_a, (0, grid_num-1), a_lim)
+    tick_positions_m = hlp.value2index(tick_vals_m, (0, grid_num-1), m_lim)
     
-    tick_positions_a = hlp.value2index(tick_labels_a, (0, grid_num_ext-1), a_lim_plot)
-    tick_positions_m = hlp.value2index(tick_labels_m, (0, grid_num_ext-1), m_lim_plot)
+    ax.set_xticks(tick_positions_a)
+    ax.set_yticks(tick_positions_m)
+    ax.set_xticklabels([rf"$10^{{{int(np.log10(v))}}}$" for v in tick_vals_a], size=tick_size)
+    ax.set_yticklabels([rf"$10^{{{int(np.log10(v))}}}$" for v in tick_vals_m], size=tick_size)
     
-    plt.xticks(tick_positions_a, tick_labels_a, size=tick_size)
-    plt.yticks(tick_positions_m, tick_labels_m, size=tick_size)
+    ## Minor ticks
+    minor_tick_list_of_arrs = [np.arange(2, 10) * 10.0**p for p in range(min_exp, max_exp)]
+    minor_tick_vals_a_long = np.concatenate(minor_tick_list_of_arrs)
+    minor_tick_vals_m_long = np.concatenate(minor_tick_list_of_arrs)
+    
+    # Exclude any positions that fall outside the grid domain
+    minor_tick_vals_a = minor_tick_vals_a_long[(a_lim[0]<=minor_tick_vals_a_long)\
+                                              &(minor_tick_vals_a_long<a_lim[1])]
+    minor_tick_vals_m = minor_tick_vals_m_long[(m_lim[0]<=minor_tick_vals_m_long)\
+                                              &(minor_tick_vals_m_long<m_lim[1])]
+    
+    minor_tick_positions_a = hlp.value2index(minor_tick_vals_a, (0, grid_num-1), a_lim)
+    minor_tick_positions_m = hlp.value2index(minor_tick_vals_m, (0, grid_num-1), m_lim)
+    
+    ax.set_xticks(minor_tick_positions_a, minor=True)
+    ax.set_yticks(minor_tick_positions_m, minor=True)
+    
+    
+    ## Add top x-axis for angular separation ##
+    ###########################################
+    ## Create a top x-axis sharing the same x scale
+    ax_top = ax.twiny()
+
+    ## Match limits so ticks line up
+    ax_top.set_xlim(ax.get_xlim())
+    ax_top.tick_params(axis='x', which='major', pad=2)
+    
+    ## Initial long list of ang seps
+    min_exp, max_exp = -4, 4
+    n = max_exp-min_exp+1
+    tick_vals_angsep_long = np.logspace(min_exp, max_exp, n, base=10)
+    
+    ## Max and min angular separation values, based on SMA limits
+    angsep_min = hlp_plot.sma2angsep(a_lim[0], d_star)
+    angsep_max = hlp_plot.sma2angsep(a_lim[1], d_star)
+    angsep_lim = (angsep_min, angsep_max)
+    
+    ## Trim to fit in SMA domain
+    tick_vals_angsep = tick_vals_angsep_long[(angsep_min<=tick_vals_angsep_long)\
+                                            &(tick_vals_angsep_long<angsep_max)]
+                                            
+    ## Convert angsep to SMA and then to index
+    tick_positions_angsep_sma = hlp_plot.angsep2sma(tick_vals_angsep, d_star)
+    tick_positions_angsep = hlp.value2index(tick_positions_angsep_sma, (0, grid_num-1), a_lim)
+
+    ax_top.set_xticks(tick_positions_angsep)
+    ax_top.set_xticklabels([rf"$10^{{{int(np.log10(v))}}}$" for v in tick_vals_angsep], size=tick_size)
+    
+    ## Minor ticks on top axis
+    minor_tick_list_of_arrs = [np.arange(2, 10) * 10.0**p for p in range(min_exp, max_exp)]
+    minor_tick_vals_angsep_long = np.concatenate(minor_tick_list_of_arrs)
+    minor_tick_vals_angsep = minor_tick_vals_angsep_long[(angsep_min<=minor_tick_vals_angsep_long)\
+                                              &(minor_tick_vals_angsep_long<angsep_max)]
+    
+    minor_tick_positions_angsep = hlp.value2index(minor_tick_vals_angsep, (0, grid_num-1), angsep_lim)
+    ax_top.set_xticks(minor_tick_positions_angsep, minor=True)
+
+    ## Set label
+    ax_top.set_xlabel("Projected Separation (\")", size=label_size, labelpad=15)
+    #import pdb; pdb.set_trace()
+    ###########################################
     
     
     ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:
 
         for scatter_pair in scatter_plot:
-            sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num_ext, a_lim_plot, m_lim_plot)
+            sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num, a_lim, m_lim)
 
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
     
@@ -194,8 +217,8 @@ def joint_plot(star_name, m_star, d_star,
         ## Plot harmonics of total baseline
         const_per_a_inds_list, const_per_m_inds_list, fmt =\
                                 hlp_plot.period_lines(m_star, a_lim, m_lim, 
-                                                      a_lim_plot, m_lim_plot, 
-                                                      grid_num_ext, 0, how='tot')
+                                                      a_lim, m_lim, 
+                                                      grid_num, 0, how='tot')
         num_lines = len(const_per_a_inds_list)
         for i in range(num_lines):
             plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5)
@@ -204,18 +227,28 @@ def joint_plot(star_name, m_star, d_star,
         ## Plot harmonics of Gaia baseline
         const_per_a_inds_list, const_per_m_inds_list, fmt =\
                                 hlp_plot.period_lines(m_star, a_lim, m_lim,
-                                                      a_lim_plot, m_lim_plot,
-                                                      grid_num_ext, 5, how='gaia')
+                                                      a_lim, m_lim,
+                                                      grid_num, 5, how='gaia')
         num_lines = len(const_per_a_inds_list)
         for i in range(num_lines):
             plt.plot(const_per_a_inds_list[i], const_per_m_inds_list[i], fmt, alpha=0.5, linewidth=3)
-            
+    
+    
+    ## Set plot limits ##
+    # value2index(value, index_space, value_space)
+    # x_min, x_max = value2index([a_lim], (0, grid_num-1), a_lim)
+    # ax.set_xlim(a_lim)
+    # ax.set_ylim(m_lim)
+    # import pdb; pdb.set_trace()
+    
+    # a_min, m_min = a_lim[0], m_lim[0]
+    # a_max, m_max = a_lim[1], m_lim[1]
     
     fig.tight_layout()
     save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
     # Try to make directory. If it exists, just continue. Parallel code was bugging out here, so exist_ok is great.
     os.makedirs(save_dir, exist_ok = True)
-    fig.savefig(save_dir + star_name + '_2d.png')
+    fig.savefig(save_dir + star_name + '_2d.png', dpi=400)
     
     plt.close()
     
@@ -226,52 +259,127 @@ def joint_plot(star_name, m_star, d_star,
     return
 
 
-def plot_1d(star_name, post_tot, a_lim, m_lim, outdir=''):
-    
+def plot_1d(star_name, post_tot, a_lim, m_lim, 
+            which=['cdf'], outdir=''):
     """
-    Plots the 1D joint mass and semi-major axis posteriors calculated with 
-    provided RV, astrometry, and imaging data.
-
+    Plots and saves 2 marginalized posterior cumulative distribution function (CDF).
+    The first is marginalized over mass, so it gives the semi-major axis CDF. The
+    second is marginalized over semi-major axis and gives the mass CDF.
+                    
     Arguments:
-        star_name (str): Name of star (does not need to be official)
-        post_tot (array of floats): Total posterior array
+        star_name (str): Star name to label saved figure
+        post_tot (array of floats): Posterior probability array
+        twosig_inds (list of 2 lists): Each set of indices in twosig_inds
+                                       encompasses 95% of the sma or mass
+                                       posterior.
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max)
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
-        out_dir (str): Path to save generated plot
-
+        tick_labels_a (list of floats, AU): Sma values to use as axis 
+                                            labels
+        tick_labels_m (list of floats, M_jup): Mass values to use as 
+                                               axis labels
+        which (list of str): 'cdf' to plot/save CDFs, and 
+                             'pdf to plot/save PDFs
+        outdir (str): Path to save plot
+    
     Returns:
-         None (plots 1D posteriors)
+        None (but plots and saves 1D posteriors)
+        
     """
-
-    ###################################################
-    ############ Axis ticks and labels ################
+    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)                
+    
+    title_size = 30
+    label_size = 25
     tick_num = 6
-    # List of round numbers to use as labels for both a and m
-    # tick_labels = np.array([0.11, 0.33, 1, 3, 10, 30, 100, 300, 900])
-    min_exp = -4
-    max_exp = 13
-    n = max_exp-min_exp+1
-    # tick_labels = np.array([0.125, 0.25, 0.5, 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024])
-    tick_labels = np.logspace(min_exp, max_exp, n, base=4)
+    tick_size = 25
+    
+    sma_1d = post_tot.sum(axis=0)
+    mass_1d = post_tot.sum(axis=1)
+    
+    grid_num = np.shape(post_tot)[0]
+    
+    for plot_type in which:
+        fig, ax = plt.subplots(1,2, figsize=(12,8))
+        
+        if plot_type == 'cdf':
+            plot_dist_a = np.cumsum(sma_1d)
+            plot_dist_m = np.cumsum(mass_1d)
+            
+            max_ylim_a = 1
+            max_ylim_m = 1
+            
+            save_name_suffix = '_cdf_1d.png'
+            
+        elif plot_type == 'pdf':
+            plot_dist_a = sma_1d
+            plot_dist_m = mass_1d
+            
+            max_ylim_a = np.max(sma_1d)
+            max_ylim_m = np.max(mass_1d)
+            
+            save_name_suffix = '_pdf_1d.png'
 
-    # Chop out any labels outside the a or m bounds
-    raw_labels_a = tick_labels[(a_lim[0] < tick_labels) & (tick_labels < a_lim[1])][:tick_num]
-    raw_labels_m = tick_labels[(m_lim[0] < tick_labels) & (tick_labels < m_lim[1])][:tick_num]
-    
-    # Make sure the whole numbers are integers for clean display, but the small floats are rounded to 2 decimals
-    tick_labels_a = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_a))
-    tick_labels_m = list(map(lambda x: int(x) if x%1 == 0 else np.around(x, decimals=2), raw_labels_m))
-    
-    ###################################################
-    ###################################################
-    
-    # bounds is the final answer: [range of 2σ a, range of 2σ m].
-    # twosig_inds contains the indices corresponding to bounds. That is, where the CDF reaches the upper and lower values associated with the 95% confidence interval.
-    bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
+        ax[0].set_ylim(0, max_ylim_a*1.05)
+        ax[0].plot(range(grid_num + 1), np.insert(plot_dist_a, 0, 0))
+        ax[0].set_title(f"Semi-major axis {plot_type.upper()}", size=title_size)
+        ax[0].set_xlabel("Companion semi-major axis (AU)", size=label_size)
 
-    hlp_plot.marginalized_1d(star_name, post_tot, twosig_inds, 
-                             a_lim, m_lim, tick_labels_a, tick_labels_m, 
-                             which=['pdf', 'cdf'], outdir=outdir)
+        ax[0].vlines(twosig_inds[0][0], 0, max_ylim_a, colors='r', linestyles='dashed')
+        ax[0].vlines(twosig_inds[0][1], 0, max_ylim_a, colors='r', linestyles='dashed')
+        ax[0].tick_params(axis='x', which='both', top=False, bottom=True)
+        ax[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+
+        ax[1].set_ylim(0, max_ylim_m*1.05)
+        ax[1].plot(range(grid_num + 1), np.insert(plot_dist_m, 0, 0))
+        ax[1].set_title('Mass {}'.format(plot_type.upper()), size=title_size)
+        ax[1].set_xlabel(r"Companion mass ($\mathrm{M_{Jup}}$)", size=label_size)
+
+        ax[1].vlines(twosig_inds[1][0], 0, max_ylim_m, colors='r', linestyles='dashed')
+        ax[1].vlines(twosig_inds[1][1], 0, max_ylim_m, colors='r', linestyles='dashed')
+        ax[1].tick_params(axis='x', which='both', top=False, bottom=True)
+        ax[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+        
+        ###################################################
+        ############ Tick positions and labels ################
+        tick_num = 6
+        min_exp = -4
+        max_exp = 13
+        n = max_exp-min_exp+1
+        
+        for i in range(2):
+            lim = [a_lim, m_lim][i]
+    
+            ##
+            tick_vals_long = np.logspace(min_exp, max_exp, n, base=10)
+
+            # Exclude any positions that fall outside the grid domain
+            tick_vals = tick_vals_long[(lim[0]<=tick_vals_long)\
+                                          &(tick_vals_long<lim[1])]
+
+            # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
+            tick_positions = hlp.value2index(tick_vals, (0, grid_num-1), lim)
+
+            ax[i].set_xticks(tick_positions)
+            ax[i].set_xticklabels([rf"$10^{{{int(np.log10(v))}}}$" for v in tick_vals], size=tick_size)
+            
+            ## Minor ticks ##
+            minor_tick_list_of_arrs = [np.arange(2, 10) * 10.0**p for p in range(min_exp, max_exp)]
+            minor_tick_vals_long = np.concatenate(minor_tick_list_of_arrs)
+    
+            # Exclude any positions that fall outside the grid domain
+            minor_tick_vals = minor_tick_vals_long[(lim[0]<=minor_tick_vals_long)\
+                                                      &(minor_tick_vals_long<lim[1])]
+    
+            minor_tick_positions = hlp.value2index(minor_tick_vals, (0, grid_num-1), lim)
+    
+            ax[i].set_xticks(minor_tick_positions, minor=True)
+    
+        save_dir = os.path.join(outdir, 'results/{}/'.format(star_name)) # Each star gets its own folder
+        os.makedirs(save_dir, exist_ok = True)
+    
+        fig.tight_layout()
+        fig.savefig(save_dir + star_name + save_name_suffix, dpi=400)
     
     return
+
