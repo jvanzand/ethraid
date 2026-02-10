@@ -330,7 +330,7 @@ def interp_fn(d_star, vmag, imag_wavelength, age_table, contrast_str=None, which
 
     # Concatenate the two dfs above
     interp_df = pd.concat([interp_df_mamajek, interp_df_baraffe])\
-                        .sort_values(by=band_name)[[band_name, 'M_jup']]\
+                        .sort_values(by=band_name)[[band_name, 'M_jup']]
     interp_df.loc[:, 'delta_mag'] = interp_df[band_name] - host_abs_Xmag # Contrast column
 
     if which=='C2M': # Function from contrast to mass
