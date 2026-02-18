@@ -302,25 +302,25 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
 
-    config_path = 'test_config_files/test3.py'
-    read_file_path = None#'results/test3/test3_raw.h5'
-    #
-    #
-    plot=True
-    verbose=True
-    first_time = time.time()
-    run(config_path, read_file_path,
-        plot=plot, verbose=verbose)
-    second_time = time.time()
-    print("TIME {:.2f}".format(second_time-first_time))  
+    # config_path = 'test_config_files/test3.py'
+    # read_file_path = None#'results/test3/test3_raw.h5'
+    # #
+    # #
+    # plot=True
+    # verbose=True
+    # first_time = time.time()
+    # run(config_path, read_file_path,
+    #     plot=plot, verbose=verbose)
+    # second_time = time.time()
+    # print("TIME {:.2f}".format(second_time-first_time))  
     
     # run('ethraid/local_configs/config_151090_1msun.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_151090_2msun.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_24916.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_HIP45839.py', None, plot=True, verbose=True)
 
-    # rfp = 'results/GammaCep/GammaCep_processed.h5'
-    # run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
+    rfp = 'results/GammaCep/GammaCep_processed.h5'
+    run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
     
     
     

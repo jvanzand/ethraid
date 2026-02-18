@@ -46,7 +46,7 @@ def main():
     psr_run.add_argument('-cf', '--config',
                          type=str,
                          required=True,
-                         help='Relative path of configuration file.'
+                         help='Relative path of configuration file'
                          )
 
     psr_run.set_defaults(func=ethraid.driver.run)

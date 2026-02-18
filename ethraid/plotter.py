@@ -260,7 +260,7 @@ def joint_plot(star_name, m_star, d_star,
 
 
 def plot_1d(star_name, post_tot, a_lim, m_lim, 
-            which=['cdf'], outdir=''):
+            which=['cdf', 'pdf'], outdir=''):
     """
     Plots and saves 2 marginalized posterior cumulative distribution function (CDF).
     The first is marginalized over mass, so it gives the semi-major axis CDF. The
@@ -309,6 +309,9 @@ def plot_1d(star_name, post_tot, a_lim, m_lim,
             max_ylim_a = 1
             max_ylim_m = 1
             
+            ax[0].tick_params(axis='y', which='both', left=True, right=True, labelleft=True)
+            ax[1].tick_params(axis='y', which='both', left=True, right=True, labelleft=True)
+            
             save_name_suffix = '_cdf_1d.png'
             
         elif plot_type == 'pdf':
@@ -317,6 +320,9 @@ def plot_1d(star_name, post_tot, a_lim, m_lim,
             
             max_ylim_a = np.max(sma_1d)
             max_ylim_m = np.max(mass_1d)
+            
+            ax[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+            ax[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
             
             save_name_suffix = '_pdf_1d.png'
 
@@ -328,7 +334,7 @@ def plot_1d(star_name, post_tot, a_lim, m_lim,
         ax[0].vlines(twosig_inds[0][0], 0, max_ylim_a, colors='r', linestyles='dashed')
         ax[0].vlines(twosig_inds[0][1], 0, max_ylim_a, colors='r', linestyles='dashed')
         ax[0].tick_params(axis='x', which='both', top=False, bottom=True)
-        ax[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+        # ax[0].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
 
         ax[1].set_ylim(0, max_ylim_m*1.05)
         ax[1].plot(range(grid_num + 1), np.insert(plot_dist_m, 0, 0))
@@ -338,7 +344,7 @@ def plot_1d(star_name, post_tot, a_lim, m_lim,
         ax[1].vlines(twosig_inds[1][0], 0, max_ylim_m, colors='r', linestyles='dashed')
         ax[1].vlines(twosig_inds[1][1], 0, max_ylim_m, colors='r', linestyles='dashed')
         ax[1].tick_params(axis='x', which='both', top=False, bottom=True)
-        ax[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
+        #ax[1].tick_params(axis='y', which='both', left=False, right=False, labelleft=False)
         
         ###################################################
         ############ Tick positions and labels ################
