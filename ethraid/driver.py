@@ -300,8 +300,10 @@ def plot(args):
     config_path = args.config
     cm = load_module_from_file(config_path)
 
-    # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
-    scatter_plot, outdir = set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
+    # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults    
+    scatter_plot, outdir, age_table = set_values(config_path, 
+                                                ['scatter_plot', 'outdir', 'age_table'], 
+                                                [None, '', 4])
 
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
@@ -313,7 +315,8 @@ def plot(args):
                            cm.run_rv, cm.run_astro, cm.run_imag,
                            post_tot, post_rv, post_astro, post_imag,
                            a_lim, m_lim,
-                           scatter_plot=scatter_plot, period_lines=False,
+                           scatter_plot=scatter_plot, age_table=age_table,
+                           period_lines=False,
                            outdir=outdir, verbose=args.verbose)
 
     if "1d" in args.type:

@@ -408,6 +408,49 @@ def abs_Xmag(d_star, vmag, imaging_wavelength):
 
     return band_name, host_abs_Xmag
 
+def mag2mass(d_star, Xmag, band_name, age_table=4):
+    """
+    Use the Mamajek/Baraffe tables to convert an apparent
+    companion magnitude into a mass.
+    
+    Arguments:
+        d_star (float, au): Distance of system from Sun
+        Xmag (float, mag): Apparent magnitude of host star in any
+                           of the V, R, I, J, H, K, or L' bands
+        band_name (str): Any of V, R, I, J, H, K, or L_prime
+        age_table (int): Integer 1-5, indicating which BD cooling model to use
+                         based on age of system.
+                         1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
+    """
+    
+    
+    ############## Create interp_df, a csv relating companion absolute magnitude to companion mass
+    # Start with Mamajek. We could cut super bright targets from the interpolation, but no need
+    interp_df_mamajek = mamajek_table[['M_jup', band_name]]
+
+    # It may be that Mamajek covers the whole contrast curve and we don't need Baraffe, but maybe not.
+    # Find the dimmest mag in Mamajek and start using Baraffe mags after that. 
+    max_mag = interp_df_mamajek[band_name].max()
+
+    # Just like we took even the brightest entries from Mamajek, take even the dimmest from Baraffe to be safe.
+    baraffe_table = pd.read_csv(_ROOT+'/data/baraffe_table{}.csv'.format(age_table)) # Load correct table
+    interp_df_baraffe = baraffe_table.query("{}>{}".format(band_name, max_mag))[['M_jup', band_name]]
+
+    # Concatenate the two dfs above
+    interp_df = pd.concat([interp_df_mamajek, interp_df_baraffe])\
+                        .sort_values(by=band_name)[[band_name, 'M_jup']]
+    
+    mag2mass_fn = interp1d(interp_df[band_name], interp_df['M_jup'], 
+                            bounds_error=False, fill_value=np.nan)
+    ###############################
+    
+    
+    abs_Xmag = Xmag - 5*np.log10(d_star/pc_in_au/10) # absolute magnitude in the given band. Convert au to pc
+    mass = mag2mass_fn(abs_Xmag)
+    
+    return mass
+    
+    
 
 def imag_array(d_star, vmag, imag_wavelength, age_table, contrast_str, a_lim, m_lim, grid_num):
     """

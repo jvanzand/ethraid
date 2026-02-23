@@ -278,13 +278,15 @@ def run(config_path, read_file_path=None,
     if plot==True:
         
         # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
-        scatter_plot, outdir = driver.set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
+        scatter_plot, outdir, age_table = driver.set_values(config_path, 
+                                                            ['scatter_plot', 'outdir', 'age_table'], 
+                                                            [None, '', 4])
         
         plotter.joint_plot(star_name, m_star, d_star,
                            run_rv, run_astro, run_imag,
                            post_tot, post_rv, post_astro, post_imag, 
                            a_lim, m_lim,
-                           scatter_plot=scatter_plot, 
+                           scatter_plot=scatter_plot, age_table=age_table,
                            period_lines=False, outdir='', verbose=verbose)
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, which=['pdf', 'cdf'], outdir='')
     

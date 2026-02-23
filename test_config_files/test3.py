@@ -95,5 +95,7 @@ outdir = ''
 
 
 # PLOTTING PARAMS
-# Coordinates at which to plot a gold star. Usually corresponds to a known companion which could be the source of an observed trend.
-scatter_plot = [(3.8, 3.0)]
+# List of coordinate pairs at which to plot gold stars. Usually correspond to known companions which could be the source of an observed trend.
+# Two format options: (a1, m1, 'sma_mass') or (angsep1, mag1, 'angsep_mag', band_name)
+# Example to scatter two companions: scatter_plot = [(10, 9.5, 'angsep_mag', 'L_prime'), (5, 10, 'sma_mass')]
+scatter_plot = [(7, 5, 'angsep_mag', 'L_prime')]

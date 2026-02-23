@@ -8,6 +8,7 @@ import warnings
 from ethraid import _ROOT
 from ethraid import helper_functions_plotting as hlp_plot
 from ethraid.compiled import helper_functions_general as hlp
+from ethraid.compiled import helper_functions_imaging as hlp_imag
 
 # Use plot template
 plt.style.use(os.path.join(_ROOT, 'data/matplotlibrc'))
@@ -16,8 +17,9 @@ def joint_plot(star_name, m_star, d_star,
                run_rv, run_astro, run_imag, 
                post_tot, post_rv, post_astro, post_imag, 
                a_lim, m_lim,
-               scatter_plot=None, period_lines=False, 
-               outdir='', verbose=False):
+               scatter_plot=None, age_table=4,
+               period_lines=False, outdir='', 
+               verbose=False):
     
     """
     Plots the 2D joint mass-semi-major axis posteriors calculated using 
@@ -47,6 +49,10 @@ def joint_plot(star_name, m_star, d_star,
         scatter_plot (list): Optional list of (sep, mass) tuples to scatter plot 
                              the parameters of 1 or more companions. Sma in AU, 
                              mass in M_jup.
+        age_table (int): Integer 1-5, indicating which BD cooling model to use
+                         based on age of system.
+                         1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
+                         Only needed if plotting scatter companion with angsep_mag units
         period_lines (bool): Optionally plot lines of constant period
                               at periods equal to harmonics of the Gaia and 
                               HG baselines
@@ -207,7 +213,41 @@ def joint_plot(star_name, m_star, d_star,
     ## Add scatter point to indicate known/expected companion location ##
     if scatter_plot is not None:
 
-        for scatter_pair in scatter_plot:
+        for scatter_tuple in scatter_plot:
+            
+            ## scatter_tuple looks like (xcoord, ycoord, units)
+            ## e.g. (5.1, 9.6, 'angsep_mag')
+            ## For backward compatibility, default to assuming units=='sma_mass'
+            try:
+                units = scatter_tuple[2]
+            except:
+                units = 'sma_mass'
+            
+            
+            if units=='sma_mass': # If sma and mass given directly, no need to transform
+                scatter_pair = scatter_tuple[0:2]
+                
+            elif units=='angsep_mag': # If angsep and mag given, convert to sma and mass
+                try:
+                    band_name = scatter_tuple[3]
+                except:
+                    raise Exception("plotter.joint_plot: \n"
+                                    "        If using 'angsep_mag' units, must provide \n"
+                                    "        band name of mag as 4th tuple value in scatter_plot \n"
+                                    "        parameter in the setup file.")
+                angsep, mag = scatter_tuple[0:2]
+                sma = hlp_plot.angsep2sma(angsep, d_star) # Convert ang sep to distance (ignoring projection effects)
+                
+                ## Now convert mag to mass
+                mass = hlp_imag.mag2mass(d_star, mag, band_name, age_table)
+                
+                scatter_pair = (sma, mass)
+                
+                
+            else:
+                raise Exception("plotter.joint_plot: \n"
+                                "        units must be either 'sma_mass' or 'angsep_mag'")
+                
             sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num, a_lim, m_lim)
 
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
