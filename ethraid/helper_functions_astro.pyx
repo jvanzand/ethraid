@@ -513,6 +513,9 @@ def calc_dmu_error(chi2, pmra_gaia, pmra_hg, pmdec_gaia, pmdec_hg):
     Then convert p-value to a Z-score assuming Gaussian uncertainties.
     Finally, convert Z-score to an uncertainty value using the actual dmu value.
     
+    NOTE: a chi2 value of 1.38629 corresponds to a p-value of 0.5, and thus a z-score
+          of 0.0. Therefore, negative z-scores ARE possible
+    
     Arguments:
         chi2 (float): Chi squared value between pm_G and pm_HG (from HGCA)
         
