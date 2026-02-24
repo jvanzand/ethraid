@@ -46,9 +46,13 @@ def joint_plot(star_name, m_star, d_star,
         run_rv, run_astro, run_imag (bool): True/False values indicating whether
                                             each data type was considered. Omitted
                                             data types are not plotted.
-        scatter_plot (list): Optional list of (sep, mass) tuples to scatter plot 
-                             the parameters of 1 or more companions. Sma in AU, 
-                             mass in M_jup.
+        scatter_plot (list): Optional list of tuples to scatter plot 
+                             the parameters of 1 or more companions.
+                             Tuples can take 2 forms:
+                             (sma, mass, 'sep_mass'); sma in AU, mass in M_jup
+                             (angsep, mag, 'angsep_mag', band_name); angsep in
+                             arcsec, mag in any of the V, R, I, J, H, K, or L_prime 
+                             bands, specified 'band_name'. E.g. (0.1, 8.5, 'angsep_mag', 'V')
         age_table (int): Integer 1-5, indicating which BD cooling model to use
                          based on age of system.
                          1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
@@ -73,7 +77,7 @@ def joint_plot(star_name, m_star, d_star,
     data_types = ['rv', 'astro', 'imag']
     colors = ['Greens', 'Blues', 'gray']
     alphas = [0.5, 0.5, 0.4]
-    zorders = [20, 10, 0]
+    zorders = [0.2, 0.1, 0]
 
     # data_types=['astro']
     # colors = ['Blues']
@@ -109,7 +113,7 @@ def joint_plot(star_name, m_star, d_star,
         #post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
         t_contours_tot = hlp.contour_levels(post_tot, [1,2])
         post_tot_cont = ax.contourf(post_tot, t_contours_tot,
-           cmap='Reds', extend='max', alpha=0.75, zorder=30)
+           cmap='Reds', extend='max', alpha=0.75, zorder=0.3)
     ################################
     
     ############### In-plot Labels #####################
@@ -250,7 +254,7 @@ def joint_plot(star_name, m_star, d_star,
                 
             sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num, a_lim, m_lim)
 
-            plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
+            plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=0.4)
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
     if period_lines:
