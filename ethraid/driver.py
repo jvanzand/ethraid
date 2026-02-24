@@ -301,9 +301,9 @@ def plot(args):
     cm = load_module_from_file(config_path)
 
     # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults    
-    scatter_plot, outdir, age_table = set_values(config_path, 
-                                                ['scatter_plot', 'outdir', 'age_table'], 
-                                                [None, '', 4])
+    scatter_plot, outdir, age_table, octofitter_file = driver.set_values(config_path, 
+                                                        ['scatter_plot', 'outdir', 'age_table', 'octofitter_file'], 
+                                                        [None, '', 4, None])
 
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
@@ -314,7 +314,7 @@ def plot(args):
         plotter.joint_plot(star_name, m_star, d_star,
                            cm.run_rv, cm.run_astro, cm.run_imag,
                            post_tot, post_rv, post_astro, post_imag,
-                           a_lim, m_lim,
+                           a_lim, m_lim, octofitter_file=octofitter_file,
                            scatter_plot=scatter_plot, age_table=age_table,
                            period_lines=False,
                            outdir=outdir, verbose=args.verbose)

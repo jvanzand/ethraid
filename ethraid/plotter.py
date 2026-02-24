@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from astropy.time import Time
+from astropy.table import Table
 import matplotlib.pyplot as plt
 import matplotlib.patches as ptch
 import warnings
@@ -16,7 +17,7 @@ plt.style.use(os.path.join(_ROOT, 'data/matplotlibrc'))
 def joint_plot(star_name, m_star, d_star, 
                run_rv, run_astro, run_imag, 
                post_tot, post_rv, post_astro, post_imag, 
-               a_lim, m_lim,
+               a_lim, m_lim, octofitter_file=None,
                scatter_plot=None, age_table=4,
                period_lines=False, outdir='', 
                verbose=False):
@@ -73,7 +74,7 @@ def joint_plot(star_name, m_star, d_star,
     data_types = ['rv', 'astro', 'imag']
     colors = ['Greens', 'Blues', 'gray']
     alphas = [0.5, 0.5, 0.4]
-    zorders = [20, 10, 0]
+    zorders = [0.2, 0.1, 0]
 
     # data_types=['astro']
     # colors = ['Blues']
@@ -109,7 +110,7 @@ def joint_plot(star_name, m_star, d_star,
         #post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
         t_contours_tot = hlp.contour_levels(post_tot, [1,2])
         post_tot_cont = ax.contourf(post_tot, t_contours_tot,
-           cmap='Reds', extend='max', alpha=0.75, zorder=30)
+           cmap='Reds', extend='max', alpha=0.75, zorder=0.3)
     ################################
     
     ############### In-plot Labels #####################
@@ -250,7 +251,18 @@ def joint_plot(star_name, m_star, d_star,
                 
             sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num, a_lim, m_lim)
 
-            plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=40)
+            plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=0.5)
+    
+    if octofitter_file is not None:
+        octo_table = Table.read(octofitter_file)
+        plot_a = hlp.value2index(octo_table['b_a'], (0, grid_num-1), a_lim)
+        plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
+        sc = plt.scatter(plot_a, plot_m, c=octo_table['b_e'], zorder=0.4)
+        cbar = plt.colorbar(sc)
+        cbar.set_label('eccentricity', fontsize=label_size)
+        cbar.ax.tick_params(labelsize=tick_size)
+        
+        
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
     if period_lines:

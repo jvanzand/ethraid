@@ -278,14 +278,14 @@ def run(config_path, read_file_path=None,
     if plot==True:
         
         # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
-        scatter_plot, outdir, age_table = driver.set_values(config_path, 
-                                                            ['scatter_plot', 'outdir', 'age_table'], 
-                                                            [None, '', 4])
+        scatter_plot, outdir, age_table, octofitter_file = driver.set_values(config_path, 
+                                                            ['scatter_plot', 'outdir', 'age_table', 'octofitter_file'], 
+                                                            [None, '', 4, None])
         
         plotter.joint_plot(star_name, m_star, d_star,
                            run_rv, run_astro, run_imag,
                            post_tot, post_rv, post_astro, post_imag, 
-                           a_lim, m_lim,
+                           a_lim, m_lim, octofitter_file=octofitter_file,
                            scatter_plot=scatter_plot, age_table=age_table,
                            period_lines=False, outdir='', verbose=verbose)
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, which=['pdf', 'cdf'], outdir='')
@@ -319,10 +319,12 @@ if __name__ == "__main__":
     # run('ethraid/local_configs/config_151090_1msun.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_151090_2msun.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_24916.py', None, plot=True, verbose=True)
-    # run('ethraid/local_configs/config_HIP45839.py', None, plot=True, verbose=True)
+    
+    rfp = 'results/HIP45839/HIP45839_processed.h5'
+    run('ethraid/local_configs/config_HIP45839_octomerge.py', rfp, plot=True, verbose=True)
 
-    rfp = 'results/GammaCep/GammaCep_processed.h5'
-    run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
+    # rfp = 'results/GammaCep/GammaCep_processed.h5'
+    # run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
     
     
     
