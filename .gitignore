@@ -1,4 +1,4 @@
-d/analysis
+/analysis
 /build
 /cython_practice
 
@@ -23,8 +23,8 @@ results/*
 # Any h5 files, which take up too much space
 *.h5
 
-/trends/c_kepler/build
-/trends/__pycache__
+/ethraid/c_kepler/build
+/ethraid/__pycache__
 
 
 *.c
@@ -36,9 +36,6 @@ results/*
 
 
 
-*.c
-!c_kepler/kepler.c
-!no_classes/c_kepler/kepler.c
 *.pyc
 *.so
 *.png
