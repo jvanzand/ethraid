@@ -329,6 +329,9 @@ def lims(args):
     """
     Load in saved arrays and calculate 1D a and m bounds.
     Print out and return these bounds.
+    Also calculate the probability of the companion residing 
+    in the planetary, brown dwarf, and stellar mass regimes,
+    and print these values out.
     
     Arguments:
         args: Command line arguments, including:
@@ -358,7 +361,16 @@ def lims(args):
     print('a_lim = ', bounds[0], ' AU')
     print('m_lim = ', bounds[1], ' M_J')
     
+    
+    # SEPARATELY, print the probability of the companion residing in each mass regime
+    prob_tuple = hlp.pl_bd_star_probs(post_tot, m_lim)
+    print("    Planet prob: {:.3f}".format(prob_tuple[0]))
+    print("    BD prob: {:.3f}".format(prob_tuple[1]))
+    print("    Star prob: {:.3f}".format(prob_tuple[2]))
+    print("")
+    
     return bounds
+    
     
 def all(args):
     """

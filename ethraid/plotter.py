@@ -47,9 +47,13 @@ def joint_plot(star_name, m_star, d_star,
         run_rv, run_astro, run_imag (bool): True/False values indicating whether
                                             each data type was considered. Omitted
                                             data types are not plotted.
-        scatter_plot (list): Optional list of (sep, mass) tuples to scatter plot 
-                             the parameters of 1 or more companions. Sma in AU, 
-                             mass in M_jup.
+        scatter_plot (list): Optional list of tuples to scatter plot 
+                             the parameters of 1 or more companions.
+                             Tuples can take 2 forms:
+                             (sma, mass, 'sep_mass'); sma in AU, mass in M_jup
+                             (angsep, mag, 'angsep_mag', band_name); angsep in
+                             arcsec, mag in any of the V, R, I, J, H, K, or L_prime 
+                             bands, specified 'band_name'. E.g. (0.1, 8.5, 'angsep_mag', 'V')
         age_table (int): Integer 1-5, indicating which BD cooling model to use
                          based on age of system.
                          1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
@@ -251,6 +255,7 @@ def joint_plot(star_name, m_star, d_star,
                 
             sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num, a_lim, m_lim)
 
+
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=0.5)
     
     if octofitter_file is not None:
@@ -261,7 +266,6 @@ def joint_plot(star_name, m_star, d_star,
         cbar = plt.colorbar(sc)
         cbar.set_label('eccentricity', fontsize=label_size)
         cbar.ax.tick_params(labelsize=tick_size)
-        
         
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
