@@ -299,6 +299,15 @@ def run(config_path, read_file_path=None,
         bounds, twosig_inds = hlp.bounds_1D(post_tot, [m_lim, a_lim], 2)
         print("a_lim = ", bounds[0])
         print("m_lim = ", bounds[1])
+        
+        # Also print the probability of the companion residing in each mass regime
+        prob_tuple = hlp.pl_bd_star_probs(post_tot, m_lim)
+        print("")
+        print("Planet prob: {:.3f}".format(prob_tuple[0]))
+        print("BD prob: {:.3f}".format(prob_tuple[1]))
+        print("Star prob: {:.3f}".format(prob_tuple[2]))
+        print("")
+        
     return
 
 

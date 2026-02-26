@@ -1,7 +1,9 @@
+import os
 import sys
 import numpy as np
 import scipy as sp
 import scipy.stats as spst
+import h5py
 
 cimport numpy as np
 cimport cython
@@ -703,6 +705,75 @@ def bounds_1D(prob_array, value_spaces, sig):
         bounds_list.append(value_bounds)
 
     return bounds_list, inds_sig_list
+
+def pl_bd_star_probs(prob_array, m_lim):
+    """
+    Given a normalized 2D probability array representing a 2D a-M posterior,
+    this function calculates the integrated probability in three different
+    mass intervals: M<13 M_Jup, M = 13-80 M_Jup, and M>80 M_Jup.
+    
+    Note that a_lim is not needed because the function marginalizes over the
+    full SMA range, whereas it needs to know where to make cuts in the m direction.
+    
+    Arguments:
+        prob_array (2D array of floats): Square array of probabilities
+        m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max), the
+                                        lower/upper m bounds covered by the
+                                        posterior.
+    
+    Returns:
+        3-tuple of floats corresponding to the integrated probability of a
+        planet, brown dwarf, and star, respectively
+    """
+    
+    grid_num = np.shape(prob_array)[0]
+    upper_ind_pl = int(np.round(value2index(13, (0, grid_num), m_lim)))
+    upper_ind_bd = int(np.round(value2index(80, (0, grid_num), m_lim)))
+
+    pl_prob = np.sum(prob_array[:upper_ind_pl]) # Approximation. The last index isn't included bc it's at the end
+    bd_prob = np.sum(prob_array[upper_ind_pl:upper_ind_bd]) # Approximation. The first index IS included bc it's at the front, but the last is not
+    star_prob = np.sum(prob_array[upper_ind_bd:])
+
+    return (pl_prob, bd_prob, star_prob)
+    
+def pl_bd_star_probs_list(names, results_root):
+    """
+    Wrapper function for pl_bd_star_probs(). Takes a list of system
+    names and runs that function on each one.
+    
+    Arguments:
+        names (list of str): Names of systems of which to retrieve
+                             pl/bd/star probabilities
+        results_root (str): Path to folder containing results folders
+                            for each system in 'names'
+    
+    Returns:
+        list of 3-tuples of floats (one 3-tuple per system in 'names') 
+        corresponding to the integrated probability of a
+        planet, brown dwarf, and star, respectively
+    """
+
+    result_list = []
+    for name in names:
+        post_path = os.path.join(results_root, "{0}/{0}_processed.h5".format(name))
+
+        post_file = h5py.File(post_path, "r")
+
+
+        post_tot = np.array(post_file.get("post_tot"))
+        m_lim = np.array(post_file.get('m_lim')) # Limits over which m is sampled
+        
+        prob_tuple = pl_bd_star_probs(post_tot, m_lim)
+        
+        print(name)
+        print("    Planet prob: {:.3f}".format(prob_tuple[0]))
+        print("    BD prob: {:.3f}".format(prob_tuple[1]))
+        print("    Star prob: {:.3f}".format(prob_tuple[2]))
+        print("")
+        
+        result_list.append(prob_tuple)
+
+    return np.array(result_list)
 
 
 def CDF_indices(prob_list, sig_list):
