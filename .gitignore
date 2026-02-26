@@ -28,10 +28,10 @@ results/*
 
 
 *.c
-!trends/c_kepler/kepler.c
+!ethraid/c_kepler/kepler.c
 
-/trends/c_kepler/build
-/trends/__pycache__
+/ethraid/c_kepler/build
+/ethraid/__pycache__
 */__pycache__
 
 
