@@ -313,6 +313,11 @@ def joint_plot(star_name, m_star, d_star,
         # First, remove all artists
         for artist in ax.lines + ax.collections + ax.patches + ax.images:
             artist.remove()
+        # Also remove color bar from previous plot. Can delete if I remove the earlier cbar creation
+        try:
+            cbar.remove()
+        except:
+            pass
             
         octo_table = Table.read(octofitter_file)
         plot_a = hlp.value2index(octo_table['b_a'], (0, grid_num-1), a_lim)
