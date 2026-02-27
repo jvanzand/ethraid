@@ -329,11 +329,14 @@ if __name__ == "__main__":
     # run('ethraid/local_configs/config_151090_2msun.py', None, plot=True, verbose=True)
     # run('ethraid/local_configs/config_24916.py', None, plot=True, verbose=True)
     
-    rfp = 'results/24916/24916_processed.h5'
-    run('ethraid/local_configs/config_24916.py', rfp, plot=True, verbose=True)
+    #rfp = 'results/24916/24916_processed.h5'
+    #run('ethraid/local_configs/config_24916.py', rfp, plot=True, verbose=True)
     
     #rfp = 'results/HIP45839/HIP45839_processed.h5'
     #run('ethraid/local_configs/config_HIP45839_octomerge.py', rfp, plot=True, verbose=True)
+    
+    #rfp = 'results/151090_1msun/151090_1msun_processed.h5'
+    #run('ethraid/local_configs/config_151090_1msun.py', rfp, plot=True, verbose=True)
 
     # rfp = 'results/GammaCep/GammaCep_processed.h5'
     # run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
