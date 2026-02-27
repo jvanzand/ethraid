@@ -301,7 +301,7 @@ def plot(args):
     cm = load_module_from_file(config_path)
 
     # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults    
-    scatter_plot, outdir, age_table, octofitter_file = driver.set_values(config_path, 
+    scatter_plot, outdir, age_table, octofitter_file = set_values(config_path, 
                                                         ['scatter_plot', 'outdir', 'age_table', 'octofitter_file'], 
                                                         [None, '', 4, None])
 
