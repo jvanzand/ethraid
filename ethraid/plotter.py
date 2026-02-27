@@ -257,8 +257,9 @@ def joint_plot(star_name, m_star, d_star,
 
 
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=0.5)
-    
+        
     if octofitter_file is not None:
+            
         octo_table = Table.read(octofitter_file)
         plot_a = hlp.value2index(octo_table['b_a'], (0, grid_num-1), a_lim)
         plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
@@ -266,7 +267,6 @@ def joint_plot(star_name, m_star, d_star,
         cbar = plt.colorbar(sc)
         cbar.set_label('eccentricity', fontsize=label_size)
         cbar.ax.tick_params(labelsize=tick_size)
-        
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
     if period_lines:
@@ -305,6 +305,27 @@ def joint_plot(star_name, m_star, d_star,
     # Try to make directory. If it exists, just continue. Parallel code was bugging out here, so exist_ok is great.
     os.makedirs(save_dir, exist_ok = True)
     fig.savefig(save_dir + star_name + '_2d.png', dpi=400)
+    
+    
+    ## Now that the first image is made, optionally plot Octofitter results on the same set of axes, but with all ethraid results removed.
+    if octofitter_file is not None:
+        
+        # First, remove all artists
+        for artist in ax.lines + ax.collections + ax.patches + ax.images:
+            artist.remove()
+            
+        octo_table = Table.read(octofitter_file)
+        plot_a = hlp.value2index(octo_table['b_a'], (0, grid_num-1), a_lim)
+        plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
+        sc = plt.scatter(plot_a, plot_m, c=octo_table['b_e'], zorder=0.4)
+        cbar = plt.colorbar(sc)
+        cbar.set_label('eccentricity', fontsize=label_size)
+        cbar.ax.tick_params(labelsize=tick_size)
+        
+        fig.tight_layout()
+        # Try to make directory. If it exists, just continue. Parallel code was bugging out here, so exist_ok is great.
+        fig.savefig(save_dir + star_name + '_2d_octofitter.png', dpi=400)
+    
     
     plt.close()
     
