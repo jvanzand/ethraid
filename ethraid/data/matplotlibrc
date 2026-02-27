@@ -370,7 +370,7 @@ mathtext.fontset: stix  # Should be 'dejavusans' (default),
 ## https://matplotlib.org/stable/api/axes_api.html#module-matplotlib.axes
 #axes.facecolor:     white   # axes background color
 #axes.edgecolor:     black   # axes edge color
-#axes.linewidth:     0.8     # edge line width
+axes.linewidth:     3.5     # edge line width
 #axes.grid:          False   # display grid or not
 #axes.grid.axis:     both    # which axis the grid should apply to
 #axes.grid.which:    major   # grid lines at {major, minor, both} ticks
@@ -487,7 +487,7 @@ xtick.bottom:        True    # draw ticks on the bottom side
 #xtick.labeltop:      False   # draw label on the top
 xtick.labelbottom:   True    # draw label on the bottom
 xtick.major.size:    8.5     # major tick size in points
-xtick.minor.size:    4       # minor tick size in points
+xtick.minor.size:    6       # minor tick size in points
 xtick.major.width:   3.5     # major tick width in points
 xtick.minor.width:   2.25     # minor tick width in points
 xtick.major.pad:     10.0     # distance to major tick label in points
@@ -509,7 +509,7 @@ ytick.right:         True   # draw ticks on the right side
 ytick.labelleft:     True    # draw tick labels on the left side
 #ytick.labelright:    False   # draw tick labels on the right side
 ytick.major.size:    8.5     # major tick size in points
-ytick.minor.size:    4       # minor tick size in points
+ytick.minor.size:    6       # minor tick size in points
 ytick.major.width:   3.5     # major tick width in points
 ytick.minor.width:   2.25     # minor tick width in points
 ytick.major.pad:     10.0     # distance to major tick label in points
