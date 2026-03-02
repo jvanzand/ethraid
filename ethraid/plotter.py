@@ -110,8 +110,7 @@ def joint_plot(star_name, m_star, d_star,
                                         cmap=c, extend='max', alpha=alpha, zorder=z)
             
     ## Only plot the overlap red if plotting both RV and astro. Otherwise let the green/blue show
-    if True:#run_rv and run_astro:
-        #post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
+    if run_rv and run_astro:
         t_contours_tot = hlp.contour_levels(post_tot, [1,2])
         post_tot_cont = ax.contourf(post_tot, t_contours_tot,
            cmap='Reds', extend='max', alpha=0.75, zorder=0.3)
