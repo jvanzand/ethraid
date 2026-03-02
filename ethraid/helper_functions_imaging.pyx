@@ -61,7 +61,7 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
                          based on age of system.
                          1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
         imag_epoch (float, BJD): Epoch at which imaging was acquired
-        contrast_str (str): Path to contrast curve file
+        contrast_str (str): Path to a csv file with columns "ang_sep" and "delta_mag"
     
     Returns:
         log_lik_list (list of floats): List of likelihoods corresponding
