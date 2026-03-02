@@ -259,7 +259,9 @@ def joint_plot(star_name, m_star, d_star,
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=0.5)
         
     if octofitter_file is not None:
-            
+        from astropy.io.fits.verify import VerifyWarning
+        warnings.filterwarnings("ignore", category=VerifyWarning)
+        
         octo_table = Table.read(octofitter_file)
         plot_a = hlp.value2index(octo_table['b_a'], (0, grid_num-1), a_lim)
         plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
