@@ -658,8 +658,10 @@ def contour_levels(prob_array, sig_list, t_num = 1e3):
     # Make sure that no two probability contours have identical values. This generally only occurs for the imaging posterior in the approximate case, which is designed so that all pixels have either p=0 or p=some single value.
     for i in range(len(t_contours)):
       if i == 0:
-          continue
-      if t_contours[i] == t_contours[i-1]:
+          if t_contours[i] >= np.max(prob_array): # If the first value equals the array max, lower slightly
+              t_contours[i] = np.max(prob_array) * 0.999
+              
+      if t_contours[i] == t_contours[i-1]: # For the rest of the values, ensure inequality
           t_contours[i] = t_contours[i-1]*1.001
           
     # Return t_countours, which looks like eg [0.0004, 0.0015, 0.0062]. It will be passed to matplotlib's contourf() function.

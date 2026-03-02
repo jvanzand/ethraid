@@ -62,6 +62,8 @@ def imag_list(double [:] a_list, double [:] m_list, double [:] e_list,
                          1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
         imag_epoch (float, BJD): Epoch at which imaging was acquired
         contrast_str (str): Path to a csv file with columns "ang_sep" and "delta_mag"
+                            ang_sep column should be in arcsec, and delta_mag is specified
+                            by imag_wavelength
     
     Returns:
         log_lik_list (list of floats): List of likelihoods corresponding
@@ -290,6 +292,8 @@ def interp_fn(d_star, vmag, imag_wavelength, age_table, contrast_str=None, which
                          based on age of system. Correspond to tables 1-5 in Baraffe+03.
                          1-->0.1 Gyr, 2-->0.5 Gyr, 3-->1 Gyr, 4-->5 Gyr, 5-->10 Gyr
         contrast_str (str): Path to a csv file with columns "ang_sep" and "delta_mag"
+                            ang_sep column should be in arcsec, and delta_mag is specified
+                            by imag_wavelength
         which (str): One of 'C2M', 'M2C', 'A2M', or 'A2C' to choose a function with
                      arguments/outputs of contrast/mass, mass/contrast,
                      angular separation/mass, or angular separation/contrast
