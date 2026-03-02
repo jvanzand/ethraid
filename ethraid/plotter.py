@@ -96,7 +96,8 @@ def joint_plot(star_name, m_star, d_star,
             # For imaging only, plot 2sig contour and use contour instead of contourf to get a line instead of a filled region
             if dt == 'imag':
                 t_contours = hlp.contour_levels(post, [1,2])
-                
+                # import pdb; pdb.set_trace()
+
                 # In the approximate case, the imaging posterior has 2 regions by design: uniformly 0 and uniformly some nonzero value. Suppress Matplotlib's warning that contour levels are undefined in this case.
                 with warnings.catch_warnings():
                     warnings.filterwarnings("ignore", message='No contour levels were found within the data range.')
@@ -110,7 +111,7 @@ def joint_plot(star_name, m_star, d_star,
                                         cmap=c, extend='max', alpha=alpha, zorder=z)
             
     ## Only plot the overlap red if plotting both RV and astro. Otherwise let the green/blue show
-    if run_rv and run_astro:
+    if True:#run_rv and run_astro:
         #post_tot_pad = np.pad(post_tot, [(grid_pad, 0), (grid_pad, 0)])
         t_contours_tot = hlp.contour_levels(post_tot, [1,2])
         post_tot_cont = ax.contourf(post_tot, t_contours_tot,

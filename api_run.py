@@ -313,8 +313,8 @@ def run(config_path, read_file_path=None,
 
 if __name__ == "__main__":
 
-    # config_path = 'test_config_files/test3.py'
-    # read_file_path = None#'results/test3/test3_raw.h5'
+    # config_path = 'test_config_files/test2.py'
+    # read_file_path = 'results/test2/test2_raw.h5'
     # #
     # #
     # plot=True
@@ -338,8 +338,8 @@ if __name__ == "__main__":
     # rfp = 'results/151090_1msun/151090_1msun_processed.h5'
     # run('ethraid/local_configs/config_151090_1msun_octomerge.py', rfp, plot=True, verbose=True)
 
-    # rfp = 'results/GammaCep/GammaCep_processed.h5'
-    # run('ethraid/local_configs/config_GammaCep.py', rfp, plot=True, verbose=True)
+    #rfp = 'results/GammaCep/GammaCep_processed.h5'
+    run('ethraid/local_configs/config_GammaCep.py', None, plot=True, verbose=True)
     
     
     
