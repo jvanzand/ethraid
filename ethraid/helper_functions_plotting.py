@@ -9,7 +9,7 @@ from ethraid.compiled import helper_functions_general as hlp
 two_pi = 6.283185307179586
 G = 2.824760877012879e-07 # c.G.cgs.value*(1/c.au.cgs.value)**3 * (c.M_jup.cgs.value) * (24*3600)**2
 
-def scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot):
+def scatter_companion(scatter_plot, grid_num_a, grid_num_m, a_lim_plot, m_lim_plot):
     """
     Simple function to calculate where to plot an expected/known companion.
     
@@ -17,8 +17,7 @@ def scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot):
         scatter_plot (tuple of floats): (semi-major axis, mass) values at
                                         which to plot a companion. Sma is
                                         in AU and mass is in M_Jup.
-        grid_num_ext (int): Dimension of square plotting array, including
-                           extension for ruled-out regions
+        grid_num_a/m (int): Dimensions of (grid_num_m x grid_num_a) plotting array
         a_lim_plot (tuple of floats, au): Semi-major axis limits to plot 
                                           over, in the form (a_min, a_max)
         m_lim_plot (tuple of floats, M_jup): Mass limits as (m_min, m_max)
@@ -30,8 +29,8 @@ def scatter_companion(scatter_plot, grid_num_ext, a_lim_plot, m_lim_plot):
     
     sma, mass = scatter_plot
     
-    sep_ind = hlp.value2index(sma, (0, grid_num_ext-1), a_lim_plot)
-    mp_ind  = hlp.value2index(mass, (0, grid_num_ext-1), m_lim_plot)
+    sep_ind = hlp.value2index(sma, (0, grid_num_a-1), a_lim_plot)
+    mp_ind  = hlp.value2index(mass, (0, grid_num_m-1), m_lim_plot)
     
 
     scatter_a, scatter_m = scatter_plot

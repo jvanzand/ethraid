@@ -59,12 +59,16 @@ def run(config_path, read_file_path=None,
         ## First try loading optional params. If they can't be loaded, use defaults
         optional_params = ['num_points', 'min_a', 'max_a', 
                            'e_prior', 'a_m_prior', 'min_m', 'max_m',
+                           'plot_min_a', 'plot_max_a', 'plot_min_m', 'plot_max_m',
                            'age_table', 'save', 'outdir']
         default_values = [int(1e6), 1, 64, 
-                          'piecewise', 'loguniform', 1, 1e3, 4, ['proc'], '']
+                          'piecewise', 'loguniform', 1, 1e3,
+                          np.nan, np.nan, np.nan, np.nan,
+                          4, ['proc'], '']
 
         num_points, min_a, max_a,\
         e_prior, a_m_prior, min_m, max_m,\
+        plot_min_a, plot_max_a, plot_min_m, plot_max_m,\
         age_table, save, outdir = driver.set_values(config_path, 
                                                     optional_params, 
                                                     default_values)
@@ -85,6 +89,8 @@ def run(config_path, read_file_path=None,
         ### General ###
         a_lim = (min_a, max_a)
         m_lim = (min_m, max_m)
+        plot_a_lim = (plot_min_a, plot_max_a)
+        plot_m_lim = (plot_min_m, plot_max_m)
     
         if verbose:
             print('Min sampling m is: ', min_m)
@@ -245,6 +251,7 @@ def run(config_path, read_file_path=None,
         scatter_plot, outdir = driver.set_values(config_path, ['scatter_plot', 'outdir'], [None, ''])
         
         if 'proc' in save:
+            # import pdb; pdb.set_trace()
             ls.save_processed(star_name, m_star, d_star,
                               run_rv, run_astro, run_imag, 
                               post_tot, post_rv, post_astro, post_imag,
@@ -278,14 +285,22 @@ def run(config_path, read_file_path=None,
     if plot==True:
         
         # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
-        scatter_plot, outdir, age_table = driver.set_values(config_path, 
-                                                            ['scatter_plot', 'outdir', 'age_table'], 
-                                                            [None, '', 4])
+        param_names = ['scatter_plot', 'outdir', 'plot_a_min', 'plot_a_max', 
+                       'plot_m_min', 'plot_m_max', 'age_table']
+        default_vals = [None, '', np.nan, np.nan, np.nan, np.nan, 4]
+        
+        scatter_plot, outdir,\
+        plot_a_min, plot_a_max,\
+        plot_m_min, plot_m_max, age_table = driver.set_values(config_path, param_names, default_vals)
+        
+        ## Make plotting limits
+        plot_a_lim = (plot_a_min, plot_a_max)
+        plot_m_lim = (plot_m_min, plot_m_max)
         
         plotter.joint_plot(star_name, m_star, d_star,
                            run_rv, run_astro, run_imag,
                            post_tot, post_rv, post_astro, post_imag, 
-                           a_lim, m_lim,
+                           a_lim, m_lim, plot_a_lim, plot_m_lim,
                            scatter_plot=scatter_plot, age_table=age_table,
                            period_lines=False, outdir='', verbose=verbose)
         plotter.plot_1d(star_name, post_tot, a_lim, m_lim, which=['pdf', 'cdf'], outdir='')

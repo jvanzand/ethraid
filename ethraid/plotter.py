@@ -17,6 +17,7 @@ def joint_plot(star_name, m_star, d_star,
                run_rv, run_astro, run_imag, 
                post_tot, post_rv, post_astro, post_imag, 
                a_lim, m_lim,
+               plot_a_lim=None, plot_m_lim=None,
                scatter_plot=None, age_table=4,
                period_lines=False, outdir='', 
                verbose=False):
@@ -43,6 +44,10 @@ def joint_plot(star_name, m_star, d_star,
         a_lim (tuple of floats, au): Semi-major axis limits to consider, 
                                      in the form (a_min, a_max)
         m_lim (tuple of floats, M_jup): Mass limits as (m_min, m_max)
+        plot_a_lim (tuple of floats, au): Semi-major axis limits to plot over. Values
+                                          must encompass those of a_lim
+        plot_m_lim (tuple of floats, M_jup): Mass axis limits to plot over. Values
+                                             must encompass those of m_lim
         run_rv, run_astro, run_imag (bool): True/False values indicating whether
                                             each data type was considered. Omitted
                                             data types are not plotted.
@@ -65,12 +70,40 @@ def joint_plot(star_name, m_star, d_star,
     Returns:
          None (plots 2D joint posterior)
     """
-    grid_num = np.shape(post_tot)[0] # grid_num is the shape of the posterior(s). This handles raw and processed posterior arrays.
+
+    # Pad the probability arrays to show a "Zoomed out" view
+    if all(~np.isnan(np.concatenate([plot_a_lim, plot_m_lim]))): # Ensure all vals are non-nan
+        post_rv = hlp.pad_array(post_rv, a_lim, m_lim, plot_a_lim, plot_m_lim)
+        post_astro = hlp.pad_array(post_astro, a_lim, m_lim, plot_a_lim, plot_m_lim)
+        post_imag = hlp.pad_array(post_imag, a_lim, m_lim, plot_a_lim, plot_m_lim)
+        post_tot = hlp.pad_array(post_tot, a_lim, m_lim, plot_a_lim, plot_m_lim)
+        
+        ## For "zoomed out" plots, only plot the total posterior
+        # run_rv=False
+        # run_astro=False
+        # run_imag=False
+        run_rv=False
+        run_astro=False
+        run_imag=False
+        plot_tot=True
+    
+        ## After new grids have been created, no need for original a_lim and m_lim.
+        ## Redefine them to be the plotting limits
+        a_lim = plot_a_lim
+        m_lim = plot_m_lim
+    ## Plot the regular, non-padded probability arrays
+    else:
+        # Only plot total array if there are at least two posteriors
+        if np.sum(run_list)>1:
+            plot_tot=True
+
+    
+    grid_num_m, grid_num_a = np.shape(post_rv)
     
     fig, ax = plt.subplots(figsize=(12,12), dpi = 300)
                  
          
-    # Loop through all data types (rv, astro, and imag) simultaneously define and format variables, as well as the values those variables are being assigned.
+    # Loop through all data types (rv, astro, and imag)
     ################################
     run_list = [run_rv, run_astro, run_imag]
     post_list = [post_rv, post_astro, post_imag]
@@ -89,6 +122,7 @@ def joint_plot(star_name, m_star, d_star,
         c = colors[i]
         alpha = alphas[i]
         z = zorders[i]
+        
         # First, check if run_rv, run_astro, and run_imag are True. If any is not, don't plot that contour
         if run:
             
@@ -108,9 +142,8 @@ def joint_plot(star_name, m_star, d_star,
                 t_contours = hlp.contour_levels(post, [1,2])
                 post_cont = ax.contourf(post, t_contours,\
                                         cmap=c, extend='max', alpha=alpha, zorder=z)
-            
-    ## Only plot the overlap red if plotting both RV and astro. Otherwise let the green/blue show
-    if run_rv and run_astro:
+    
+    if plot_tot:
         t_contours_tot = hlp.contour_levels(post_tot, [1,2])
         post_tot_cont = ax.contourf(post_tot, t_contours_tot,
            cmap='Reds', extend='max', alpha=0.75, zorder=0.3)
@@ -143,8 +176,8 @@ def joint_plot(star_name, m_star, d_star,
     
     
     # Convert the labels to index positions. Note that the positions need not be integers, even though they correspond to "indices"
-    tick_positions_a = hlp.value2index(tick_vals_a, (0, grid_num-1), a_lim)
-    tick_positions_m = hlp.value2index(tick_vals_m, (0, grid_num-1), m_lim)
+    tick_positions_a = hlp.value2index(tick_vals_a, (0, grid_num_a-1), a_lim)
+    tick_positions_m = hlp.value2index(tick_vals_m, (0, grid_num_m-1), m_lim)
     
     ax.set_xticks(tick_positions_a)
     ax.set_yticks(tick_positions_m)
@@ -162,8 +195,8 @@ def joint_plot(star_name, m_star, d_star,
     minor_tick_vals_m = minor_tick_vals_m_long[(m_lim[0]<=minor_tick_vals_m_long)\
                                               &(minor_tick_vals_m_long<m_lim[1])]
     
-    minor_tick_positions_a = hlp.value2index(minor_tick_vals_a, (0, grid_num-1), a_lim)
-    minor_tick_positions_m = hlp.value2index(minor_tick_vals_m, (0, grid_num-1), m_lim)
+    minor_tick_positions_a = hlp.value2index(minor_tick_vals_a, (0, grid_num_a-1), a_lim)
+    minor_tick_positions_m = hlp.value2index(minor_tick_vals_m, (0, grid_num_m-1), m_lim)
     
     ax.set_xticks(minor_tick_positions_a, minor=True)
     ax.set_yticks(minor_tick_positions_m, minor=True)
@@ -194,7 +227,7 @@ def joint_plot(star_name, m_star, d_star,
                                             
     ## Convert angsep to SMA and then to index
     tick_positions_angsep_sma = hlp_plot.angsep2sma(tick_vals_angsep, d_star)
-    tick_positions_angsep = hlp.value2index(tick_positions_angsep_sma, (0, grid_num-1), a_lim)
+    tick_positions_angsep = hlp.value2index(tick_positions_angsep_sma, (0, grid_num_a-1), a_lim)
 
     ax_top.set_xticks(tick_positions_angsep)
     ax_top.set_xticklabels([rf"$10^{{{int(np.log10(v))}}}$" for v in tick_vals_angsep], size=tick_size)
@@ -205,7 +238,7 @@ def joint_plot(star_name, m_star, d_star,
     minor_tick_vals_angsep = minor_tick_vals_angsep_long[(angsep_min<=minor_tick_vals_angsep_long)\
                                               &(minor_tick_vals_angsep_long<angsep_max)]
     
-    minor_tick_positions_angsep = hlp.value2index(minor_tick_vals_angsep, (0, grid_num-1), angsep_lim)
+    minor_tick_positions_angsep = hlp.value2index(minor_tick_vals_angsep, (0, grid_num_a-1), angsep_lim)
     ax_top.set_xticks(minor_tick_positions_angsep, minor=True)
 
     ## Set label
@@ -252,7 +285,8 @@ def joint_plot(star_name, m_star, d_star,
                 raise Exception("plotter.joint_plot: \n"
                                 "        units must be either 'sma_mass' or 'angsep_mag'")
                 
-            sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num, a_lim, m_lim)
+            sep_ind, mp_ind  = hlp_plot.scatter_companion(scatter_pair, grid_num_a, grid_num_m, 
+                                                          a_lim, m_lim)
 
             plt.scatter(sep_ind, mp_ind, marker='*', c='yellow', edgecolors='black', s=2000, zorder=0.4)
     

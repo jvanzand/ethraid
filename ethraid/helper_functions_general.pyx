@@ -864,7 +864,8 @@ def index2value(index, index_space, value_space):
     # Convert from a linear space of indices to a linear space of log(values).
     log_value = (index-min_index)*(log_value_range/index_range) + np.log(min_value)
 
-    value = np.around(math_e**(log_value), 2) # Round to 2 decimal places
+    #value = np.around(math_e**(log_value), 2) # Round to 2 decimal places
+    value = np.exp(log_value)
 
     return value
 
@@ -898,6 +899,65 @@ def value2index(value, index_space, value_space):
             *(index_range/log_value_range) + min_index
 
     return index
+
+def pad_array(array, value_space_a, value_space_m,
+              plot_value_space_a, plot_value_space_m):
+    """
+    Expand a 2D probability array by adding 0s around
+    the border. The purpose is to make the array more
+    suited for plotting without changing the array
+    values or the integrated probability.
+    
+    Note: the expanded plot bounds must encompass the
+    original array values. That is, no clipping allowed
+    
+    Arguments:
+        array (2D array of floats): Square array of probabilities
+        value_space_a/m (tuple of floats): Mass or Semi-major axis range
+                                           in the form 
+                                           (min_value, max_value)
+        plot_value_space_a/m (tuple of floats): Same as value_space but
+                                                for the desired plotting
+                                                range of mass/SMA
+    Returns:
+        padded_array (2D array of floats): Same as array, but padded with
+                                            0s to extend to the mass/SMA
+                                            limits given by plot_value_space_a/m
+    """
+    
+    grid_num = np.shape(array)[0]
+    
+    a_min, a_max = value_space_a
+    m_min, m_max = value_space_m
+    a_min_plot, a_max_plot = plot_value_space_a
+    m_min_plot, m_max_plot = plot_value_space_m
+    
+    assert (a_min_plot<=a_min) \
+         & (m_min_plot<=m_min) \
+         & (a_max_plot>=a_max) \
+         & (m_max_plot>=m_max), "Plotting bounds must encompass sampling bounds"
+    
+    
+    a_ind_min_plot = value2index(a_min_plot, (0, grid_num-1), (a_min, a_max))
+    a_ind_max_plot = value2index(a_max_plot, (0, grid_num-1), (a_min, a_max))
+    m_ind_min_plot = value2index(m_min_plot, (0, grid_num-1), (m_min, m_max))
+    m_ind_max_plot = value2index(m_max_plot, (0, grid_num-1), (m_min, m_max))
+    
+    a_pad_low = int(abs(a_ind_min_plot))
+    a_pad_high = int(a_ind_max_plot-(grid_num-1))
+    m_pad_low = int(abs(m_ind_min_plot))
+    m_pad_high = int(m_ind_max_plot-(grid_num-1))
+    
+    padded_array = np.pad(array,
+                          pad_width=((m_pad_low, m_pad_high),
+                                     (a_pad_low, a_pad_high)),
+                          mode='constant',
+                          constant_values=0)
+    
+    return padded_array
+    
+    
+    
     
 def min_a_and_m(trend, curv, rv_baseline, min_per, m_star):
     """
