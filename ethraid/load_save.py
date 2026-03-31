@@ -156,7 +156,8 @@ def save_raw(star_name, m_star, d_star,
              tot_list, rv_list, astro_list, imag_data,
              vmag, imag_wavelength, contrast_str, age_table,
              log_a_m_prior, a_list, m_list,
-             a_lim, m_lim, imag_calc='exact', outdir='', 
+             a_lim, m_lim,
+             imag_calc='exact', outdir='', 
              verbose=False):
          
          """
@@ -268,7 +269,8 @@ def save_raw(star_name, m_star, d_star,
 def save_processed(star_name, m_star, d_star, 
                    run_rv, run_astro, run_imag,
                    post_tot, post_rv, post_astro, post_imag,
-                   a_lim, m_lim, outdir='', verbose=False):
+                   a_lim, m_lim,
+                   outdir='', verbose=False):
          
          """
          Saves shaped 2D probability arrays to a specified h5py file.

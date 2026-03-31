@@ -501,11 +501,11 @@ def imag_array(d_star, vmag, imag_wavelength, age_table, contrast_str, a_lim, m_
     if not set(['ang_sep', 'delta_mag']).issubset(contrast_curve.columns):
         raise Exception("The dataframe must contain columns 'ang_sep' and 'delta_mag'")
 
-    seps = contrast_curve['ang_sep']*(d_star/pc_in_au)*two_pi/8 # π/4 correction factor to avg over i and E
+    seps = contrast_curve['ang_sep']*(d_star/pc_in_au)#*two_pi/8 # π/4 correction factor to avg over i and E
     dmags = contrast_curve['delta_mag']
 
     ## Create an interpolation fn that takes delta mag contrast to companion mass
-    ## Fill value: if dmag is extremely small, mass is large. If dmag is too large, then mass -> 0
+    ## Fill value: if dmag is extremely small, mass is large. If dmag is extremely large, then ALSO treat mass as large because if we don't have sensitivity outside the FOV then there could be anything there
     dmag_to_mass = interp_fn(d_star, vmag, imag_wavelength, age_table, which='C2M', fill_value=(np.inf,0))
     companion_masses = dmag_to_mass(dmags)
 
@@ -523,7 +523,7 @@ def imag_array(d_star, vmag, imag_wavelength, age_table, contrast_str, a_lim, m_
 
     # Mass values below bounds are +inf (bc -inf contrast), while those above bounds are last m value within bounds.
     a_m_interp_fn = interp1d(a_m_contrast['sep'], a_m_contrast['M_jup'], 
-                             bounds_error=False, fill_value=(np.inf,last_m))
+                             bounds_error=False, fill_value=(np.inf,np.inf))
                          
     imag_array = np.ones((grid_num, grid_num))
 

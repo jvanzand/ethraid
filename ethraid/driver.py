@@ -106,13 +106,15 @@ def run(args):
                        'e_prior', 'a_m_prior', 'min_m', 'max_m',
                        'age_table', 'save', 'outdir']
     default_values = [int(1e6), 1, 64, 
-                      'piecewise', 'loguniform', 1, 1e3, 4, ['proc'], '']
+                      'piecewise', 'loguniform', 1, 1e3,
+                      4, ['proc'], '']
 
     num_points, min_a, max_a,\
     e_prior, a_m_prior, min_m, max_m,\
-    age_table, save, outdir = set_values(config_path, 
-                                         optional_params, 
-                                         default_values)
+    plot_min_a, plot_max_a, plot_min_m, plot_max_m,
+    age_table, save, outdir = driver.set_values(config_path, 
+                                                optional_params, 
+                                                default_values)
     
     num_points = int(num_points)
     ######################################
@@ -300,10 +302,15 @@ def plot(args):
     config_path = args.config
     cm = load_module_from_file(config_path)
 
-    # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults    
-    scatter_plot, outdir, age_table, octofitter_file = set_values(config_path, 
-                                                        ['scatter_plot', 'outdir', 'age_table', 'octofitter_file'], 
-                                                        [None, '', 4, None])
+    # Check if scatter_plot and outdir are provided in config. Otherwise set to defaults
+    param_names = ['scatter_plot', 'outdir', 'plot_a_min', 'plot_a_max', 
+                   'plot_m_min', 'plot_m_max', 'age_table', 'octofitter_file']
+    default_vals = [None, '', np.nan, np.nan, np.nan, np.nan, 4, None]
+    scatter_plot, outdir, age_table = driver.set_values(config_path, param_names, default_vals)
+    
+    ## Set plotting bounds, if provided
+    plot_a_lim = (plot_min_a, plot_max_a)
+    plot_m_lim = (plot_min_m, plot_max_m)
 
     star_name, m_star, d_star,\
     run_rv, run_astro, run_imag,\
@@ -314,7 +321,8 @@ def plot(args):
         plotter.joint_plot(star_name, m_star, d_star,
                            cm.run_rv, cm.run_astro, cm.run_imag,
                            post_tot, post_rv, post_astro, post_imag,
-                           a_lim, m_lim, octofitter_file=octofitter_file,
+                           a_lim, m_lim, plot_a_lim, plot_m_lim,
+                           octofitter_file=octofitter_file,
                            scatter_plot=scatter_plot, age_table=age_table,
                            period_lines=False,
                            outdir=outdir, verbose=args.verbose)
