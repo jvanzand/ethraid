@@ -261,14 +261,20 @@ def joint_plot(star_name, m_star, d_star,
     if octofitter_file is not None:
         from astropy.io.fits.verify import VerifyWarning
         warnings.filterwarnings("ignore", category=VerifyWarning)
-        
+
         octo_table = Table.read(octofitter_file)
+        #octo_table = octo_table[octo_table['b_mass']<80]
         plot_a = hlp.value2index(octo_table['b_a'], (0, grid_num-1), a_lim)
-        plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
-        sc = plt.scatter(plot_a, plot_m, c=octo_table['b_e'], zorder=0.4)
-        cbar = plt.colorbar(sc)
-        cbar.set_label('eccentricity', fontsize=label_size)
-        cbar.ax.tick_params(labelsize=tick_size)
+        try:
+            plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
+        except:
+            plot_m = hlp.value2index(octo_table['b_mass'], (0, grid_num-1), m_lim)
+
+        #import pdb; pdb.set_trace()
+        #sc = plt.scatter(plot_a, plot_m, c=octo_table['b_e'], alpha=0.1, zorder=0.4)
+        #cbar = plt.colorbar(sc)
+        #cbar.set_label('eccentricity', fontsize=label_size)
+        #cbar.ax.tick_params(labelsize=tick_size)
     
     ## Plot lines of constant period at harmonics of mission baseline (baseline/1, baseline/2, etc.)
     if period_lines:
@@ -322,8 +328,12 @@ def joint_plot(star_name, m_star, d_star,
             pass
             
         octo_table = Table.read(octofitter_file)
+        #octo_table = octo_table[octo_table['b_mass']<80]
         plot_a = hlp.value2index(octo_table['b_a'], (0, grid_num-1), a_lim)
-        plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
+        try:
+            plot_m = hlp.value2index(octo_table['$b_{mass\prime}$'], (0, grid_num-1), m_lim)
+        except:
+            plot_m = hlp.value2index(octo_table['b_mass'], (0, grid_num-1), m_lim)
         sc = plt.scatter(plot_a, plot_m, c=octo_table['b_e'], zorder=0.4)
         cbar = plt.colorbar(sc)
         cbar.set_label('eccentricity', fontsize=label_size)

@@ -738,7 +738,7 @@ def pl_bd_star_probs(prob_array, m_lim):
 
     return (pl_prob, bd_prob, star_prob)
     
-def pl_bd_star_probs_list(names, results_root):
+def delete_pl_bd_star_probs_list(names, results_root):
     """
     Wrapper function for pl_bd_star_probs(). Takes a list of system
     names and runs that function on each one.
